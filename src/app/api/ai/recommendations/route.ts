@@ -6,6 +6,9 @@ import { generateRecommendationsSchema } from '@/schemas/ai';
 import { AuditService, AuditActions } from '@/server/services/audit-service';
 import { aiLimiter, getRateLimitIdentifier } from '@/lib/rate-limit';
 
+const VALID_REC_TYPES = new Set(['UPSELL', 'CROSS_SELL', 'CAMPAIGN', 'PRICING', 'BUNDLE', 'CONVERSION']);
+const VALID_RISK_LEVELS = new Set(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);
+
 export async function POST(req: Request) {
   try {
     const identifier = getRateLimitIdentifier(req);
@@ -33,29 +36,48 @@ export async function POST(req: Request) {
       entityId: session.merchantId,
     });
 
+    // Fetch existing merchant products to validate foreign keys
+    const merchantProducts = await prisma.product.findMany({
+      where: { merchantId: session.merchantId, isActive: true },
+      select: { id: true },
+    });
+    const validProductIds = new Set(merchantProducts.map((p) => p.id));
+
     const recommendations = await AIEngine.generateRecommendations(
       session.merchantId,
       validated.data
     );
 
-    // Store recommendations in database
+    // Sanitize and store recommendations in database
     const stored = await Promise.all(
-      recommendations.map((rec) =>
-        prisma.aIRecommendation.create({
+      recommendations.map(async (rec) => {
+        const sanitizedType = VALID_REC_TYPES.has(rec.type) ? rec.type : 'UPSELL';
+        const sanitizedRisk = VALID_RISK_LEVELS.has(rec.riskLevel) ? rec.riskLevel : 'LOW';
+        const sanitizedProductId = rec.productId && validProductIds.has(rec.productId) ? rec.productId : null;
+        const sanitizedTargetIds = Array.isArray(rec.targetProductIds)
+          ? rec.targetProductIds.filter((id) => validProductIds.has(id))
+          : [];
+        const sanitizedImpact = Math.round(Number(rec.expectedImpact) || 10000);
+        const sanitizedConfidence = Math.min(1, Math.max(0, Number(rec.confidence) || 0.75));
+        const sanitizedEvidence = Array.isArray(rec.evidence) && rec.evidence.length > 0
+          ? rec.evidence.map(String)
+          : ['Derived from historical catalog analysis'];
+
+        return prisma.aIRecommendation.create({
           data: {
             merchantId: session.merchantId,
-            type: rec.type as never,
-            title: rec.title,
-            reason: rec.reason,
-            evidence: rec.evidence,
-            expectedImpact: rec.expectedImpact,
-            confidence: rec.confidence,
-            riskLevel: rec.riskLevel as never,
-            productId: rec.productId,
-            targetProductIds: rec.targetProductIds || [],
+            type: sanitizedType as never,
+            title: rec.title || 'Revenue Growth Opportunity',
+            reason: rec.reason || 'Identified opportunity to increase average order value',
+            evidence: sanitizedEvidence,
+            expectedImpact: sanitizedImpact,
+            confidence: sanitizedConfidence,
+            riskLevel: sanitizedRisk as never,
+            productId: sanitizedProductId,
+            targetProductIds: sanitizedTargetIds,
           },
-        })
-      )
+        });
+      })
     );
 
     await AuditService.create({
@@ -81,11 +103,15 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ recommendations: stored });
-  } catch (error) {
-    if (error instanceof Error && error.name === 'AuthError') {
+  } catch (error: any) {
+    if (error && error.name === 'AuthError') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
-    console.error('[AI Recommendations Error]', error);
-    return NextResponse.json({ error: 'Failed to generate recommendations' }, { status: 500 });
+    console.error('=== [AI Recommendations Error Detail] ===', error?.message, error?.stack);
+    return NextResponse.json({
+      error: 'Failed to generate recommendations',
+      detail: error?.message || String(error),
+      stack: error?.stack
+    }, { status: 500 });
   }
 }

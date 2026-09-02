@@ -41,11 +41,16 @@ export class AIEngine {
     }
 
     const provider = (process.env.AI_PROVIDER || '').toLowerCase();
-    const grokKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
-    const openAiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
+    const rawGrokKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY || '';
+    const isRealGrokKey = Boolean(rawGrokKey && rawGrokKey.trim().length > 10 && !rawGrokKey.includes('placeholder') && !rawGrokKey.includes('your-grok'));
+    const grokKey = isRealGrokKey ? rawGrokKey.trim() : '';
+
+    const rawOpenAiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY || '';
+    const isRealOpenAiKey = Boolean(rawOpenAiKey && rawOpenAiKey.trim().length > 10 && !rawOpenAiKey.includes('placeholder'));
+    const openAiKey = isRealOpenAiKey ? rawOpenAiKey.trim() : '';
 
     // ─── Grok / xAI Integration ──────────────────────────
-    if ((provider === 'grok' || provider === 'xai' || grokKey) && grokKey) {
+    if ((provider === 'grok' || provider === 'xai') && grokKey) {
       try {
         const grokRecs = await this.generateWithGrok({
           apiKey: grokKey,
@@ -57,11 +62,11 @@ export class AIEngine {
           customers,
         });
 
-        if (grokRecs.length > 0) {
+        if (grokRecs && grokRecs.length > 0) {
           return grokRecs.slice(0, limit);
         }
-      } catch (err) {
-        console.warn('[AIEngine] Grok API call failed, falling back to deterministic engine:', err);
+      } catch (err: any) {
+        console.warn(`[AIEngine] Grok API call failed (${err?.message || 'unknown'}), falling back to deterministic engine`);
       }
     }
 
@@ -78,11 +83,11 @@ export class AIEngine {
           customers,
         });
 
-        if (openAiRecs.length > 0) {
+        if (openAiRecs && openAiRecs.length > 0) {
           return openAiRecs.slice(0, limit);
         }
-      } catch (err) {
-        console.warn('[AIEngine] OpenAI API call failed, falling back to deterministic engine:', err);
+      } catch (err: any) {
+        console.warn(`[AIEngine] OpenAI API call failed (${err?.message || 'unknown'}), falling back to deterministic engine`);
       }
     }
 
