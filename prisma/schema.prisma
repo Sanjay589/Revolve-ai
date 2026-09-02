@@ -1,0 +1,480 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum ActionStatus {
+  PROPOSED
+  POLICY_CHECK
+  AWAITING_APPROVAL
+  APPROVED
+  EXECUTING
+  SUCCESS
+  FAILED
+  REJECTED
+  EXPIRED
+  EXECUTION_UNKNOWN
+}
+
+enum ActionType {
+  UPSELL
+  CROSS_SELL
+  CAMPAIGN
+  PRICING
+  BUNDLE
+  DISCOUNT
+  AI_PURCHASE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+  UNKNOWN
+}
+
+enum OrderStatus {
+  CREATED
+  ATTEMPTED
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum CampaignStatus {
+  DRAFT
+  PROPOSED
+  AWAITING_APPROVAL
+  APPROVED
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum RecommendationType {
+  UPSELL
+  CROSS_SELL
+  CAMPAIGN
+  PRICING
+  BUNDLE
+  CONVERSION
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum NotificationType {
+  OPPORTUNITY
+  APPROVAL_REQUIRED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  CAMPAIGN_UPDATE
+  AI_ANALYSIS
+  SYSTEM
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("merchant_admin")
+  merchantId   String
+  merchant     Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([merchantId])
+  @@index([email])
+}
+
+model Merchant {
+  id               String             @id @default(cuid())
+  name             String
+  businessName     String?
+  email            String             @unique
+  website          String?
+  currency         String             @default("INR")
+  timezone         String             @default("Asia/Kolkata")
+  isActive         Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  users            User[]
+  products         Product[]
+  customers        Customer[]
+  orders           Order[]
+  payments         Payment[]
+  recommendations  AIRecommendation[]
+  agentActions     AIAgentAction[]
+  approvals        Approval[]
+  campaigns        Campaign[]
+  webhookEvents    WebhookEvent[]
+  auditEvents      AuditEvent[]
+  agentPolicies    AgentPolicy[]
+  buyerSessions    AIBuyerSession[]
+  notifications    Notification[]
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  merchantId      String
+  merchant        Merchant         @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  name            String
+  description     String?
+  shortDescription String?
+  price           Int              // stored in paise
+  compareAtPrice  Int?             // for showing discounts
+  currency        String           @default("INR")
+  category        String?
+  sku             String?
+  inventory       Int              @default(0)
+  isActive        Boolean          @default(true)
+  imageUrl        String?
+  features        String[]         // array of feature strings
+  tags            String[]         // array of tags
+  aiMetadata      Json?            // flexible AI-specific data
+  upsellProductIds   String[]      // IDs of upsell products
+  crossSellProductIds String[]     // IDs of cross-sell products
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  variants        ProductVariant[]
+  recommendations AIRecommendation[]
+  orderItems      OrderItem[]
+
+  @@index([merchantId])
+  @@index([merchantId, category])
+  @@index([merchantId, isActive])
+}
+
+model ProductVariant {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name       String   // e.g., "Size: 10, Color: Blue"
+  sku        String?
+  price      Int      // in paise
+  inventory  Int      @default(0)
+  isActive   Boolean  @default(true)
+  attributes Json?    // { size: "10", color: "blue" }
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model Customer {
+  id         String   @id @default(cuid())
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  email      String
+  name       String
+  phone      String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  orders     Order[]
+
+  @@unique([merchantId, email])
+  @@index([merchantId])
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  merchantId       String
+  merchant         Merchant    @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId       String?
+  customer         Customer?   @relation(fields: [customerId], references: [id])
+  razorpayOrderId  String?     @unique
+  status           OrderStatus @default(CREATED)
+  amount           Int         // in paise
+  currency         String      @default("INR")
+  receipt          String?     @unique
+  customerEmail    String?
+  customerName     String?
+  customerPhone    String?
+  notes            Json?
+  aiActionId       String?     // link to the AI action that triggered this
+  idempotencyKey   String?     @unique
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  items            OrderItem[]
+  payments         Payment[]
+
+  @@index([merchantId])
+  @@index([merchantId, status])
+  @@index([merchantId, createdAt])
+  @@index([razorpayOrderId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+  price     Int     // in paise at time of purchase
+  name      String
+
+  @@index([orderId])
+}
+
+model Payment {
+  id                  String        @id @default(cuid())
+  merchantId          String
+  merchant            Merchant      @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  orderId             String
+  order               Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  razorpayPaymentId   String?       @unique
+  razorpayOrderId     String?
+  razorpaySignature   String?
+  status              PaymentStatus @default(CREATED)
+  amount              Int           // in paise
+  currency            String        @default("INR")
+  method              String?       // card, upi, netbanking, etc.
+  errorCode           String?
+  errorDescription    String?
+  verifiedAt          DateTime?
+  webhookConfirmedAt  DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([merchantId])
+  @@index([merchantId, status])
+  @@index([razorpayPaymentId])
+  @@index([razorpayOrderId])
+}
+
+model AIRecommendation {
+  id              String             @id @default(cuid())
+  merchantId      String
+  merchant        Merchant           @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  type            RecommendationType
+  title           String
+  reason          String
+  evidence        String[]
+  expectedImpact  Int                // in paise
+  confidence      Float              // 0-1
+  riskLevel       RiskLevel          @default(LOW)
+  productId       String?
+  product         Product?           @relation(fields: [productId], references: [id])
+  targetProductIds String[]
+  metadata        Json?
+  isProcessed     Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  actions         AIAgentAction[]
+
+  @@index([merchantId])
+  @@index([merchantId, type])
+  @@index([merchantId, isProcessed])
+  @@index([merchantId, createdAt])
+}
+
+model AIAgentAction {
+  id                String          @id @default(cuid())
+  merchantId        String
+  merchant          Merchant        @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  recommendationId  String?
+  recommendation    AIRecommendation? @relation(fields: [recommendationId], references: [id])
+  type              ActionType
+  status            ActionStatus    @default(PROPOSED)
+  title             String
+  description       String?
+  amount            Int?            // in paise
+  currency          String          @default("INR")
+  riskLevel         RiskLevel       @default(LOW)
+  policyResult      Json?           // { passed: boolean, reasons: [...] }
+  executionResult   Json?           // result from execution
+  errorMessage      String?
+  idempotencyKey    String?         @unique
+  metadata          Json?
+  expiresAt         DateTime?
+  executedAt        DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  approval          Approval?
+
+  @@index([merchantId])
+  @@index([merchantId, status])
+  @@index([merchantId, type])
+  @@index([merchantId, createdAt])
+}
+
+model Approval {
+  id           String         @id @default(cuid())
+  merchantId   String
+  merchant     Merchant       @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  actionId     String         @unique
+  action       AIAgentAction  @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  status       ApprovalStatus @default(PENDING)
+  approvedBy   String?        // userId
+  rejectedBy   String?        // userId
+  reason       String?        // reason for rejection
+  expiresAt    DateTime
+  respondedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([merchantId])
+  @@index([merchantId, status])
+}
+
+model Campaign {
+  id              String         @id @default(cuid())
+  merchantId      String
+  merchant        Merchant       @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  name            String
+  description     String?
+  targetAudience  String?
+  discountPercent Float?
+  budget          Int?           // in paise
+  spent           Int            @default(0) // in paise
+  startDate       DateTime?
+  endDate         DateTime?
+  status          CampaignStatus @default(DRAFT)
+  isAiGenerated   Boolean        @default(false)
+  aiActionId      String?
+  metadata        Json?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([merchantId])
+  @@index([merchantId, status])
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  merchantId  String?
+  merchant    Merchant? @relation(fields: [merchantId], references: [id])
+  eventId     String   @unique // Razorpay event ID for deduplication
+  eventType   String   // e.g. "payment.captured"
+  payload     Json
+  signature   String?
+  processed   Boolean  @default(false)
+  processedAt DateTime?
+  errorMessage String?
+  attempts    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([eventId])
+  @@index([eventType])
+  @@index([processed])
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  merchantId String
+  merchant   Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  actor      String   // userId or "system" or "ai_agent"
+  action     String   // e.g. "AI_RECOMMENDATION_CREATED"
+  entity     String   // e.g. "AIRecommendation"
+  entityId   String
+  reason     String?
+  metadata   Json?
+  requestId  String?  // for tracing
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  // AuditEvent is immutable — no updatedAt, no onDelete cascade
+  @@index([merchantId])
+  @@index([merchantId, action])
+  @@index([merchantId, createdAt])
+  @@index([entityId])
+  @@index([requestId])
+}
+
+model AgentPolicy {
+  id                       String   @id @default(cuid())
+  merchantId               String   @unique
+  merchant                 Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  maximumTransactionAmount Int      @default(1000000) // 10,000 INR in paise
+  dailySpendLimit          Int      @default(5000000) // 50,000 INR in paise
+  maximumCampaignBudget    Int      @default(2000000) // 20,000 INR in paise
+  maximumDiscountPercentage Float   @default(25.0)
+  requireMerchantApproval  Boolean  @default(true)
+  allowedActions           String[] @default(["UPSELL", "CROSS_SELL", "CAMPAIGN"])
+  blockedActions           String[] @default([])
+  isActive                 Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+model AIBuyerSession {
+  id          String          @id @default(cuid())
+  merchantId  String
+  merchant    Merchant        @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  buyerName   String?
+  buyerEmail  String?
+  context     String?         // initial user request
+  status      String          @default("active") // active, completed, abandoned
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  requests    AIBuyerRequest[]
+
+  @@index([merchantId])
+  @@index([merchantId, status])
+}
+
+model AIBuyerRequest {
+  id           String         @id @default(cuid())
+  sessionId    String
+  session      AIBuyerSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userMessage  String
+  aiResponse   Json           // structured AI response
+  productIds   String[]       // products referenced
+  selectedProductId String?   // product chosen for purchase
+  orderId      String?        // if purchase was initiated
+  status       String         @default("pending") // pending, product_selected, checkout, completed, failed
+  createdAt    DateTime       @default(now())
+
+  @@index([sessionId])
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  merchantId String
+  merchant   Merchant         @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  title      String
+  message    String
+  entityId   String?          // link to relevant entity
+  entityType String?
+  isRead     Boolean          @default(false)
+  createdAt  DateTime         @default(now())
+
+  @@index([merchantId])
+  @@index([merchantId, isRead])
+  @@index([merchantId, createdAt])
+}
