@@ -14,20 +14,17 @@ import {
   Megaphone,
   CreditCard,
   FileText,
+  Sliders,
   Settings,
   LogOut,
-  ChevronDown,
   Shield,
-  Sliders,
-  HelpCircle,
-  TrendingUp,
-  Zap
+  ChevronDown,
 } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 
 const NAV_GROUPS = [
   {
-    title: 'MAIN MENU',
+    title: 'INTELLIGENCE',
     items: [
       { href: '/overview', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/ai-agent', label: 'AI Agent', icon: Brain },
@@ -74,37 +71,30 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="finpilot-sidebar">
+    <aside className="finpilot-sidebar" style={{ padding: '18px 12px' }}>
       {/* ─── 1. Brand Logo & Title ────────────────────────────── */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingBottom: 16,
+        padding: '0 6px 14px',
         borderBottom: '1px solid var(--border-secondary)',
       }}>
         <Link href="/overview" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <div style={{
-            width: 34,
-            height: 34,
+            width: 32, height: 32,
             borderRadius: 'var(--radius-md)',
-            background: 'linear-gradient(135deg, #f97316, #ea580c)',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: '1rem',
+            background: 'var(--text-primary)',
+            color: 'var(--text-inverse)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 800, fontSize: '0.875rem',
             fontFamily: 'var(--font-heading)',
-            boxShadow: '0 4px 10px rgba(234, 88, 12, 0.3)',
-          }}>
-            R
-          </div>
+          }}>R</div>
           <div>
-            <div className="font-heading" style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+            <div className="font-heading" style={{ fontSize: '0.9375rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1 }}>
               REVOLVE AI
             </div>
-            <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>
+            <div style={{ fontSize: '0.625rem', color: 'var(--text-tertiary)', fontWeight: 500, letterSpacing: '0.02em' }}>
               Commerce Operating OS
             </div>
           </div>
@@ -112,61 +102,56 @@ export const Sidebar: React.FC = () => {
         <ThemeToggle />
       </div>
 
-      {/* ─── 2. Workspace Selector (Exact FinPilot BayFi Style) ─── */}
-      <div style={{ padding: '14px 0 8px' }}>
+      {/* ─── 2. Workspace Selector ────────────────────────────── */}
+      <div style={{ padding: '10px 0 6px' }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '8px 12px',
+          padding: '6px 10px',
           background: 'var(--bg-tertiary)',
           borderRadius: 'var(--radius-md)',
           border: '1px solid var(--border-primary)',
-          cursor: 'pointer',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
             <div style={{
-              width: 24,
-              height: 24,
+              width: 22, height: 22,
               borderRadius: 'var(--radius-sm)',
-              background: '#0f172a',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.75rem',
-              fontWeight: 800,
+              background: 'var(--text-primary)',
+              color: 'var(--text-inverse)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '0.6875rem', fontWeight: 800,
               flexShrink: 0,
             }}>
               A
             </div>
-            <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-              Apex Athletics
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+              Apex Athletics &amp; Gear
             </span>
           </div>
-          <ChevronDown size={14} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
+          <ChevronDown size={13} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
         </div>
       </div>
 
-      {/* ─── 3. Navigation Links (Grouped with Coral Active Pills) ─ */}
-      <nav style={{ flex: 1, padding: '4px 0', overflowY: 'auto' }}>
+      {/* ─── 3. Grouped Navigation Links ──────────────────────── */}
+      <nav style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
         {NAV_GROUPS.map((group) => (
-          <div key={group.title} style={{ marginBottom: 12 }}>
+          <div key={group.title} style={{ marginBottom: 10 }}>
             <div className="nav-section-header">{group.title}</div>
-            <div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = item.href === '/overview'
                   ? pathname === '/overview' || pathname === '/'
-                  : pathname === item.href || pathname.startsWith(item.href + '/');
+                  : pathname === item.href || (pathname.startsWith(item.href + '/') && item.label !== 'Settings');
 
                 return (
                   <Link
                     key={item.href + item.label}
                     href={item.href}
-                    className={`nav-pill-item ${isActive ? 'active' : ''}`}
+                    className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
                   >
-                    <Icon size={17} className="nav-icon" />
+                    <Icon size={16} className="nav-icon" />
                     <span>{item.label}</span>
                   </Link>
                 );
@@ -174,60 +159,49 @@ export const Sidebar: React.FC = () => {
             </div>
           </div>
         ))}
-
-        {/* Quick Log Out Action */}
-        <button
-          onClick={handleLogout}
-          className="nav-pill-item"
-          style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-        >
-          <LogOut size={17} className="nav-icon" />
-          <span>Log out</span>
-        </button>
       </nav>
 
-      {/* ─── 4. Bottom Safety / Guardrail Shield Card ─────────── */}
+      {/* ─── 4. Guardrail Status Box ──────────────────────────── */}
       <div style={{
-        marginTop: 12,
-        padding: '14px',
-        background: 'linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%)',
-        borderRadius: 'var(--radius-lg)',
-        border: '1px solid #fed7aa',
-        textAlign: 'center',
+        padding: '10px 12px',
+        background: 'var(--bg-tertiary)',
+        borderRadius: 'var(--radius-md)',
+        border: '1px solid var(--border-primary)',
+        marginTop: 6,
       }}>
-        <div style={{
-          width: 32,
-          height: 32,
-          borderRadius: '50%',
-          background: '#ea580c',
-          color: '#ffffff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 8px',
-          boxShadow: '0 4px 10px rgba(234, 88, 12, 0.25)',
-        }}>
-          <Shield size={16} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+          <Shield size={12} style={{ color: 'var(--ai-primary)' }} />
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>Policy Guardrails</span>
         </div>
-        <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#9a3412', marginBottom: 2 }}>
-          Policy Guardrails
-        </div>
-        <div style={{ fontSize: '0.6875rem', color: '#c2410c', lineHeight: 1.3, marginBottom: 10 }}>
-          Max ₹10,000/tx • 100% Policy Intercept
+        <div style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)', lineHeight: 1.3, marginBottom: 6 }}>
+          Max ₹10k/tx · 100% Intercept
         </div>
         <Link href="/settings" style={{
-          display: 'block',
-          padding: '6px 12px',
-          background: '#ea580c',
-          color: '#ffffff',
-          borderRadius: 'var(--radius-md)',
-          fontSize: '0.75rem',
-          fontWeight: 700,
+          display: 'block', textAlign: 'center',
+          padding: '4px 8px',
+          background: 'var(--bg-secondary)', color: 'var(--text-primary)',
+          border: '1px solid var(--border-primary)',
+          borderRadius: 'var(--radius-sm)',
+          fontSize: '0.6875rem', fontWeight: 600,
           textDecoration: 'none',
         }}>
-          Configure Rules
+          Configure
         </Link>
       </div>
+
+      {/* ─── 5. Log Out Action ────────────────────────────────── */}
+      <button
+        onClick={handleLogout}
+        className="sidebar-nav-item"
+        style={{
+          width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+          marginTop: 6, padding: '7px 12px',
+          color: 'var(--text-tertiary)', fontSize: '0.75rem',
+        }}
+      >
+        <LogOut size={14} />
+        <span>Sign Out</span>
+      </button>
     </aside>
   );
 };

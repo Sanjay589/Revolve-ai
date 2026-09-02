@@ -1,46 +1,44 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Settings, Shield, Key, Sliders, CheckCircle2, Lock, User } from 'lucide-react';
+import { Sliders, Shield, Save, CheckCircle2, Lock } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/form';
 import { useToast } from '@/components/ui/toast';
-import { formatCurrency } from '@/lib/utils';
 
 export default function SettingsPage() {
   const [maxTxRupees, setMaxTxRupees] = useState('10000');
   const [dailySpendRupees, setDailySpendRupees] = useState('50000');
-  const [maxBudgetRupees, setMaxBudgetRupees] = useState('20000');
-  const [maxDiscount, setMaxDiscount] = useState('25');
+  const [maxBudgetRupees, setMaxBudgetRupees] = useState('25000');
+  const [maxDiscount, setMaxDiscount] = useState('20');
   const [requireApproval, setRequireApproval] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [isSaving, setIsSaving] = useState(false);
   const { success, error } = useToast();
 
-  const fetchPolicy = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch('/api/settings/policies');
-      if (res.ok) {
-        const data = await res.json();
-        const p = data.policy;
-        if (p) {
-          setMaxTxRupees((p.maximumTransactionAmount / 100).toString());
-          setDailySpendRupees((p.dailySpendLimit / 100).toString());
-          setMaxBudgetRupees((p.maximumCampaignBudget / 100).toString());
-          setMaxDiscount(p.maximumDiscountPercentage.toString());
-          setRequireApproval(p.requireMerchantApproval);
-        }
-      }
-    } catch {
-      // ignore
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchPolicy = async () => {
+      try {
+        const res = await fetch('/api/policies');
+        if (res.ok) {
+          const data = await res.json();
+          const p = data.policy;
+          if (p) {
+            setMaxTxRupees((p.maxAutoExecuteAmount / 100).toString());
+            setDailySpendRupees((p.maxDailyBudget / 100).toString());
+            setMaxBudgetRupees((p.maxCampaignBudget / 100).toString());
+            setMaxDiscount(p.maxDiscountPercent.toString());
+            setRequireApproval(p.requireApprovalForHighRisk);
+          }
+        }
+      } catch {
+        // ignore
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchPolicy();
   }, []);
 
@@ -49,55 +47,63 @@ export default function SettingsPage() {
     setIsSaving(true);
 
     try {
-      const res = await fetch('/api/settings/policies', {
-        method: 'PATCH',
+      const payload = {
+        maxAutoExecuteAmount: Math.round(parseFloat(maxTxRupees) * 100),
+        maxDailyBudget: Math.round(parseFloat(dailySpendRupees) * 100),
+        maxCampaignBudget: Math.round(parseFloat(maxBudgetRupees) * 100),
+        maxDiscountPercent: parseFloat(maxDiscount),
+        requireApprovalForHighRisk: requireApproval,
+      };
+
+      const res = await fetch('/api/policies', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          maximumTransactionAmount: Math.round(parseFloat(maxTxRupees) * 100),
-          dailySpendLimit: Math.round(parseFloat(dailySpendRupees) * 100),
-          maximumCampaignBudget: Math.round(parseFloat(maxBudgetRupees) * 100),
-          maximumDiscountPercentage: parseFloat(maxDiscount),
-          requireMerchantApproval: requireApproval,
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error('Failed to update policy');
-      success('Policy Updated', 'Safety guardrails have been applied in real-time.');
+      if (!res.ok) throw new Error('Failed to update policies');
+
+      success('Policy Updated', 'Guardrails actively enforced on all AI actions.');
     } catch (err: unknown) {
-      error('Save Failed', err instanceof Error ? err.message : 'Error updating policy');
+      error('Error', err instanceof Error ? err.message : 'Could not save policy');
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* Header */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <span className="badge badge-fintech">
-            <Sliders size={12} /> CONTROLS &amp; POLICIES
-          </span>
-        </div>
-        <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-          Safety &amp; Policy Settings
-        </h1>
-        <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-          Configure financial guardrails, automated thresholds, and human-in-the-loop authorization gates.
-        </p>
-      </div>
+    <>
+      {/* ── Page Header ────────────────────────────────────── */}
+      <PageHeader
+        badgeText="CONTROLS &amp; POLICIES"
+        badgeVariant="neutral"
+        badgeIcon={<Sliders size={12} />}
+        title="Safety Guardrails &amp; Policy Engine"
+        description="Define strict financial limits, automated thresholds, and human-in-the-loop authorization gates. The merchant maintains absolute control."
+      />
 
-      {/* Policy Form */}
-      <div className="editorial-card" style={{ padding: '28px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <Shield size={20} style={{ color: 'var(--fintech-primary)' }} />
-          <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            Agent Financial Guardrails
-          </h3>
+      {/* ── Policy Form Card ────────────────────────────────── */}
+      <div className="editorial-card" style={{ padding: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 'var(--radius-md)',
+            background: 'var(--success-bg)', border: '1px solid var(--success-border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Shield size={16} style={{ color: 'var(--success)' }} />
+          </div>
+          <div>
+            <h3 className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Agent Financial Guardrails
+            </h3>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              Rules evaluated dynamically before any AI action or transaction is executed.
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleSavePolicy} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
+        <form onSubmit={handleSavePolicy} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             <Input
               label="Max Single Transaction (₹ INR)"
               type="number"
@@ -139,10 +145,10 @@ export default function SettingsPage() {
             display: 'flex',
             alignItems: 'center',
             gap: 12,
-            padding: '16px',
+            padding: '14px 16px',
             background: 'var(--bg-tertiary)',
             borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-secondary)',
+            border: '1px solid var(--border-primary)',
           }}>
             <input
               type="checkbox"
@@ -151,18 +157,18 @@ export default function SettingsPage() {
               onChange={(e) => setRequireApproval(e.target.checked)}
               style={{ width: 18, height: 18, accentColor: 'var(--fintech-primary)', cursor: 'pointer' }}
             />
-            <label htmlFor="requireApproval" style={{ fontSize: '0.875rem', color: 'var(--text-primary)', cursor: 'pointer' }}>
-              <strong>Require Merchant Approval for High-Impact Changes:</strong> Always route significant AI price adjustments and campaign allocations through the Approval Security Center.
+            <label htmlFor="requireApproval" style={{ fontSize: '0.8125rem', color: 'var(--text-primary)', cursor: 'pointer', lineHeight: 1.4 }}>
+              <strong>Require Merchant Approval for High-Impact Actions:</strong> Always intercept significant AI price adjustments and campaign allocations through the Approval Security Center.
             </label>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
             <Button variant="primary" type="submit" isLoading={isSaving}>
               Save Guardrail Policies
             </Button>
           </div>
         </form>
       </div>
-    </div>
+    </>
   );
 }

@@ -60,23 +60,8 @@ export const MobileNav: React.FC = () => {
 
   return (
     <>
-      {/* Top Mobile Bar */}
-      <header
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 60,
-          background: 'var(--bg-secondary)',
-          borderBottom: '1px solid var(--border-primary)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 16px',
-          zIndex: 45,
-        }}
-      >
+      {/* Top Mobile Bar - strictly hidden on desktop (>= 1025px) */}
+      <header className="mobile-top-bar">
         <Link href="/overview" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <div style={{
             width: 28,
@@ -111,7 +96,7 @@ export const MobileNav: React.FC = () => {
       {/* Slide-out Menu Overlay */}
       {drawerOpen && (
         <div
-          className="overlay"
+          className="overlay mobile-drawer-overlay"
           onClick={() => setDrawerOpen(false)}
           style={{ paddingTop: 60, alignItems: 'flex-start' }}
         >
@@ -161,23 +146,8 @@ export const MobileNav: React.FC = () => {
         </div>
       )}
 
-      {/* Bottom Mobile Navigation */}
-      <nav
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 60,
-          background: 'var(--bg-secondary)',
-          borderTop: '1px solid var(--border-primary)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-          zIndex: 40,
-        }}
-        className="lg:hidden"
-      >
+      {/* Bottom Mobile Navigation - strictly hidden on desktop (>= 1025px) */}
+      <nav className="mobile-bottom-bar">
         {PRIMARY_MOBILE_TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = pathname === tab.href;

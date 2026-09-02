@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Clock, Shield } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, RefreshCw, Lock, AlertTriangle, Shield } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 import { ApprovalCard } from '@/components/approval-card';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface ApprovalItem {
@@ -49,67 +49,67 @@ export default function ApprovalsPage() {
     fetchApprovals();
   }, [filter]);
 
+  const pendingCount = approvals.filter((a) => a.status === 'PENDING').length;
+
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="badge badge-warning">
-              <ShieldCheck size={12} /> HUMAN-IN-THE-LOOP AUTHORIZATION
-            </span>
-          </div>
-          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            Approval Security Center
-          </h1>
-          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-            High-impact AI campaigns & financial changes require explicit merchant verification.
-          </p>
-        </div>
+    <>
+      {/* ── Page Header ────────────────────────────────────── */}
+      <PageHeader
+        badgeText="HUMAN-IN-THE-LOOP AUTHORIZATION"
+        badgeVariant="warning"
+        badgeIcon={<ShieldCheck size={12} />}
+        title="Approval Security Center"
+        description="High-impact AI campaigns, discount thresholds, and financial workflows require explicit merchant authorization before execution."
+        actions={
+          <button
+            onClick={fetchApprovals}
+            disabled={isLoading}
+            className="btn btn-outline btn-sm"
+          >
+            <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+            <span>Refresh Queue</span>
+          </button>
+        }
+      />
 
-        <Button variant="outline" size="sm" onClick={fetchApprovals} disabled={isLoading}>
-          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-          <span>Refresh</span>
-        </Button>
-      </div>
-
-      {/* Safety Principle Banner */}
+      {/* ── Financial Guardrail Guarantee Card ───────────────── */}
       <div className="editorial-card" style={{
-        padding: '18px 24px',
+        padding: '16px 20px',
         display: 'flex',
         alignItems: 'center',
         gap: 16,
         background: 'var(--bg-secondary)',
       }}>
         <div style={{
-          width: 40,
-          height: 40,
+          width: 38,
+          height: 38,
           borderRadius: 'var(--radius-md)',
           background: 'var(--warning-bg)',
+          border: '1px solid var(--warning-border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
         }}>
-          <ShieldCheck size={22} style={{ color: 'var(--warning)' }} />
+          <ShieldCheck size={20} style={{ color: 'var(--warning-text)' }} />
         </div>
         <div>
           <h4 className="font-heading" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             Financial Guardrail Guarantee
           </h4>
-          <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-            AI proposes opportunities based on catalog affinity. The Policy Engine validates bounds, but no funds move without merchant sign-off.
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: 2, lineHeight: 1.4 }}>
+            AI autonomously proposes revenue opportunities. Policy limits are validated in real-time, but zero funds move without your direct cryptographic confirmation.
           </p>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--border-primary)', paddingBottom: 8 }}>
+      {/* ── Filter Tabs ──────────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: 6, borderBottom: '1px solid var(--border-primary)', paddingBottom: 6 }}>
         <button
           onClick={() => setFilter('pending')}
           style={{
-            padding: '8px 16px',
-            fontSize: '0.875rem',
+            padding: '6px 14px',
+            fontSize: '0.8125rem',
             fontWeight: 600,
             borderRadius: 'var(--radius-md)',
             border: '1px solid',
@@ -117,15 +117,16 @@ export default function ApprovalsPage() {
             background: filter === 'pending' ? 'var(--bg-secondary)' : 'transparent',
             color: filter === 'pending' ? 'var(--text-primary)' : 'var(--text-secondary)',
             cursor: 'pointer',
+            boxShadow: filter === 'pending' ? 'var(--shadow-xs)' : 'none',
           }}
         >
-          Pending Review ({approvals.filter((a) => a.status === 'PENDING').length})
+          Pending Review ({pendingCount})
         </button>
         <button
           onClick={() => setFilter('all')}
           style={{
-            padding: '8px 16px',
-            fontSize: '0.875rem',
+            padding: '6px 14px',
+            fontSize: '0.8125rem',
             fontWeight: 600,
             borderRadius: 'var(--radius-md)',
             border: '1px solid',
@@ -133,20 +134,21 @@ export default function ApprovalsPage() {
             background: filter === 'all' ? 'var(--bg-secondary)' : 'transparent',
             color: filter === 'all' ? 'var(--text-primary)' : 'var(--text-secondary)',
             cursor: 'pointer',
+            boxShadow: filter === 'all' ? 'var(--shadow-xs)' : 'none',
           }}
         >
           All Approvals History
         </button>
       </div>
 
-      {/* Approvals List */}
+      {/* ── Approvals List ───────────────────────────────────── */}
       {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Skeleton height={180} />
           <Skeleton height={180} />
         </div>
       ) : approvals.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {approvals.map((approval) => (
             <ApprovalCard
               key={approval.id}
@@ -156,16 +158,23 @@ export default function ApprovalsPage() {
           ))}
         </div>
       ) : (
-        <div className="editorial-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <CheckCircle2 size={36} style={{ color: 'var(--success)', margin: '0 auto 12px' }} />
-          <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 4 }}>
+        <div className="editorial-card" style={{ textAlign: 'center', padding: '48px 20px' }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: '50%',
+            background: 'var(--success-bg)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 12px',
+          }}>
+            <CheckCircle2 size={24} style={{ color: 'var(--success)' }} />
+          </div>
+          <h3 className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700, marginBottom: 4 }}>
             Security Queue Clear
           </h3>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-            No pending AI actions requiring authorization at this time.
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', maxWidth: 420, margin: '0 auto' }}>
+            No pending AI actions requiring authorization at this time. New suggestions will appear here automatically.
           </p>
         </div>
       )}
-    </div>
+    </>
   );
 }

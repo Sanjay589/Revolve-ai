@@ -279,14 +279,22 @@ Each recommendation object MUST have the following structure:
 - targetProductIds: Array of string product IDs being recommended/bundled
 `;
 
-    const res = await fetch('https://api.x.ai/v1/chat/completions', {
+    const isGroq = apiKey.startsWith('gsk_');
+    const endpoint = isGroq
+      ? 'https://api.groq.com/openai/v1/chat/completions'
+      : 'https://api.x.ai/v1/chat/completions';
+    const effectiveModel = isGroq
+      ? (model.startsWith('grok') ? 'openai/gpt-oss-120b' : model)
+      : model;
+
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model,
+        model: effectiveModel,
         messages: [
           {
             role: 'system',
@@ -304,7 +312,7 @@ Each recommendation object MUST have the following structure:
 
     if (!res.ok) {
       const errText = await res.text();
-      throw new Error(`Grok API error (${res.status}): ${errText}`);
+      throw new Error(`AI API error (${res.status}): ${errText}`);
     }
 
     const data = await res.json();
@@ -334,14 +342,22 @@ Each recommendation object MUST have the following structure:
       description: p.description,
     }));
 
-    const res = await fetch('https://api.x.ai/v1/chat/completions', {
+    const isGroq = apiKey.startsWith('gsk_');
+    const endpoint = isGroq
+      ? 'https://api.groq.com/openai/v1/chat/completions'
+      : 'https://api.x.ai/v1/chat/completions';
+    const effectiveModel = isGroq
+      ? (model.startsWith('grok') ? 'openai/gpt-oss-120b' : model)
+      : model;
+
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model,
+        model: effectiveModel,
         messages: [
           {
             role: 'system',

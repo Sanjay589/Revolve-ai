@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Edit2, Trash2, Sparkles, RefreshCw, ShoppingBag, CheckCircle2 } from 'lucide-react';
+import { Package, Plus, Edit2, Sparkles, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -134,42 +135,35 @@ export default function ProductsPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="badge badge-fintech">
-              <Package size={12} /> COMMERCE CATALOG
-            </span>
+    <>
+      {/* ── Page Header ────────────────────────────────────── */}
+      <PageHeader
+        badgeText="COMMERCE CATALOG"
+        badgeVariant="neutral"
+        badgeIcon={<Package size={12} />}
+        title="Products &amp; Inventory"
+        description="Manage store merchandise indexed for autonomous AI discovery, companion bundling, and natural language recommendations."
+        actions={
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button variant="outline" size="sm" onClick={fetchProducts} disabled={isLoading}>
+              <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+              <span>Refresh</span>
+            </Button>
+            <Button variant="primary" size="sm" onClick={openCreateModal}>
+              <Plus size={14} />
+              <span>Add Product</span>
+            </Button>
           </div>
-          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            Products &amp; Inventory
-          </h1>
-          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-            Manage store merchandise indexed for autonomous AI discovery and companion bundling.
-          </p>
-        </div>
+        }
+      />
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <Button variant="outline" size="sm" onClick={fetchProducts} disabled={isLoading}>
-            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-            <span>Refresh</span>
-          </Button>
-          <Button variant="primary" size="sm" onClick={openCreateModal}>
-            <Plus size={14} />
-            <span>Add Product</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Products Table */}
+      {/* ── Products Table ──────────────────────────────────── */}
       <div className="editorial-card" style={{ padding: 0, overflow: 'hidden' }}>
         {isLoading ? (
-          <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <Skeleton height={40} />
-            <Skeleton height={40} />
-            <Skeleton height={40} />
+          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Skeleton height={36} />
+            <Skeleton height={36} />
+            <Skeleton height={36} />
           </div>
         ) : products.length > 0 ? (
           <div style={{ overflowX: 'auto' }}>
@@ -188,7 +182,7 @@ export default function ProductsPage() {
                 {products.map((p) => (
                   <tr key={p.id}>
                     <td>
-                      <div className="font-heading" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9375rem' }}>
+                      <div className="font-heading" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
                         {p.name}
                       </div>
                       {p.shortDescription && (
@@ -205,7 +199,7 @@ export default function ProductsPage() {
                     </td>
 
                     <td>
-                      <div className="font-mono" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                      <div className="font-mono" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
                         {formatCurrency(p.price)}
                       </div>
                       {p.compareAtPrice && (
@@ -216,7 +210,7 @@ export default function ProductsPage() {
                     </td>
 
                     <td>
-                      <span className={`badge ${p.inventory > 10 ? 'badge-fintech' : 'badge-warning'}`} style={{ fontSize: '0.6875rem' }}>
+                      <span className={`badge ${p.inventory > 10 ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.6875rem' }}>
                         {p.inventory} in stock
                       </span>
                     </td>
@@ -224,7 +218,7 @@ export default function ProductsPage() {
                     <td>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                         {p.features?.slice(0, 3).map((f, i) => (
-                          <span key={i} style={{ fontSize: '0.6875rem', padding: '2px 6px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)' }}>
+                          <span key={i} style={{ fontSize: '0.6875rem', padding: '2px 6px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)' }}>
                             {f}
                           </span>
                         ))}
@@ -243,104 +237,98 @@ export default function ProductsPage() {
             </table>
           </div>
         ) : (
-          <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
-            <Package size={36} style={{ margin: '0 auto 12px', opacity: 0.6 }} />
-            <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 4 }}>
+          <div style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+            <Package size={32} style={{ margin: '0 auto 10px', opacity: 0.6 }} />
+            <h3 className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700, marginBottom: 4 }}>
               No Products in Catalog
             </h3>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
+            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: 14 }}>
               Add items to enable autonomous bundling and buyer discovery.
             </p>
-            <Button variant="primary" onClick={openCreateModal}>
+            <Button variant="primary" size="sm" onClick={openCreateModal}>
               <Plus size={14} /> Add First Product
             </Button>
           </div>
         )}
       </div>
 
-      {/* Create / Edit Modal */}
+      {/* ── Product Create / Edit Modal ─────────────────────── */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingId ? 'Edit Product' : 'Add Catalog Product'}
+        title={editingId ? 'Edit Product Details' : 'Add New Product to Catalog'}
         size="lg"
       >
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Input
-            label="Product Name"
+            label="Product Title"
+            required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
-            placeholder="e.g. Apex HyperLight 2 Running Shoes"
+            placeholder="e.g. Apex Carbon Pro Running Shoes"
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <Textarea
+            label="Full Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter comprehensive product specification for AI search reasoning..."
+            rows={3}
+          />
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
             <Input
-              label="Price (₹ INR)"
+              label="Price (₹)"
+              required
               type="number"
               step="0.01"
               value={priceRupees}
               onChange={(e) => setPriceRupees(e.target.value)}
-              required
-              placeholder="4499"
+              placeholder="4499.00"
             />
             <Input
-              label="Compare-at Price (₹ INR)"
+              label="Compare At Price (₹)"
               type="number"
               step="0.01"
               value={compareAtPriceRupees}
               onChange={(e) => setCompareAtPriceRupees(e.target.value)}
-              placeholder="5999"
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <Select
-              label="Category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              options={[
-                { value: 'Footwear', label: 'Footwear' },
-                { value: 'Apparel', label: 'Apparel' },
-                { value: 'Accessories', label: 'Accessories' },
-                { value: 'Electronics', label: 'Electronics' },
-                { value: 'Fitness', label: 'Fitness' },
-              ]}
+              placeholder="5999.00"
             />
             <Input
               label="Inventory Stock"
+              required
               type="number"
               value={inventory}
               onChange={(e) => setInventory(e.target.value)}
-              required
+              placeholder="50"
             />
           </div>
 
-          <Textarea
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            placeholder="Product details, specs, and materials..."
-          />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+            <Input
+              label="AI Features (comma-separated)"
+              value={featuresStr}
+              onChange={(e) => setFeaturesStr(e.target.value)}
+              placeholder="Carbon plate, Breathable mesh, Lightweight"
+            />
+            <Input
+              label="Tags (comma-separated)"
+              value={tagsStr}
+              onChange={(e) => setTagsStr(e.target.value)}
+              placeholder="Running, Marathon, Performance"
+            />
+          </div>
 
-          <Input
-            label="AI Features (comma-separated)"
-            value={featuresStr}
-            onChange={(e) => setFeaturesStr(e.target.value)}
-            placeholder="Carbon plate, Breathable mesh, Daily running"
-          />
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
             <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
             <Button variant="primary" type="submit" isLoading={isSubmitting}>
-              {editingId ? 'Save Changes' : 'Create Product'}
+              {editingId ? 'Save Changes' : 'Publish to Catalog'}
             </Button>
           </div>
         </form>
       </Modal>
-    </div>
+    </>
   );
 }

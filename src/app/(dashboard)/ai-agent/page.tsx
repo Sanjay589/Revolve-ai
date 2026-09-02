@@ -10,16 +10,13 @@ import {
   Layers,
   CheckCircle2,
   RefreshCw,
-  Play,
-  ArrowRight,
-  ShieldCheck,
-  Activity,
   Eye,
+  ShieldCheck,
+  Shield,
   Check,
-  AlertTriangle
 } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RecommendationCard } from '@/components/recommendation-card';
 import { ExplainabilityModal, ExplainabilityData } from '@/components/explainability-drawer';
@@ -65,7 +62,7 @@ export default function AIAgentPage() {
 
       if (prodRes.ok) {
         const prodData = await prodRes.json();
-        setProductCount(prodData.products?.length || 7);
+        setProductCount(prodData.products?.length || 0);
       }
     } catch {
       // ignore
@@ -78,13 +75,13 @@ export default function AIAgentPage() {
     loadData();
   }, []);
 
-  const handleRunAgent = async (focus: string = 'all') => {
+  const handleRunAgent = async (focus: string) => {
     setIsAnalyzing(true);
     try {
       const res = await fetch('/api/ai/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ focusArea: focus, limit: 6 }),
+        body: JSON.stringify({ focusArea: focus === 'all' ? 'all' : focus, limit: 6 }),
       });
 
       if (!res.ok) throw new Error('Agent scan failed');
@@ -106,88 +103,82 @@ export default function AIAgentPage() {
   const topRec = recommendations[0];
 
   return (
-    <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* ─── 1. Header & Live Brain Indicator ───────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="badge badge-ai" style={{ fontSize: '0.75rem', padding: '4px 10px' }}>
-              <Brain size={12} /> AI REVENUE AGENT • ONLINE
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />
-              Active Monitoring
-            </span>
-          </div>
-          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            Autonomous Intelligence Engine
-          </h1>
-          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-            Catalog co-purchase discovery, margin protection &amp; bounded conversion optimizers.
-          </p>
-        </div>
+    <>
+      {/* ── Page Header ────────────────────────────────────── */}
+      <PageHeader
+        badgeText="AI REVENUE AGENT • ONLINE"
+        badgeVariant="ai"
+        badgeIcon={<Brain size={12} />}
+        title="Autonomous Intelligence Engine"
+        description="Catalog co-purchase discovery, margin protection, cross-sell bundles, and bounded conversion optimizers."
+        actions={
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => handleRunAgent(activeTab)}
+            disabled={isAnalyzing}
+          >
+            <Sparkles size={14} className={isAnalyzing ? 'animate-spin' : ''} />
+            <span>{isAnalyzing ? 'Analyzing Product Relationships...' : 'Run Intelligence Scan'}</span>
+          </Button>
+        }
+      />
 
-        <Button
-          variant="fintech"
-          onClick={() => handleRunAgent(activeTab)}
-          disabled={isAnalyzing}
-        >
-          <Sparkles size={16} className={isAnalyzing ? 'animate-spin' : ''} />
-          <span>{isAnalyzing ? 'Analyzing Product Relationships...' : 'Run Intelligence Scan'}</span>
-        </Button>
-      </div>
-
-      {/* ─── 2. Real Engine Health & Status Stats ─────────────── */}
+      {/* ── Real Engine Health & Status Stats ───────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: 16,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 14,
       }}>
-        <div className="editorial-card" style={{ padding: '20px' }}>
+        <div className="editorial-card" style={{ padding: '16px 18px' }}>
           <div className="stat-label">Products Analyzed</div>
-          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+          <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
             {productCount} Items
           </div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
+          <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
             Indexed with AI feature metadata
           </p>
         </div>
 
-        <div className="editorial-card" style={{ padding: '20px' }}>
+        <div className="editorial-card" style={{ padding: '16px 18px' }}>
           <div className="stat-label">Opportunities Found</div>
-          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--fintech-primary)' }}>
+          <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--fintech-primary)', marginTop: 2 }}>
             {recommendations.length} Active
           </div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
+          <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
             Passed policy validation
           </p>
         </div>
 
-        <div className="editorial-card" style={{ padding: '20px' }}>
+        <div className="editorial-card" style={{ padding: '16px 18px' }}>
           <div className="stat-label">High Confidence (&gt;75%)</div>
-          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+          <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
             {highConfidenceCount}
           </div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
+          <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
             Strong historical basket affinity
           </p>
         </div>
 
-        <div className="editorial-card" style={{ padding: '20px' }}>
-          <div className="stat-label">Awaiting Approval</div>
-          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: pendingApprovalsCount > 0 ? 'var(--warning)' : 'var(--text-primary)' }}>
+        <div className="editorial-card" style={{ padding: '16px 18px' }}>
+          <div className="stat-label">Awaiting Authorization</div>
+          <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: pendingApprovalsCount > 0 ? 'var(--warning)' : 'var(--text-primary)', marginTop: 2 }}>
             {pendingApprovalsCount}
           </div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
+          <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
             Rerouted to Security Center
           </p>
         </div>
       </div>
 
-      {/* ─── 3. Current Inspectable Reasoning Pipeline ─────────── */}
+      {/* ── Current Inspectable Reasoning Pipeline ──────────── */}
       {topRec && (
-        <div className="editorial-card" style={{ padding: '24px 28px', background: 'var(--bg-secondary)', borderLeft: '4px solid var(--ai-primary)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div className="editorial-card" style={{
+          padding: '20px 24px',
+          background: 'var(--bg-secondary)',
+          borderLeft: '4px solid var(--ai-primary)',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className="badge badge-ai"><Brain size={12} /> CURRENT REASONING PIPELINE</span>
               <span className="stat-label" style={{ margin: 0 }}>ACTIVE COGNITION</span>
@@ -206,25 +197,26 @@ export default function AIAgentPage() {
               })}
             >
               <Eye size={13} />
-              <span>Inspect Reasoning</span>
+              <span>Inspect Reasoning Model</span>
             </Button>
           </div>
 
-          <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 8 }}>
+          <h3 className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
             {topRec.title}
           </h3>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 18 }}>
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 14 }}>
             {topRec.reason}
           </p>
 
           {/* Sequential Reasoning Chain */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 12,
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 10,
             background: 'var(--bg-tertiary)',
-            padding: '16px',
+            padding: '14px',
             borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-primary)',
           }}>
             <div>
               <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
@@ -265,12 +257,12 @@ export default function AIAgentPage() {
         </div>
       )}
 
-      {/* ─── 4. Filter Tabs & Opportunities Grid ─────────────── */}
+      {/* ── Filter Tabs ──────────────────────────────────────── */}
       <div style={{
         display: 'flex',
-        gap: 8,
+        gap: 6,
         borderBottom: '1px solid var(--border-primary)',
-        paddingBottom: 12,
+        paddingBottom: 6,
         overflowX: 'auto',
       }}>
         {[
@@ -284,8 +276,8 @@ export default function AIAgentPage() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
             style={{
-              padding: '8px 16px',
-              fontSize: '0.875rem',
+              padding: '6px 14px',
+              fontSize: '0.8125rem',
               fontWeight: 600,
               borderRadius: 'var(--radius-md)',
               border: '1px solid',
@@ -294,7 +286,6 @@ export default function AIAgentPage() {
               color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-secondary)',
               boxShadow: activeTab === tab.id ? 'var(--shadow-xs)' : 'none',
               cursor: 'pointer',
-              transition: 'all var(--transition-fast)',
               whiteSpace: 'nowrap',
             }}
           >
@@ -303,14 +294,15 @@ export default function AIAgentPage() {
         ))}
       </div>
 
+      {/* ── Opportunities Grid ───────────────────────────────── */}
       {isLoading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 20 }}>
-          <Skeleton height={260} />
-          <Skeleton height={260} />
-          <Skeleton height={260} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
+          <Skeleton height={240} />
+          <Skeleton height={240} />
+          <Skeleton height={240} />
         </div>
       ) : filtered.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
           {filtered.map((rec) => (
             <RecommendationCard
               key={rec.id}
@@ -320,16 +312,16 @@ export default function AIAgentPage() {
           ))}
         </div>
       ) : (
-        <div className="editorial-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <Brain size={36} style={{ color: 'var(--ai-primary)', margin: '0 auto 12px', opacity: 0.6 }} />
-          <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 6 }}>
+        <div className="editorial-card" style={{ textAlign: 'center', padding: '48px 20px' }}>
+          <Brain size={32} style={{ color: 'var(--ai-primary)', margin: '0 auto 10px', opacity: 0.7 }} />
+          <h3 className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700, marginBottom: 4 }}>
             No recommendations in this category
           </h3>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', maxWidth: 460, margin: '0 auto 20px' }}>
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', maxWidth: 420, margin: '0 auto 16px' }}>
             Run an intelligence pass to analyze your product catalog and recent order histories.
           </p>
-          <Button variant="fintech" onClick={() => handleRunAgent(activeTab)}>
-            <Sparkles size={16} /> Run Scan Now
+          <Button variant="primary" size="sm" onClick={() => handleRunAgent(activeTab)}>
+            <Sparkles size={14} /> Run Scan Now
           </Button>
         </div>
       )}
@@ -340,6 +332,6 @@ export default function AIAgentPage() {
         onClose={() => setSelectedExplain(null)}
         data={selectedExplain}
       />
-    </div>
+    </>
   );
 }

@@ -69,7 +69,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
               Total Revenue
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--fintech-primary)' }} />
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ai-primary)' }} />
               AI-Attributed
             </span>
           </div>
@@ -117,8 +117,8 @@ export const ChartCard: React.FC<ChartCardProps> = ({
                 <stop offset="95%" stopColor="var(--text-primary)" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorAi" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="var(--fintech-primary)" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="var(--fintech-primary)" stopOpacity={0} />
+                <stop offset="5%" stopColor="var(--ai-primary)" stopOpacity={0.16} />
+                <stop offset="95%" stopColor="var(--ai-primary)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="var(--border-secondary)" />
@@ -162,7 +162,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
               type="monotone"
               dataKey={comparisonKey}
               name="AI-Attributed Revenue"
-              stroke="var(--fintech-primary)"
+              stroke="var(--ai-primary)"
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorAi)"

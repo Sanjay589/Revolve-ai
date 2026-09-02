@@ -6,29 +6,20 @@ import {
   Brain,
   Sparkles,
   TrendingUp,
-  ShoppingBag,
   CreditCard,
   ShieldCheck,
   ArrowRight,
   RefreshCw,
   CheckCircle2,
-  AlertCircle,
-  MoreVertical,
-  Plus,
   ArrowUpRight,
   Send,
-  Zap,
   Shield,
-  Sliders,
-  Eye,
   Activity,
-  Calendar,
-  Lock,
-  ChevronDown
+  BarChart3,
+  Package,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@/components/ui/page-header';
 import { ChartCard } from '@/components/chart-card';
 import { ExplainabilityModal, ExplainabilityData } from '@/components/explainability-drawer';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
@@ -121,7 +112,7 @@ export default function OverviewPage() {
         body: JSON.stringify({ focusArea: 'all', limit: 5 }),
       });
       if (!res.ok) throw new Error('AI analysis failed');
-      success('AI Intelligence Scan Complete', 'Catalog affinities and revenue opportunities updated.');
+      success('AI Scan Complete', 'Revenue opportunities updated.');
       fetchDashboard();
     } catch (err: unknown) {
       error('Analysis Error', err instanceof Error ? err.message : 'Failed to analyze');
@@ -143,7 +134,7 @@ export default function OverviewPage() {
     } else if (q.includes('transaction') || q.includes('payment')) {
       window.location.href = '/transactions';
     } else {
-      info('AI Processing', `Evaluating query: "${aiPrompt}"`);
+      info('AI Processing', `Evaluating: "${aiPrompt}"`);
       handleTriggerAnalysis();
     }
     setAiPrompt('');
@@ -151,30 +142,23 @@ export default function OverviewPage() {
 
   if (isLoading && !data) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
-          <div style={{ gridColumn: 'span 5' }}><Skeleton height={140} /></div>
-          <div style={{ gridColumn: 'span 3' }}><Skeleton height={140} /></div>
-          <div style={{ gridColumn: 'span 4' }}><Skeleton height={140} /></div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <Skeleton height={50} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14 }}>
+          {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} height={100} />)}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
-          <div style={{ gridColumn: 'span 6' }}><Skeleton height={320} /></div>
-          <div style={{ gridColumn: 'span 6' }}><Skeleton height={320} /></div>
+        <div style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: 16 }}>
+          <Skeleton height={320} />
+          <Skeleton height={320} />
         </div>
       </div>
     );
   }
 
   const metrics = data?.metrics || {
-    revenue: 0,
-    revenueChange: 0,
-    orders: 0,
-    ordersChange: 0,
-    avgOrderValue: 0,
-    conversionRate: 0,
-    customers: 0,
-    pendingApprovals: 0,
-    aiAttributedRevenue: 0,
+    revenue: 0, revenueChange: 0, orders: 0, ordersChange: 0,
+    avgOrderValue: 0, conversionRate: 0, customers: 0,
+    pendingApprovals: 0, aiAttributedRevenue: 0,
   };
 
   const recommendations = data?.recentRecommendations || [];
@@ -193,393 +177,384 @@ export default function OverviewPage() {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      {/* ══════════════════════════════════════════════════════════
-          ROW 1: Financial Snapshot | Finance Score | Available Balance
-      ══════════════════════════════════════════════════════════ */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(12, 1fr)',
-        gap: 16,
-      }}>
-        {/* Left Card: Financial Snapshot (5 cols) */}
-        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 5', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Financial Snapshot
-            </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-              Customize View <ChevronDown size={12} />
-            </span>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 12,
-          }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
-                Total Income
-              </div>
-              <div className="font-mono" style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
-                {formatCurrency(metrics.revenue)}
-              </div>
-              <div style={{ fontSize: '0.6875rem', color: '#10b981', fontWeight: 600, marginTop: 2 }}>
-                ▲ +12.07%
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444' }} />
-                AI Attributed
-              </div>
-              <div className="font-mono" style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
-                {formatCurrency(metrics.aiAttributedRevenue)}
-              </div>
-              <div style={{ fontSize: '0.6875rem', color: '#10b981', fontWeight: 600, marginTop: 2 }}>
-                ▲ +18.4%
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0284c7' }} />
-                Verified Orders
-              </div>
-              <div className="font-mono" style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
-                {metrics.orders} Captured
-              </div>
-              <div style={{ fontSize: '0.6875rem', color: '#10b981', fontWeight: 600, marginTop: 2 }}>
-                ▲ +22.08%
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Center Card: Finance Score (3 cols) */}
-        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 3', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Policy Score
-            </span>
-            <MoreVertical size={14} style={{ color: 'var(--text-tertiary)', cursor: 'pointer' }} />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Guardrail Quality</span>
-              <span className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>98%</span>
-            </div>
-            <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#10b981', marginBottom: 8 }}>
-              Optimal (100% Policy Bound)
-            </div>
-            {/* Progress Bar */}
-            <div style={{ width: '100%', height: 8, background: 'var(--bg-tertiary)', borderRadius: 4, overflow: 'hidden' }}>
-              <div style={{ width: '98%', height: '100%', background: 'linear-gradient(90deg, #10b981, #059669)', borderRadius: 4 }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Right Card: Available Balance Hero Gradient (4 cols) */}
-        <div className="fintech-hero-card" style={{ gridColumn: 'span 12 / span 4', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.8125rem', fontWeight: 600, opacity: 0.9 }}>
-              Captured Commerce Balance
-            </span>
-            <div style={{
-              width: 24,
-              height: 24,
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Plus size={14} />
-            </div>
-          </div>
-
-          <div>
-            <div className="font-mono" style={{ fontSize: '1.875rem', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-              {formatCurrency(metrics.revenue)}
-              <span style={{ fontSize: '0.875rem', fontWeight: 500, opacity: 0.85, marginLeft: 4 }}>INR</span>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+    <>
+      {/* ── Page Header ────────────────────────────────────── */}
+      <PageHeader
+        badgeText="COMMERCE INTELLIGENCE"
+        badgeVariant="ai"
+        badgeIcon={<Brain size={12} />}
+        title="Merchant Dashboard"
+        description="Clarity and control over every AI commerce action, policy verification, and payment outcome."
+        actions={
+          <div style={{ display: 'flex', gap: 8 }}>
             <button
               onClick={handleTriggerAnalysis}
               disabled={isGenerating}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                borderRadius: 'var(--radius-md)',
-                background: '#0f172a',
-                color: '#ffffff',
-                border: 'none',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-              }}
+              className="btn btn-outline btn-sm"
             >
-              <Sparkles size={13} className={isGenerating ? 'animate-spin' : ''} />
-              <span>{isGenerating ? 'Scanning...' : 'Scan Catalog'}</span>
+              <RefreshCw size={13} className={isGenerating ? 'animate-spin' : ''} />
+              <span>{isGenerating ? 'Scanning...' : 'Refresh Scan'}</span>
             </button>
-
-            <Link href="/approvals" style={{
-              flex: 1,
-              padding: '8px 12px',
-              borderRadius: 'var(--radius-md)',
-              background: 'rgba(255, 255, 255, 0.25)',
-              backdropFilter: 'blur(8px)',
-              color: '#ffffff',
-              border: 'none',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 4,
-            }}>
-              <span>Authorize ({metrics.pendingApprovals})</span>
+            <Link href="/ai-agent" className="btn btn-primary btn-sm" style={{ gap: 4 }}>
+              <Sparkles size={13} />
+              <span>AI Agent Brain</span>
             </Link>
           </div>
-        </div>
+        }
+      />
+
+      {/* ── AI Command Center ──────────────────────────────── */}
+      <div style={{
+        background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)',
+        borderRadius: 'var(--radius-lg)', padding: '12px 18px',
+        boxShadow: 'var(--shadow-card)',
+      }}>
+        <form onSubmit={handlePromptSubmit} style={{
+          display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+        }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 'var(--radius-md)',
+            background: 'var(--ai-bg)', border: '1px solid var(--ai-border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <Sparkles size={16} style={{ color: 'var(--ai-primary)' }} />
+          </div>
+          <input
+            type="text"
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            placeholder="Ask Revolve AI — scan catalog, find cross-sell, show revenue..."
+            style={{
+              flex: '1 1 240px', background: 'transparent', border: 'none', outline: 'none',
+              fontSize: '0.8125rem', color: 'var(--text-primary)',
+              fontFamily: 'var(--font-body)',
+            }}
+          />
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0, flexWrap: 'wrap' }}>
+            {['Scan Catalog', 'Cross-Sell', 'Approvals'].map(chip => (
+              <button key={chip} type="button" className="command-chip" onClick={() => {
+                if (chip === 'Approvals') window.location.href = '/approvals';
+                else { setAiPrompt(chip); handleTriggerAnalysis(); }
+              }}>
+                {chip}
+              </button>
+            ))}
+          </div>
+          <button type="submit" className="btn btn-primary btn-sm" style={{ gap: 4 }}>
+            <Send size={13} /> Send
+          </button>
+        </form>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════
-          ROW 2: AI Assistant Command Center | Cash Flow Trajectory
-      ══════════════════════════════════════════════════════════ */}
+      {/* ── Primary AI Opportunity Card (Clean Sophisticated Accent) ── */}
+      {topOpportunity && (
+        <div style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--ai-border)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '20px 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: 'var(--shadow-card)',
+          position: 'relative',
+          overflow: 'hidden',
+          flexWrap: 'wrap',
+          gap: 16,
+        }}>
+          {/* Subtle Left Indigo Indicator */}
+          <div style={{
+            position: 'absolute', left: 0, top: 0, bottom: 0, width: 4,
+            background: 'var(--ai-primary)',
+          }} />
+
+          <div style={{ flex: '1 1 400px', paddingLeft: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span className="badge badge-ai">
+                <Brain size={12} /> Top AI Opportunity
+              </span>
+              <span className="badge badge-neutral" style={{ fontSize: '0.6875rem' }}>
+                {Math.round(topOpportunity.confidence * 100)}% Confidence
+              </span>
+            </div>
+            <h2 className="font-heading" style={{
+              fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.3,
+            }}>
+              {topOpportunity.title}
+            </h2>
+            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5, maxWidth: 620 }}>
+              {topOpportunity.reason}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>
+                Expected Impact
+              </div>
+              <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--fintech-primary)' }}>
+                +{formatCurrency(topOpportunity.expectedImpact)}
+                <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-tertiary)' }}> /mo</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => setSelectedExplain({
+                  title: topOpportunity.title,
+                  type: topOpportunity.type,
+                  confidence: topOpportunity.confidence,
+                  reason: topOpportunity.reason,
+                  evidence: topOpportunity.evidence,
+                  riskLevel: topOpportunity.riskLevel,
+                  expectedImpact: topOpportunity.expectedImpact,
+                })}
+                className="btn btn-outline btn-sm"
+              >
+                Explain AI Logic
+              </button>
+              <Link href="/approvals" className="btn btn-primary btn-sm" style={{ gap: 4 }}>
+                <span>Review &amp; Authorize</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── KPI Row ────────────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(12, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 14,
+      }}>
+        {[
+          {
+            label: 'Total Revenue',
+            value: formatCurrency(metrics.revenue),
+            change: `${metrics.revenueChange >= 0 ? '+' : ''}${metrics.revenueChange.toFixed(1)}%`,
+            positive: metrics.revenueChange >= 0,
+            icon: TrendingUp, iconColor: 'var(--fintech-primary)', iconBg: 'var(--fintech-bg)',
+          },
+          {
+            label: 'AI-Attributed Revenue',
+            value: formatCurrency(metrics.aiAttributedRevenue),
+            change: metrics.aiAttributedRevenue > 0 ? '+Active' : 'No data',
+            positive: metrics.aiAttributedRevenue > 0,
+            icon: Brain, iconColor: 'var(--ai-primary)', iconBg: 'var(--ai-bg)',
+          },
+          {
+            label: 'Verified Orders',
+            value: String(metrics.orders),
+            change: `${metrics.ordersChange >= 0 ? '+' : ''}${metrics.ordersChange.toFixed(0)}%`,
+            positive: metrics.ordersChange >= 0,
+            icon: CreditCard, iconColor: 'var(--info)', iconBg: 'var(--info-bg)',
+          },
+          {
+            label: 'Avg Order Value',
+            value: formatCurrency(metrics.avgOrderValue),
+            change: '',
+            positive: true,
+            icon: BarChart3, iconColor: 'var(--warning)', iconBg: 'var(--warning-bg)',
+          },
+          {
+            label: 'Pending Approvals',
+            value: String(metrics.pendingApprovals),
+            change: metrics.pendingApprovals > 0 ? 'Needs attention' : 'All clear',
+            positive: metrics.pendingApprovals === 0,
+            icon: ShieldCheck, iconColor: metrics.pendingApprovals > 0 ? 'var(--warning)' : 'var(--success)',
+            iconBg: metrics.pendingApprovals > 0 ? 'var(--warning-bg)' : 'var(--success-bg)',
+          },
+        ].map((kpi) => (
+          <div key={kpi.label} style={{
+            background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-lg)', padding: '16px 18px',
+            boxShadow: 'var(--shadow-card)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+              <div className="stat-label">{kpi.label}</div>
+              <div style={{
+                width: 30, height: 30, borderRadius: 'var(--radius-md)',
+                background: kpi.iconBg, display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+              }}>
+                <kpi.icon size={15} style={{ color: kpi.iconColor }} />
+              </div>
+            </div>
+            <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>
+              {kpi.value}
+            </div>
+            {kpi.change && (
+              <div style={{
+                fontSize: '0.6875rem', fontWeight: 600,
+                color: kpi.positive ? 'var(--success)' : 'var(--error)',
+              }}>
+                {kpi.change}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Row: Revenue Chart + AI Scan Action ────────────── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '7fr 5fr',
         gap: 16,
       }}>
-        {/* Left Card: AI Assistant (6 cols) */}
-        <div className="ai-assistant-container" style={{ gridColumn: 'span 12 / span 6', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Revenue Intelligence Chart */}
+        <div style={{
+          background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)',
+          borderRadius: 'var(--radius-lg)', padding: '20px',
+          boxShadow: 'var(--shadow-card)',
+        }}>
+          <ChartCard
+            title="Revenue Intelligence"
+            data={chartData}
+            dataKey="revenue"
+            comparisonKey="aiRevenue"
+            timeRange={timeRange}
+            onTimeRangeChange={setTimeRange}
+          />
+        </div>
+
+        {/* AI Agent Status + Scan */}
+        <div style={{
+          background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)',
+          borderRadius: 'var(--radius-lg)', padding: '20px',
+          boxShadow: 'var(--shadow-card)',
+          display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+        }}>
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+              <div className="ai-pulse" />
               <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                AI Assistant
+                AI Agent Status
               </span>
-              <MoreVertical size={14} style={{ color: 'var(--text-tertiary)', cursor: 'pointer' }} />
             </div>
 
-            {/* Glowing Orange Orb from FinPilot Reference */}
-            <div className="ai-orb-graphic">
-              <Sparkles size={28} color="#ffffff" />
-            </div>
-
-            <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
-              How can Revolve AI help you today?
-            </h3>
-
-            {/* 6 Action Chips (Exact Reference Style) */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginBottom: 18 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
-                { label: 'Show revenue flow', action: () => setAiPrompt('Show revenue flow') },
-                { label: 'Find cross-sell', action: () => setAiPrompt('Find cross-sell opportunities') },
-                { label: 'Review approvals', action: () => { window.location.href = '/approvals'; } },
-                { label: 'Show failed payments', action: () => { window.location.href = '/transactions'; } },
-                { label: 'Detect catalog anomalies', action: handleTriggerAnalysis },
-                { label: 'More options', action: () => { window.location.href = '/ai-agent'; } },
-              ].map((chip) => (
-                <button
-                  key={chip.label}
-                  type="button"
-                  onClick={chip.action}
-                  className="fintech-chip"
-                >
-                  <Sparkles size={11} color="#ea580c" />
-                  <span>{chip.label}</span>
-                </button>
+                { label: 'Catalog Scans', val: `${recommendations.length} opportunities found`, icon: Package },
+                { label: 'Policy Enforcement', val: '100% intercepted', icon: Shield },
+                { label: 'Conversion Rate', val: `${metrics.conversionRate.toFixed(1)}%`, icon: Activity },
+                { label: 'Active Customers', val: String(metrics.customers), icon: TrendingUp },
+              ].map(item => (
+                <div key={item.label} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '8px 12px',
+                  background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-secondary)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <item.icon size={14} style={{ color: 'var(--text-tertiary)' }} />
+                    <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{item.label}</span>
+                  </div>
+                  <span className="font-mono" style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {item.val}
+                  </span>
+                </div>
               ))}
             </div>
           </div>
 
-          {/* AI Prompt Input Bar with Send Button */}
-          <form onSubmit={handlePromptSubmit} style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'var(--bg-tertiary)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-primary)',
-            padding: '6px 8px 6px 14px',
-          }}>
-            <input
-              type="text"
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              placeholder="Ask Revolve AI anything about your commerce..."
-              style={{
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                fontSize: '0.8125rem',
-                color: 'var(--text-primary)',
-                width: '100%',
-                fontFamily: 'var(--font-body)',
-              }}
-            />
-            <button
-              type="submit"
-              className="btn-coral"
-              style={{
-                padding: '6px 14px',
-                borderRadius: 'var(--radius-sm)',
-                border: 'none',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                cursor: 'pointer',
-              }}
-            >
-              <span>Send</span>
-              <ArrowRight size={12} />
-            </button>
-          </form>
-        </div>
-
-        {/* Right Card: Cash Flow & Revenue Intelligence (6 cols) */}
-        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 6', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <div>
-                <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  Cash Flow &amp; Revenue Intelligence
-                </span>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>
-                  Gross volume vs AI-attributed companion transactions
-                </div>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                padding: '4px 10px',
-                background: 'var(--bg-tertiary)',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border-primary)',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
-                cursor: 'pointer',
-              }}>
-                <span>This Year</span>
-                <ChevronDown size={12} />
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 12 }}>
-              <div className="font-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                {formatCurrency(metrics.revenue)}
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginLeft: 4 }}>USD/INR</span>
-              </div>
-              <div style={{ display: 'flex', gap: 12, fontSize: '0.6875rem', fontWeight: 600 }}>
-                <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} /> Income
-                </span>
-                <span style={{ color: '#ea580c', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ea580c' }} /> AI Attributed
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ height: 200, width: '100%' }}>
-            <ChartCard
-              title=""
-              data={chartData}
-              dataKey="revenue"
-              comparisonKey="aiRevenue"
-              timeRange={timeRange}
-              onTimeRangeChange={setTimeRange}
-            />
-          </div>
+          <button
+            onClick={handleTriggerAnalysis}
+            disabled={isGenerating}
+            className="btn btn-primary"
+            style={{ width: '100%', marginTop: 14, justifyContent: 'center' }}
+          >
+            {isGenerating ? (
+              <><RefreshCw size={14} className="animate-spin" /> Scanning Catalog...</>
+            ) : (
+              <><Sparkles size={14} /> Run AI Intelligence Scan</>
+            )}
+          </button>
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════
-          ROW 3: Recent Activity | Currency Exchange / Policy Limits | Statistic Donut
-      ══════════════════════════════════════════════════════════ */}
+      {/* ── Row: Recent Transactions + Policy + Quick Links ─── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(12, 1fr)',
+        gridTemplateColumns: '7fr 5fr',
         gap: 16,
       }}>
-        {/* Left: Recent Activity Table (6 cols) */}
-        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 6', padding: '18px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        {/* Recent Verified Orders */}
+        <div style={{
+          background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)',
+          borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-card)',
+        }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '16px 20px', borderBottom: '1px solid var(--border-secondary)',
+          }}>
             <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Recent Activity
+              Recent Verified Orders
             </span>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              padding: '3px 8px',
-              background: 'var(--bg-tertiary)',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-primary)',
-              fontSize: '0.6875rem',
-              fontWeight: 600,
-              color: 'var(--text-secondary)',
+            <Link href="/transactions" style={{
+              fontSize: '0.75rem', fontWeight: 600, color: 'var(--ai-text)',
+              textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4,
             }}>
-              <span>This Month</span>
-              <ChevronDown size={11} />
-            </div>
+              View All <ArrowUpRight size={12} />
+            </Link>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
             <table className="editorial-table">
               <thead>
                 <tr>
-                  <th>Transaction ID</th>
+                  <th>Order ID</th>
                   <th>Date</th>
-                  <th>Platform</th>
                   <th>Amount</th>
                   <th>Status</th>
+                  <th>Verification</th>
                 </tr>
               </thead>
               <tbody>
                 {data?.recentOrders && data.recentOrders.length > 0 ? (
-                  data.recentOrders.slice(0, 4).map((o) => (
-                    <tr key={o.id}>
-                      <td className="font-mono" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {o.razorpayOrderId || o.id.slice(0, 10)}
-                      </td>
-                      <td style={{ fontSize: '0.75rem' }}>
-                        {formatDateTime(o.createdAt).slice(0, 10)}
-                      </td>
-                      <td style={{ fontSize: '0.75rem', fontWeight: 500 }}>
-                        Razorpay Test
-                      </td>
-                      <td className="font-mono" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {formatCurrency(o.amount)}
-                      </td>
-                      <td>
-                        <span className="badge badge-fintech" style={{ fontSize: '0.6875rem' }}>
-                          Completed
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                  data.recentOrders.slice(0, 5).map((o) => {
+                    const hasWebhook = o.payments?.some(p => p.webhookConfirmedAt);
+                    const hasSignature = o.payments?.some(p => p.razorpaySignature);
+                    return (
+                      <tr key={o.id}>
+                        <td className="font-mono" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {o.razorpayOrderId ? o.razorpayOrderId.slice(0, 16) : o.id.slice(0, 12)}
+                        </td>
+                        <td style={{ fontSize: '0.75rem' }}>
+                          {formatDateTime(o.createdAt).slice(0, 10)}
+                        </td>
+                        <td className="font-mono" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                          {formatCurrency(o.amount)}
+                        </td>
+                        <td>
+                          <span className={`badge ${o.status === 'CAPTURED' || o.status === 'PAID' ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.6875rem' }}>
+                            {o.status === 'CAPTURED' ? <CheckCircle2 size={10} /> : null}
+                            {o.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            {hasSignature && (
+                              <span className="badge badge-success" style={{ fontSize: '0.5625rem', padding: '1px 5px' }}>
+                                HMAC ✓
+                              </span>
+                            )}
+                            {hasWebhook && (
+                              <span className="badge badge-ai" style={{ fontSize: '0.5625rem', padding: '1px 5px' }}>
+                                Webhook ✓
+                              </span>
+                            )}
+                            {!hasSignature && !hasWebhook && (
+                              <span style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>—</span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-tertiary)' }}>
-                      No recent transactions
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '28px 0', color: 'var(--text-tertiary)' }}>
+                      No transactions yet. Use AI Buyers to create your first order.
                     </td>
                   </tr>
                 )}
@@ -588,81 +563,101 @@ export default function OverviewPage() {
           </div>
         </div>
 
-        {/* Center: Currency / Policy Limits Card (3 cols) */}
-        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 3', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '18px 20px' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        {/* Right Column: Policy + Activity */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Policy Guardrails */}
+          <div style={{
+            background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-lg)', padding: '18px 20px',
+            boxShadow: 'var(--shadow-card)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Policy Guardrails
               </span>
-              <span className="badge badge-fintech" style={{ fontSize: '0.6875rem' }}>Active</span>
+              <span className="badge badge-success" style={{ fontSize: '0.6875rem' }}>Active</span>
             </div>
-
-            <div style={{ background: 'var(--bg-tertiary)', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-primary)', marginBottom: 8 }}>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>Max Transaction Limit</div>
-              <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹10,000.00</div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{
+                flex: 1, padding: '10px 12px',
+                background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-secondary)',
+              }}>
+                <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginBottom: 2 }}>Max / Transaction</div>
+                <div className="font-mono" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹10,000</div>
+              </div>
+              <div style={{
+                flex: 1, padding: '10px 12px',
+                background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-secondary)',
+              }}>
+                <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginBottom: 2 }}>Daily AI Limit</div>
+                <div className="font-mono" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹50,000</div>
+              </div>
             </div>
-
-            <div style={{ background: 'var(--bg-tertiary)', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-primary)' }}>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>Daily AI Spend Limit</div>
-              <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹50,000.00</div>
+            <div style={{
+              marginTop: 10, padding: '8px 12px',
+              background: 'var(--success-bg)', borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--success-border)',
+              fontSize: '0.75rem', color: 'var(--success-text)', fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <CheckCircle2 size={13} /> 100% Policy Intercept Rate
             </div>
           </div>
 
-          <Link href="/settings" style={{
-            display: 'block',
-            width: '100%',
-            padding: '8px',
-            background: '#ea580c',
-            color: '#ffffff',
-            borderRadius: 'var(--radius-md)',
-            textAlign: 'center',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            textDecoration: 'none',
-            marginTop: 10,
+          {/* Recent Activity */}
+          <div style={{
+            background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-lg)', padding: '18px 20px',
+            boxShadow: 'var(--shadow-card)', flex: 1,
           }}>
-            Adjust Rules
-          </Link>
-        </div>
-
-        {/* Right: Commerce Attribution Statistic Donut / Breakdown (3 cols) */}
-        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 3', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '18px 20px' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                Catalog Statistics
+                Recent Activity
               </span>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>This Month</div>
+              <Link href="/audit" style={{
+                fontSize: '0.75rem', fontWeight: 600, color: 'var(--ai-text)',
+                textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+                Audit Trail <ArrowUpRight size={12} />
+              </Link>
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.75rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ea580c' }} /> Footwear &amp; Running
-                </span>
-                <span className="font-mono font-bold">60%</span>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1' }} /> Recovery Gear
-                </span>
-                <span className="font-mono font-bold">25%</span>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} /> Hydration &amp; Tech
-                </span>
-                <span className="font-mono font-bold">15%</span>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {data?.recentActivity && data.recentActivity.length > 0 ? (
+                data.recentActivity.slice(0, 4).map(evt => (
+                  <div key={evt.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '8px 10px',
+                    background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-secondary)',
+                  }}>
+                    <div style={{
+                      width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                      background: evt.action.includes('SUCCESS') || evt.action.includes('APPROVED') || evt.action.includes('CAPTURED')
+                        ? 'var(--success)' : evt.action.includes('FAILED') || evt.action.includes('REJECTED')
+                        ? 'var(--error)' : evt.action.startsWith('AI_')
+                        ? 'var(--ai-primary)' : 'var(--text-tertiary)',
+                    }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="font-mono" style={{
+                        fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {evt.action}
+                      </div>
+                      <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>
+                        {evt.actor} · {formatDateTime(evt.createdAt).slice(11, 16)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--text-tertiary)', fontSize: '0.8125rem' }}>
+                  No recent activity.
+                </div>
+              )}
             </div>
-          </div>
-
-          <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--border-secondary)', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-            <span>Total Catalog Items</span>
-            <span className="font-mono font-bold" style={{ color: 'var(--text-primary)' }}>7 Products</span>
           </div>
         </div>
       </div>
@@ -673,6 +668,6 @@ export default function OverviewPage() {
         onClose={() => setSelectedExplain(null)}
         data={selectedExplain}
       />
-    </div>
+    </>
   );
 }

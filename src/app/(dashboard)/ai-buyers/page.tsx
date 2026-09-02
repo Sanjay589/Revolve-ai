@@ -12,6 +12,7 @@ import {
   Tag,
   Zap
 } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckoutModal } from '@/components/checkout-modal';
@@ -98,25 +99,17 @@ export default function AIBuyersPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="badge badge-ai">
-              <Bot size={12} /> AGENTIC COMMERCE
-            </span>
-          </div>
-          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            AI Buyer Discovery
-          </h1>
-          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-            Natural language product discovery, intelligent feature ranking & bounded Razorpay checkouts.
-          </p>
-        </div>
-      </div>
+    <>
+      {/* ── Page Header ────────────────────────────────────── */}
+      <PageHeader
+        badgeText="AGENTIC COMMERCE"
+        badgeVariant="ai"
+        badgeIcon={<Bot size={12} />}
+        title="AI Buyer Discovery &amp; Checkout"
+        description="Natural language product discovery, intelligent catalog matching, feature ranking, and secure Razorpay Test Mode checkout."
+      />
 
-      {/* Agentic Flow Indicator */}
+      {/* ── Agentic Flow Indicator ──────────────────────────── */}
       <div className="editorial-card" style={{ padding: '12px 18px', background: 'var(--bg-secondary)' }}>
         <div style={{
           display: 'flex',
@@ -135,7 +128,7 @@ export default function AIBuyersPage() {
             2. Catalog Search
           </span>
           <span>→</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-primary)', fontWeight: 600 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--ai-text)', fontWeight: 600 }}>
             3. AI Reasoning
           </span>
           <span>→</span>
@@ -149,9 +142,9 @@ export default function AIBuyersPage() {
         </div>
       </div>
 
-      {/* Chat Messages Area */}
-      <div className="editorial-card" style={{ minHeight: 460, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 24 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, overflowY: 'auto', maxHeight: 520, paddingRight: 4 }}>
+      {/* ── Chat Messages Area ──────────────────────────────── */}
+      <div className="editorial-card" style={{ minHeight: 440, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px 24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto', maxHeight: 520, paddingRight: 4 }}>
           {messages.map((m) => {
             const isAgent = m.sender === 'agent';
 
@@ -181,13 +174,13 @@ export default function AIBuyersPage() {
                   </div>
                 )}
 
-                <div style={{ maxWidth: '85%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ maxWidth: '85%', display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div style={{
-                    padding: '12px 18px',
+                    padding: '12px 16px',
                     borderRadius: 'var(--radius-lg)',
                     background: isAgent ? 'var(--bg-tertiary)' : 'var(--text-primary)',
                     color: isAgent ? 'var(--text-primary)' : 'var(--text-inverse)',
-                    fontSize: '0.875rem',
+                    fontSize: '0.8125rem',
                     lineHeight: 1.5,
                   }}>
                     {m.text}
@@ -214,7 +207,7 @@ export default function AIBuyersPage() {
                               <span className="badge badge-neutral" style={{ fontSize: '0.6875rem' }}>
                                 {p.category || 'Product'}
                               </span>
-                              <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                              <div className="font-mono" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                                 {formatCurrency(p.price)}
                               </div>
                             </div>
@@ -226,8 +219,8 @@ export default function AIBuyersPage() {
                             {p.reasoning && (
                               <div style={{
                                 fontSize: '0.75rem',
-                                color: 'var(--fintech-text)',
-                                background: 'var(--fintech-bg)',
+                                color: 'var(--ai-text)',
+                                background: 'var(--ai-bg)',
                                 padding: '4px 8px',
                                 borderRadius: 'var(--radius-sm)',
                                 marginBottom: 10,
@@ -249,18 +242,12 @@ export default function AIBuyersPage() {
                           </div>
 
                           <Button
-                            variant="fintech"
+                            variant="primary"
                             size="sm"
-                            style={{ width: '100%' }}
-                            onClick={() => setCheckoutProduct({
-                              id: p.id,
-                              name: p.name,
-                              price: p.price,
-                              description: p.description,
-                            })}
+                            style={{ width: '100%', marginTop: 8 }}
+                            onClick={() => setCheckoutProduct(p)}
                           >
-                            <ShoppingBag size={14} />
-                            <span>Buy with Razorpay</span>
+                            <ShoppingBag size={14} /> Buy with Razorpay
                           </Button>
                         </div>
                       ))}
@@ -272,33 +259,35 @@ export default function AIBuyersPage() {
           })}
 
           {isLoading && (
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
-              <Bot size={18} className="animate-spin" />
-              <span>Analyzing catalog and ranking matching items...</span>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: 'var(--ai-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Bot size={18} style={{ color: 'var(--ai-primary)' }} />
+              </div>
+              <div style={{ padding: '10px 16px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                Evaluating product catalog &amp; generating purchase options...
+              </div>
             </div>
           )}
         </div>
 
-        {/* Query Input Form */}
-        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border-secondary)' }}>
-          {/* Quick Prompts */}
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 12, paddingBottom: 4 }}>
-            <span style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Zap size={11} /> TRY:
-            </span>
+        {/* Input & Quick Chips Form */}
+        <div style={{ marginTop: 20, borderTop: '1px solid var(--border-secondary)', paddingTop: 16 }}>
+          {/* Suggestion Chips */}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+            <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'var(--text-tertiary)', alignSelf: 'center' }}>Try:</span>
             {[
-              'Running shoes under ₹5,000',
-              'Best laptop sleeve for travel',
-              'High-performance laptop accessories',
-              'Water-resistant backpack',
-            ].map((prompt) => (
+              'Running shoes for marathons under ₹5,000',
+              'Laptop with 16GB RAM for productivity',
+              'Noise cancelling headphones for gym workouts',
+              'Ergonomic mouse and keyboard bundle',
+            ].map((chip) => (
               <button
-                key={prompt}
-                onClick={() => handleFastQuery(prompt)}
+                key={chip}
                 type="button"
                 className="command-chip"
+                onClick={() => handleFastQuery(chip)}
               >
-                {prompt}
+                {chip}
               </button>
             ))}
           </div>
@@ -308,14 +297,14 @@ export default function AIBuyersPage() {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Describe what you want to buy (e.g. daily running shoes under ₹5,000)..."
+              placeholder="Ask for products, features, budgets or gift recommendations..."
               disabled={isLoading}
               style={{
                 flex: 1,
-                padding: '12px 18px',
-                borderRadius: 'var(--radius-lg)',
+                padding: '10px 16px',
+                borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-primary)',
-                background: 'var(--bg-secondary)',
+                background: 'var(--bg-tertiary)',
                 color: 'var(--text-primary)',
                 fontSize: '0.875rem',
                 outline: 'none',
@@ -337,17 +326,10 @@ export default function AIBuyersPage() {
           onClose={() => setCheckoutProduct(null)}
           product={checkoutProduct}
           onSuccess={() => {
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: `ord_${Date.now()}`,
-                sender: 'agent',
-                text: `Payment verified for ${checkoutProduct.name}! Your order has been recorded with HMAC signature verification.`,
-              },
-            ]);
+            setCheckoutProduct(null);
           }}
         />
       )}
-    </div>
+    </>
   );
 }

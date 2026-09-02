@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Megaphone, Plus, Sparkles, TrendingUp, RefreshCw, Calendar, Tag } from 'lucide-react';
+import { Megaphone, Plus, Sparkles, TrendingUp, RefreshCw, Calendar, Tag, CheckCircle2 } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -91,61 +92,54 @@ export default function CampaignsPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="badge badge-fintech">
-              <Megaphone size={12} /> PROMOTIONS &amp; CAMPAIGNS
-            </span>
+    <>
+      {/* ── Page Header ────────────────────────────────────── */}
+      <PageHeader
+        badgeText="PROMOTIONS &amp; CAMPAIGNS"
+        badgeVariant="neutral"
+        badgeIcon={<Megaphone size={12} />}
+        title="Autonomous Campaigns &amp; Offers"
+        description="Manage merchant promotions, bounded discount structures, and AI-generated dynamic checkout offers."
+        actions={
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button variant="outline" size="sm" onClick={fetchCampaigns} disabled={isLoading}>
+              <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+              <span>Refresh</span>
+            </Button>
+            <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
+              <Plus size={14} />
+              <span>Create Campaign</span>
+            </Button>
           </div>
-          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            Autonomous Campaigns &amp; Offers
-          </h1>
-          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-            Manage merchant promotions, bounded discount structures, and AI-generated flash offers.
-          </p>
-        </div>
+        }
+      />
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <Button variant="outline" size="sm" onClick={fetchCampaigns} disabled={isLoading}>
-            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-            <span>Refresh</span>
-          </Button>
-          <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
-            <Plus size={14} />
-            <span>Create Campaign</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Campaigns Grid */}
+      {/* ── Campaigns Grid ──────────────────────────────────── */}
       {isLoading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
           <Skeleton height={200} />
           <Skeleton height={200} />
         </div>
       ) : campaigns.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
           {campaigns.map((c) => (
-            <div key={c.id} className="editorial-card flex flex-col justify-between" style={{ height: '100%' }}>
+            <div key={c.id} className="editorial-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                   <span className={`badge ${c.isAiGenerated ? 'badge-ai' : 'badge-neutral'}`} style={{ fontSize: '0.6875rem' }}>
                     {c.isAiGenerated ? <Sparkles size={11} /> : <Megaphone size={11} />} {c.isAiGenerated ? 'AI Generated' : 'Manual'}
                   </span>
-                  <span className={`badge ${c.status === 'ACTIVE' ? 'badge-fintech' : 'badge-neutral'}`} style={{ fontSize: '0.6875rem' }}>
+                  <span className={`badge ${c.status === 'ACTIVE' ? 'badge-success' : 'badge-neutral'}`} style={{ fontSize: '0.6875rem' }}>
                     {c.status}
                   </span>
                 </div>
 
-                <h3 className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+                <h3 className="font-heading" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
                   {c.name}
                 </h3>
 
                 {c.description && (
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: 14 }}>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.4 }}>
                     {c.description}
                   </p>
                 )}
@@ -156,21 +150,19 @@ export default function CampaignsPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  paddingTop: 12,
+                  paddingTop: 10,
                   borderTop: '1px solid var(--border-secondary)',
-                  marginTop: 12,
                 }}>
                   <div>
-                    <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>DISCOUNT</div>
-                    <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
-                      {c.discountPercent ? `${c.discountPercent}% OFF` : 'Special Offer'}
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Discount</div>
+                    <div className="font-mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {c.discountPercent}% OFF
                     </div>
                   </div>
-
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>BUDGET SPENT</div>
-                    <div className="font-mono" style={{ fontSize: '0.875rem', fontWeight: 600 }}>
-                      {formatCurrency(c.spent)} / {c.budget ? formatCurrency(c.budget) : 'Uncapped'}
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Budget Cap</div>
+                    <div className="font-mono" style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      {c.budget ? formatCurrency(c.budget) : 'Unlimited'}
                     </div>
                   </div>
                 </div>
@@ -179,70 +171,72 @@ export default function CampaignsPage() {
           ))}
         </div>
       ) : (
-        <div className="editorial-card" style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-tertiary)' }}>
-          <Megaphone size={36} style={{ margin: '0 auto 12px', opacity: 0.6 }} />
-          <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 4 }}>
+        <div className="editorial-card" style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-tertiary)' }}>
+          <Megaphone size={32} style={{ margin: '0 auto 10px', opacity: 0.6 }} />
+          <h3 className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700, marginBottom: 4 }}>
             No Active Campaigns
           </h3>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
-            Create custom discounts or authorize recommendations from the AI Agent.
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: 14 }}>
+            Launch flash discounts or companion promotions for your catalog.
           </p>
-          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+          <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
             <Plus size={14} /> Create First Campaign
           </Button>
         </div>
       )}
 
-      {/* Modal */}
+      {/* ── Create Campaign Modal ───────────────────────────── */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Create Commerce Campaign"
+        title="Schedule Promotional Campaign"
       >
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Input
             label="Campaign Name"
+            required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
-            placeholder="e.g. Autumn Runner Flash Upsell"
+            placeholder="e.g. Weekend Flash Cross-Sell"
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <Textarea
+            label="Objective / Target Context"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe promotion target or bundle rules..."
+            rows={2}
+          />
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Input
-              label="Discount Percentage (%)"
+              label="Discount (%)"
+              required
               type="number"
+              max="25"
               value={discountPercent}
               onChange={(e) => setDiscountPercent(e.target.value)}
-              required
+              placeholder="10"
             />
             <Input
-              label="Budget Ceiling (₹ INR)"
+              label="Budget Cap (₹)"
               type="number"
               value={budgetRupees}
               onChange={(e) => setBudgetRupees(e.target.value)}
-              required
+              placeholder="10000"
             />
           </div>
 
-          <Textarea
-            label="Description & Offer Copy"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            placeholder="Promotion terms and companion offer incentives..."
-          />
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
             <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
             <Button variant="primary" type="submit" isLoading={isSubmitting}>
-              Launch Campaign
+              Schedule Campaign
             </Button>
           </div>
         </form>
       </Modal>
-    </div>
+    </>
   );
 }

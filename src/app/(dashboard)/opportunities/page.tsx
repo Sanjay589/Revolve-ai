@@ -13,6 +13,7 @@ import {
   Brain,
   Layers
 } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -81,61 +82,54 @@ export default function OpportunitiesPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="badge badge-ai">
-              <Sparkles size={12} /> LIFECYCLE PIPELINE
-            </span>
-          </div>
-          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            Opportunities &amp; Actions Pipeline
-          </h1>
-          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-            Track AI action lifecycles from proposal through policy validation to execution.
-          </p>
-        </div>
+    <>
+      {/* ── Page Header ────────────────────────────────────── */}
+      <PageHeader
+        badgeText="LIFECYCLE PIPELINE"
+        badgeVariant="ai"
+        badgeIcon={<Sparkles size={12} />}
+        title="Opportunities &amp; Actions Pipeline"
+        description="Track and inspect autonomous AI action lifecycles from initial co-purchase detection through policy checks to execution."
+        actions={
+          <Button variant="outline" size="sm" onClick={fetchActions} disabled={isLoading}>
+            <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+            <span>Refresh</span>
+          </Button>
+        }
+      />
 
-        <Button variant="outline" size="sm" onClick={fetchActions} disabled={isLoading}>
-          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-          <span>Refresh</span>
-        </Button>
-      </div>
-
-      {/* Pipeline Stage Indicators */}
-      <div className="editorial-card" style={{ padding: '16px 20px', background: 'var(--bg-secondary)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', fontWeight: 600 }}>
+      {/* ── Pipeline Stage Indicators ───────────────────────── */}
+      <div className="editorial-card" style={{ padding: '14px 20px', background: 'var(--bg-secondary)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', fontWeight: 600 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--text-tertiary)' }} />
             <span>1. PROPOSED ({actions.filter((a) => a.status === 'PROPOSED').length})</span>
           </div>
-          <span style={{ color: 'var(--text-tertiary)' }}>→</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', fontWeight: 600 }}>
+          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>→</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', fontWeight: 600 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--warning)' }} />
             <span>2. POLICY CHECK ({actions.filter((a) => a.status === 'POLICY_CHECK' || a.status === 'AWAITING_APPROVAL').length})</span>
           </div>
-          <span style={{ color: 'var(--text-tertiary)' }}>→</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', fontWeight: 600 }}>
+          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>→</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', fontWeight: 600 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ai-primary)' }} />
-            <span>3. APPROVED ({actions.filter((a) => a.status === 'APPROVED').length})</span>
+            <span>3. EXECUTED ({actions.filter((a) => a.status === 'EXECUTED').length})</span>
           </div>
-          <span style={{ color: 'var(--text-tertiary)' }}>→</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', fontWeight: 600 }}>
+          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>→</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', fontWeight: 600 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />
-            <span>4. SUCCESS ({actions.filter((a) => a.status === 'SUCCESS').length})</span>
+            <span>4. VERIFIED ({actions.filter((a) => a.status === 'VERIFIED').length})</span>
           </div>
         </div>
       </div>
 
-      {/* Opportunities List */}
+      {/* ── Actions Table ───────────────────────────────────── */}
       <div className="editorial-card" style={{ padding: 0, overflow: 'hidden' }}>
         {isLoading ? (
-          <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <Skeleton height={40} />
-            <Skeleton height={40} />
-            <Skeleton height={40} />
+          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Skeleton height={36} />
+            <Skeleton height={36} />
+            <Skeleton height={36} />
           </div>
         ) : actions.length > 0 ? (
           <div style={{ overflowX: 'auto' }}>
@@ -144,22 +138,23 @@ export default function OpportunitiesPage() {
                 <tr>
                   <th>Opportunity</th>
                   <th>Type</th>
-                  <th>Projected Value</th>
-                  <th>Risk Rating</th>
-                  <th>Pipeline State</th>
-                  <th>Created</th>
-                  <th></th>
+                  <th>Status</th>
+                  <th>Expected Value</th>
+                  <th>Risk Level</th>
+                  <th>Policy Gate</th>
+                  <th>Date</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {actions.map((act) => (
-                  <tr key={act.id} onClick={() => setSelectedAction(act)} style={{ cursor: 'pointer' }}>
+                  <tr key={act.id}>
                     <td>
-                      <div className="font-heading" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.8125rem' }}>
                         {act.title}
                       </div>
                       {act.description && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', maxWidth: 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)', maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {act.description}
                         </div>
                       )}
@@ -172,8 +167,20 @@ export default function OpportunitiesPage() {
                     </td>
 
                     <td>
-                      <div className="font-mono" style={{ fontWeight: 700, color: 'var(--fintech-primary)' }}>
-                        {act.amount ? `+${formatCurrency(act.amount)}` : '—'}
+                      <span className={`badge ${
+                        act.status === 'VERIFIED' || act.status === 'EXECUTED'
+                          ? 'badge-success'
+                          : act.status === 'AWAITING_APPROVAL' || act.status === 'POLICY_CHECK'
+                          ? 'badge-warning'
+                          : 'badge-neutral'
+                      }`} style={{ fontSize: '0.6875rem' }}>
+                        {act.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className="font-mono" style={{ fontWeight: 700, color: 'var(--fintech-primary)', fontSize: '0.875rem' }}>
+                        {act.amount ? `+${formatCurrency(act.amount)}` : 'Optimization'}
                       </div>
                     </td>
 
@@ -184,19 +191,35 @@ export default function OpportunitiesPage() {
                     </td>
 
                     <td>
-                      <span className={`badge ${act.status === 'SUCCESS' || act.status === 'APPROVED' ? 'badge-fintech' : act.status === 'AWAITING_APPROVAL' ? 'badge-warning' : 'badge-neutral'}`}>
-                        {act.status}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600 }}>
+                        <CheckCircle2 size={13} /> Evaluated
+                      </div>
                     </td>
 
-                    <td style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                      {formatDateTime(act.createdAt)}
+                    <td>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        {formatDateTime(act.createdAt).slice(0, 10)}
+                      </div>
                     </td>
 
-                    <td style={{ textAlign: 'right' }}>
-                      <Button variant="outline" size="sm">
-                        Details
-                      </Button>
+                    <td>
+                      {act.status === 'AWAITING_APPROVAL' ? (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => setSelectedAction(act)}
+                        >
+                          Review
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedAction(act)}
+                        >
+                          Inspect
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -204,67 +227,64 @@ export default function OpportunitiesPage() {
             </table>
           </div>
         ) : (
-          <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
-            <Sparkles size={36} style={{ margin: '0 auto 12px', opacity: 0.6 }} />
-            <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 4 }}>
-              No Actions in Pipeline
-            </h3>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-              Authorize recommendations from the AI Agent page to start actions.
-            </p>
+          <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-tertiary)' }}>
+            No actions recorded yet. Run an AI scan to discover new revenue opportunities.
           </div>
         )}
       </div>
 
-      {/* Action Detail Modal */}
+      {/* ── Action Detail Modal ─────────────────────────────── */}
       {selectedAction && (
         <Modal
           isOpen={Boolean(selectedAction)}
           onClose={() => setSelectedAction(null)}
-          title="Opportunity Lifecycle Details"
+          title="Inspect Action Lifecycle"
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
                 <span className="badge badge-ai">{selectedAction.type}</span>
-                <span className="badge badge-neutral">{selectedAction.status}</span>
+                <span className="badge badge-success">{selectedAction.status}</span>
               </div>
-              <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700 }}>
+              <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 {selectedAction.title}
               </h3>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: 4 }}>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: 4 }}>
                 {selectedAction.description}
               </p>
             </div>
 
             <div style={{
               background: 'var(--bg-tertiary)',
-              padding: '12px 16px',
+              padding: '14px',
               borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-primary)',
             }}>
-              <div className="stat-label">Projected Monthly Value</div>
-              <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
-                {selectedAction.amount ? `+${formatCurrency(selectedAction.amount)}` : 'N/A'}
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>
+                Expected Monthly Growth Impact
+              </div>
+              <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--fintech-primary)', marginTop: 2 }}>
+                {selectedAction.amount ? `+${formatCurrency(selectedAction.amount)} / mo` : 'Workflow Automation'}
               </div>
             </div>
 
             {selectedAction.status === 'AWAITING_APPROVAL' && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
-                <Button variant="ghost" onClick={() => setSelectedAction(null)}>
-                  Close
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+                <Button variant="outline" onClick={() => setSelectedAction(null)}>
+                  Cancel
                 </Button>
                 <Button
                   variant="primary"
                   onClick={() => handleApprove(selectedAction.id)}
                   isLoading={isProcessing}
                 >
-                  <CheckCircle2 size={16} /> Authorize Action
+                  Authorize Action
                 </Button>
               </div>
             )}
           </div>
         </Modal>
       )}
-    </div>
+    </>
   );
 }

@@ -2,545 +2,631 @@
 
 @import "tailwindcss";
 
-/* ─── CSS Custom Properties (FinPilot / Nevia Inspired Fintech Architecture) ─── */
+/* ═══════════════════════════════════════════════════════════
+   REVOLVE AI — Unified Design System
+   Clean, Calibrated Fintech + AI Commerce Operating System
+   ═══════════════════════════════════════════════════════════ */
 
 :root {
-  /* Typography */
-  --font-heading: 'Sora', system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Sora', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Surfaces & Canvas */
-  --bg-canvas: #f0f2f5;
-  --bg-primary: #f4f6f9;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f8fafc;
-  --bg-hover: #f1f5f9;
-  --bg-active: #e2e8f0;
-  --bg-card: #ffffff;
+  /* ── 1. Surfaces (Light Mode Primary) ─────────────────── */
+  --bg-canvas: #F7F8FA;
+  --bg-primary: #F7F8FA;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F8FAFC;
+  --bg-hover: #F1F5F9;
+  --bg-active: #E2E8F0;
+  --bg-card: #FFFFFF;
 
-  /* Typography Colors */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #94a3b8;
-  --text-inverse: #ffffff;
+  /* ── 2. Text Hierarchy ─────────────────────────────────── */
+  --text-primary: #111827;
+  --text-secondary: #64748B;
+  --text-tertiary: #94A3B8;
+  --text-inverse: #FFFFFF;
 
-  /* Borders & Dividers */
-  --border-primary: #e2e8f0;
-  --border-secondary: #f1f5f9;
-  --border-subtle: rgba(0, 0, 0, 0.05);
+  /* ── 3. Borders ────────────────────────────────────────── */
+  --border-primary: #E5E7EB;
+  --border-secondary: #F1F5F9;
+  --border-focus: #6366F1;
 
-  /* Accents */
-  --brand-primary: #ea580c;
-  --brand-primary-light: #ffedd5;
-  --fintech-primary: #0d9488;
-  --fintech-teal: #0d9488;
-  --fintech-emerald: #10b981;
-  --fintech-bg: #ecfdf5;
-  --fintech-border: #a7f3d0;
-  --fintech-text: #065f46;
+  /* ── 4. AI Accent (Indigo/Violet — ONLY for AI) ───────── */
+  --ai-primary: #6366F1;
+  --ai-secondary: #818CF8;
+  --ai-bg: #EEF2FF;
+  --ai-border: #C7D2FE;
+  --ai-text: #4F46E5;
 
-  --ai-primary: #6366f1;
-  --ai-indigo: #6366f1;
-  --ai-bg: #eef2ff;
-  --ai-border: #c7d2fe;
-  --ai-text: #3730a3;
+  /* ── 5. Semantic Colors ────────────────────────────────── */
+  /* Success: Emerald */
+  --success: #059669;
+  --success-bg: #ECFDF5;
+  --success-border: #A7F3D0;
+  --success-text: #065F46;
+  --fintech-primary: #059669;
+  --fintech-bg: #ECFDF5;
+  --fintech-border: #A7F3D0;
+  --fintech-text: #065F46;
 
-  /* Status Colors */
-  --success: #10b981;
-  --success-bg: #ecfdf5;
-  --success-border: #a7f3d0;
-  --warning: #f59e0b;
-  --warning-bg: #fffbeb;
-  --warning-border: #fde68a;
-  --error: #ef4444;
-  --error-bg: #fef2f2;
-  --error-border: #fecaca;
-  --info: #0284c7;
-  --info-bg: #f0f9ff;
-  --info-border: #bae6fd;
+  /* Warning: Amber */
+  --warning: #D97706;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FDE68A;
+  --warning-text: #92400E;
 
-  /* Elevated Fintech Shadows */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-fintech-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-fintech-card: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
-  --shadow-fintech-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+  /* Error: Crimson */
+  --error: #DC2626;
+  --error-bg: #FEF2F2;
+  --error-border: #FECACA;
+  --error-text: #991B1B;
 
-  /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  /* Info / Links: Blue */
+  --info: #2563EB;
+  --info-bg: #EFF6FF;
+  --info-border: #BFDBFE;
+  --info-text: #1D4ED8;
+
+  /* ── 6. Shadows — Restrained & Subtle ──────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+
+  /* ── 7. Radii ──────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
   --radius-full: 9999px;
 
-  /* Layout */
-  --sidebar-width: 250px;
+  /* ── 8. Layout ─────────────────────────────────────────── */
+  --sidebar-width: 248px;
+
+  /* ── 9. Transitions ────────────────────────────────────── */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
 }
 
-/* ─── Dark Mode Support ──────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE — Calibrated Slate Palette
+   ═══════════════════════════════════════════════════════════ */
 
 [data-theme='dark'] {
-  --bg-canvas: #09090b;
-  --bg-primary: #0f0f12;
-  --bg-secondary: #18181b;
-  --bg-tertiary: #27272a;
-  --bg-hover: #27272a;
-  --bg-active: #3f3f46;
-  --bg-card: #18181b;
+  --bg-canvas: #0F1115;
+  --bg-primary: #0F1115;
+  --bg-secondary: #15181D;
+  --bg-tertiary: #1B1F26;
+  --bg-hover: #222730;
+  --bg-active: #2B313D;
+  --bg-card: #15181D;
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-tertiary: #64748b;
-  --text-inverse: #09090b;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-inverse: #0F1115;
 
-  --border-primary: #27272a;
-  --border-secondary: #1f1f23;
-  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-primary: #272D36;
+  --border-secondary: #1E232B;
 
-  --shadow-fintech-card: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+  --ai-primary: #818CF8;
+  --ai-secondary: #6366F1;
+  --ai-bg: rgba(99, 102, 241, 0.12);
+  --ai-border: rgba(99, 102, 241, 0.28);
+  --ai-text: #A5B4FC;
+
+  --success: #10B981;
+  --success-bg: rgba(16, 185, 129, 0.12);
+  --success-border: rgba(16, 185, 129, 0.28);
+  --success-text: #6EE7B7;
+  --fintech-primary: #10B981;
+  --fintech-bg: rgba(16, 185, 129, 0.12);
+  --fintech-border: rgba(16, 185, 129, 0.28);
+  --fintech-text: #6EE7B7;
+
+  --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.12);
+  --warning-border: rgba(245, 158, 11, 0.28);
+  --warning-text: #FCD34D;
+
+  --error: #EF4444;
+  --error-bg: rgba(239, 68, 68, 0.12);
+  --error-border: rgba(239, 68, 68, 0.28);
+  --error-text: #FCA5A5;
+
+  --info: #3B82F6;
+  --info-bg: rgba(59, 130, 246, 0.12);
+  --info-border: rgba(59, 130, 246, 0.28);
+  --info-text: #93C5FD;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* ─── Base Typography & Setup ────────────────────────────── */
+/* ─── Reset & Base ───────────────────────────────────────── */
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: var(--font-body);
-  background-color: var(--bg-canvas);
+  background: var(--bg-canvas);
   color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6, .font-heading {
-  font-family: var(--font-heading);
-  letter-spacing: -0.025em;
-}
+h1, h2, h3, h4, h5, h6, .font-heading { font-family: var(--font-heading); letter-spacing: -0.02em; }
+.font-mono, code, pre { font-family: var(--font-mono); }
+.font-bold { font-weight: 700; }
 
-.font-mono, code, pre {
-  font-family: var(--font-mono);
-}
+/* ═══════════════════════════════════════════════════════════
+   APP SHELL & LAYOUT ARCHITECTURE
+   ═══════════════════════════════════════════════════════════ */
 
-/* ─── Application Shell Structure ────────────────────────── */
-
-.finpilot-shell, .dashboard-shell {
-  min-height: 100vh;
+.dashboard-shell, .finpilot-shell {
   display: flex;
+  min-height: 100vh;
   background: var(--bg-canvas);
-  padding: 16px;
-  gap: 16px;
+  position: relative;
+  width: 100%;
 }
 
-@media (max-width: 1024px) {
-  .finpilot-shell, .dashboard-shell {
-    padding: 10px;
-    gap: 10px;
-  }
-}
+/* ─── Left Sidebar (Desktop only) ───────────────────────── */
 
-/* Floating Clean Sidebar */
-.finpilot-sidebar, .sidebar {
+.sidebar, .finpilot-sidebar {
   width: var(--sidebar-width);
   background: var(--bg-secondary);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-primary);
+  border-right: 1px solid var(--border-primary);
   display: flex;
   flex-direction: column;
-  padding: 20px 16px;
-  box-shadow: var(--shadow-fintech-sm);
   position: sticky;
-  top: 16px;
-  height: calc(100vh - 32px);
-  z-index: 40;
+  top: 0;
+  height: 100vh;
   flex-shrink: 0;
+  z-index: 40;
+  overflow-y: auto;
 }
 
-@media (max-width: 1024px) {
-  .finpilot-sidebar, .sidebar {
-    display: none;
-  }
-}
-
-/* Main Content Surface */
-.finpilot-main, .main-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-/* Top Bar */
-.finpilot-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 24px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-fintech-sm);
-}
-
-/* ─── Navigation Item Styles ─────────────────────────────── */
-
-.nav-section-header, .sidebar-section-title {
+.sidebar-section-title, .nav-section-header {
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-tertiary);
-  padding: 10px 12px 4px;
+  padding: 14px 10px 4px;
 }
 
-.nav-pill-item, .sidebar-nav-item {
+.sidebar-nav-item, .nav-pill-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--text-secondary);
   text-decoration: none;
-  transition: all 150ms ease;
-  margin-bottom: 2px;
+  transition: all var(--transition-fast);
+  border: none;
+  background: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
 }
 
-.nav-pill-item:hover, .sidebar-nav-item:hover {
+.sidebar-nav-item:hover, .nav-pill-item:hover {
   color: var(--text-primary);
-  background: var(--bg-tertiary);
+  background: var(--bg-hover);
 }
 
-.nav-pill-item.active, .sidebar-nav-item.active {
-  color: #ffffff;
-  background: #ea580c;
+/* Subtle, premium active state — light indigo bg with indigo text */
+.sidebar-nav-item.active, .nav-pill-item.active {
+  color: var(--ai-text);
+  background: var(--ai-bg);
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
 }
 
-.nav-pill-item.active .nav-icon, .sidebar-nav-item.active .nav-icon {
-  color: #ffffff;
+.sidebar-nav-item.active .nav-icon, .nav-pill-item.active .nav-icon {
+  color: var(--ai-text);
 }
 
-/* ─── Elevated FinPilot Cards ────────────────────────────── */
+/* ─── Main Content Container ─────────────────────────────── */
 
-.fintech-card, .editorial-card, .card {
+.main-content, .finpilot-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-canvas);
+  min-height: 100vh;
+}
+
+.finpilot-topbar {
+  height: 56px;
   background: var(--bg-secondary);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-primary);
-  padding: 22px 24px;
-  box-shadow: var(--shadow-fintech-card);
-  transition: transform 150ms ease, box-shadow 150ms ease;
+  border-bottom: 1px solid var(--border-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 
-.fintech-card:hover, .editorial-card:hover, .card:hover {
-  box-shadow: var(--shadow-fintech-lg);
+.finpilot-content-container {
+  padding: 24px 28px 48px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─── Desktop App Shell (1025px and up) ──────────────────── */
+
+@media (min-width: 1025px) {
+  .sidebar, .finpilot-sidebar {
+    display: flex !important;
+  }
+
+  .mobile-top-bar,
+  .mobile-bottom-bar,
+  .mobile-drawer-overlay {
+    display: none !important;
+  }
+
+  .lg\:hidden {
+    display: none !important;
+  }
+
+  .lg\:flex {
+    display: flex !important;
+  }
+}
+
+/* ─── Mobile App Shell (1024px and down) ─────────────────── */
+
+@media (max-width: 1024px) {
+  .sidebar, .finpilot-sidebar {
+    display: none !important;
+  }
+
+  .finpilot-topbar {
+    display: none !important;
+  }
+
+  .mobile-top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 45;
+  }
+
+  .mobile-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 40;
+  }
+
+  /* Content offset to prevent any overlap under top/bottom bars */
+  .main-content, .finpilot-main {
+    padding-top: 60px !important;
+    padding-bottom: 68px !important;
+  }
+
+  .finpilot-content-container {
+    padding: 16px 14px 28px;
+    gap: 20px;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .md\:flex {
+    display: flex !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════════════════════════ */
+
+.card, .editorial-card, .fintech-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px 24px;
+}
+
+.card-compact {
+  padding: 14px 18px;
 }
 
 .dominant-stat-card {
   background: var(--bg-secondary);
-  border-radius: var(--radius-xl);
   border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-fintech-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
-/* Hero Balance / Gradient Card */
-.fintech-hero-card {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
-  color: #ffffff;
-  border-radius: var(--radius-xl);
-  padding: 24px;
-  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.28);
-}
-
-/* ─── AI Assistant Central Visual Component ──────────────── */
-
-.ai-orb-graphic {
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #fed7aa, #f97316 65%, #c2410c 100%);
-  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 12px;
-}
-
-.ai-assistant-container {
-  background: var(--bg-secondary);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-primary);
-  padding: 28px 32px;
-  text-align: center;
-  box-shadow: var(--shadow-fintech-card);
-}
-
-/* ─── Quick Filter Chips & Micro Buttons ─────────────────── */
-
-.fintech-chip, .command-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-primary);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 150ms ease;
-}
-
-.fintech-chip:hover, .command-chip:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-  border-color: #cbd5e1;
-}
-
-.ai-command-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-  padding: 8px 16px;
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-xs);
-  width: 100%;
-}
-
-/* ─── Metric Typography ──────────────────────────────────── */
-
-.fintech-stat-hero {
-  font-family: var(--font-heading);
-  font-size: 2.25rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--text-primary);
-}
-
-.fintech-stat-metric, .metric-value {
-  font-family: var(--font-mono);
-  font-size: 1.375rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-}
-
-.fintech-stat-label, .stat-label, .metric-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-tertiary);
-  margin-bottom: 4px;
-}
-
-/* ─── AI Pulse Indicator ─────────────────────────────────── */
-
-.ai-pulse {
-  position: relative;
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #10b981;
-}
-
-.ai-pulse::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border-radius: 50%;
-  background: rgba(16, 185, 129, 0.4);
-  animation: pulse-ring 2s infinite ease-out;
-}
-
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
-}
-
-/* ─── Badges ─────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   BADGES — Semantic Color System
+   ═══════════════════════════════════════════════════════════ */
 
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
+  gap: 4px;
+  padding: 2px 8px;
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   line-height: 1.4;
   white-space: nowrap;
 }
 
-.badge-fintech {
-  background: var(--fintech-bg);
-  color: var(--fintech-text);
-  border: 1px solid var(--fintech-border);
-}
+.badge-ai { background: var(--ai-bg); color: var(--ai-text); border: 1px solid var(--ai-border); }
+.badge-fintech, .badge-success { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+.badge-warning { background: var(--warning-bg); color: var(--warning-text); border: 1px solid var(--warning-border); }
+.badge-error, .badge-danger { background: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-border); }
+.badge-info { background: var(--info-bg); color: var(--info-text); border: 1px solid var(--info-border); }
+.badge-neutral { background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border-primary); }
 
-.badge-ai {
-  background: var(--ai-bg);
-  color: var(--ai-text);
-  border: 1px solid var(--ai-border);
-}
-
-.badge-warning {
-  background: var(--warning-bg);
-  color: #92400e;
-  border: 1px solid var(--warning-border);
-}
-
-.badge-danger {
-  background: var(--error-bg);
-  color: #991b1b;
-  border: 1px solid var(--error-border);
-}
-
-.badge-neutral {
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-primary);
-}
-
-/* ─── Buttons ────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS — Clean, Controlled Actions
+   ═══════════════════════════════════════════════════════════ */
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 9px 18px;
+  gap: 6px;
+  padding: 8px 16px;
   border-radius: var(--radius-md);
   font-family: var(--font-body);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all var(--transition-fast);
   border: 1px solid transparent;
   text-decoration: none;
+  line-height: 1.4;
 }
 
+/* Primary Action: Charcoal in light mode, off-white in dark mode */
 .btn-primary {
   background: var(--text-primary);
   color: var(--text-inverse);
+  border-color: var(--text-primary);
 }
+.btn-primary:hover { opacity: 0.9; }
 
-.btn-primary:hover {
-  background: #1e293b;
-  transform: translateY(-1px);
-}
-
-.btn-coral {
-  background: #ea580c;
+/* AI Action: Controlled Indigo */
+.btn-ai {
+  background: var(--ai-primary);
   color: #ffffff;
+  border-color: var(--ai-primary);
 }
+.btn-ai:hover { background: #4F46E5; }
 
-.btn-coral:hover {
-  background: #c2410c;
-  transform: translateY(-1px);
-}
-
-.btn-fintech {
-  background: var(--fintech-teal);
+/* Financial / Success Action: Emerald */
+.btn-fintech, .btn-success {
+  background: var(--fintech-primary);
   color: #ffffff;
+  border-color: var(--fintech-primary);
 }
+.btn-fintech:hover, .btn-success:hover { background: #047857; }
 
-.btn-fintech:hover {
-  background: #0f766e;
-  transform: translateY(-1px);
-}
-
+/* Secondary Action: White background with subtle border */
 .btn-outline {
   background: var(--bg-secondary);
   color: var(--text-primary);
   border-color: var(--border-primary);
 }
+.btn-outline:hover { background: var(--bg-hover); }
 
-.btn-outline:hover {
-  background: var(--bg-hover);
-  border-color: #cbd5e1;
-}
-
+/* Ghost Action */
 .btn-ghost {
   background: transparent;
   color: var(--text-secondary);
+  border: none;
 }
-
 .btn-ghost:hover {
   color: var(--text-primary);
   background: var(--bg-hover);
 }
 
+.btn-sm { padding: 5px 10px; font-size: 0.75rem; border-radius: var(--radius-sm); }
+.btn-lg { padding: 10px 20px; font-size: 0.9375rem; border-radius: var(--radius-md); }
+
 .btn-icon {
-  width: 34px;
-  height: 34px;
-  padding: 0;
+  width: 34px; height: 34px; padding: 0;
   border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AI COMMAND BAR
+   ═══════════════════════════════════════════════════════════ */
+
+.ai-command-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
 }
 
-.btn-sm {
-  padding: 6px 12px;
+.command-chip, .fintech-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.command-chip:hover, .fintech-chip:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAT LABELS
+   ═══════════════════════════════════════════════════════════ */
+
+.stat-label, .metric-label, .fintech-stat-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+.metric-value, .fintech-stat-metric {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-hero-number {
+  font-family: var(--font-mono);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AI PULSE (Emerald online status)
+   ═══════════════════════════════════════════════════════════ */
+
+.ai-pulse {
+  position: relative;
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+.ai-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: rgba(5, 150, 105, 0.25);
+  animation: pulse-ring 2s infinite ease-out;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin { animation: spin 1s linear infinite; }
+
+/* ═══════════════════════════════════════════════════════════
+   TABLES
+   ═══════════════════════════════════════════════════════════ */
+
+.editorial-table, .table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.editorial-table th, .table th {
+  padding: 10px 16px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--bg-tertiary);
+}
+
+.editorial-table td, .table td {
+  padding: 11px 16px;
   font-size: 0.8125rem;
-  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-secondary);
+  vertical-align: middle;
 }
 
-/* ─── Overlay & Modals ───────────────────────────────────── */
+.editorial-table tr:last-child td, .table tr:last-child td { border-bottom: none; }
+.editorial-table tr:hover td, .table tr:hover td { background: var(--bg-hover); }
+
+.table-container { width: 100%; overflow-x: auto; }
+
+/* ═══════════════════════════════════════════════════════════
+   OVERLAYS / MODALS / TOASTS / SKELETONS
+   ═══════════════════════════════════════════════════════════ */
 
 .overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(4px);
   z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   padding: 16px;
 }
 
 .toast-container {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
+  position: fixed; bottom: 20px; right: 20px;
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: flex; flex-direction: column; gap: 8px;
 }
 
 .toast {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: 14px 18px;
-  box-shadow: var(--shadow-fintech-lg);
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow-md);
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.8125rem;
 }
 
 .skeleton {
@@ -550,45 +636,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 @keyframes skeleton-pulse {
-  0% { opacity: 0.6; }
+  0% { opacity: 0.5; }
   50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-/* ─── Tables ─────────────────────────────────────────────── */
-
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.editorial-table, .table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.editorial-table th, .table th {
-  padding: 10px 14px;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  border-bottom: 1px solid var(--border-primary);
-}
-
-.editorial-table td, .table td {
-  padding: 12px 14px;
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-secondary);
-}
-
-.editorial-table tr:last-child td, .table tr:last-child td {
-  border-bottom: none;
-}
-
-.editorial-table tr:hover td, .table tr:hover td {
-  background: var(--bg-hover);
+  100% { opacity: 0.5; }
 }
