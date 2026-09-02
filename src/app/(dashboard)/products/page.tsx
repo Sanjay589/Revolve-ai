@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Package, Plus, Edit2, Trash2, Sparkles, RefreshCw, ShoppingBag, CheckCircle2 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Modal } from '@/components/ui/modal';
 import { Input, Textarea, Select } from '@/components/ui/form';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
@@ -100,249 +100,243 @@ export default function ProductsPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const payload = {
-      name,
-      description,
-      price: Math.round(parseFloat(priceRupees) * 100),
-      compareAtPrice: compareAtPriceRupees ? Math.round(parseFloat(compareAtPriceRupees) * 100) : null,
-      category,
-      inventory: parseInt(inventory) || 0,
-      features: featuresStr.split(',').map((f) => f.trim()).filter(Boolean),
-      tags: tagsStr.split(',').map((t) => t.trim()).filter(Boolean),
-      isActive: true,
-    };
-
     try {
-      if (editingId) {
-        const res = await fetch(`/api/products/${editingId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error('Failed to update product');
-        success('Product Updated', `${name} has been updated in your catalog.`);
-      } else {
-        const res = await fetch('/api/products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error('Failed to create product');
-        success('Product Created', `${name} is now live and indexed by AI.`);
-      }
+      const payload = {
+        name,
+        description,
+        price: Math.round(parseFloat(priceRupees) * 100),
+        compareAtPrice: compareAtPriceRupees ? Math.round(parseFloat(compareAtPriceRupees) * 100) : undefined,
+        category,
+        inventory: parseInt(inventory, 10) || 0,
+        features: featuresStr.split(',').map((s) => s.trim()).filter(Boolean),
+        tags: tagsStr.split(',').map((s) => s.trim()).filter(Boolean),
+      };
 
+      const url = editingId ? `/api/products/${editingId}` : '/api/products';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error('Failed to save product');
+
+      success(editingId ? 'Product Updated' : 'Product Created', 'Catalog successfully synchronized with AI engine.');
       setIsModalOpen(false);
       fetchProducts();
     } catch (err: unknown) {
-      error('Save Failed', err instanceof Error ? err.message : 'Error saving product');
+      error('Error', err instanceof Error ? err.message : 'Could not save product');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: string, pName: string) => {
-    if (!confirm(`Are you sure you want to delete ${pName}?`)) return;
-
-    try {
-      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete product');
-      success('Product Removed', `${pName} was deleted.`);
-      fetchProducts();
-    } catch (err: unknown) {
-      error('Delete Error', err instanceof Error ? err.message : 'Error deleting product');
-    }
-  };
-
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="badge badge-neutral">
-              <Package size={12} /> INVENTORY & CATALOG
+            <span className="badge badge-fintech">
+              <Package size={12} /> COMMERCE CATALOG
             </span>
           </div>
-          <h1 className="page-title">Product Management</h1>
-          <p className="page-subtitle">
-            Manage your store catalog with AI co-purchase indexing & pricing features.
+          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+            Products &amp; Inventory
+          </h1>
+          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+            Manage store merchandise indexed for autonomous AI discovery and companion bundling.
           </p>
         </div>
 
         <div style={{ display: 'flex', gap: 10 }}>
-          <Button variant="secondary" onClick={fetchProducts} isLoading={isLoading}>
-            <RefreshCw size={14} /> Refresh
+          <Button variant="outline" size="sm" onClick={fetchProducts} disabled={isLoading}>
+            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+            <span>Refresh</span>
           </Button>
-          <Button variant="primary" onClick={openCreateModal}>
-            <Plus size={16} /> Add Product
+          <Button variant="primary" size="sm" onClick={openCreateModal}>
+            <Plus size={14} />
+            <span>Add Product</span>
           </Button>
         </div>
       </div>
 
-      {/* Products Grid / Table */}
-      {products.length === 0 ? (
-        <Card style={{ textAlign: 'center', padding: '48px 24px' }}>
-          <Package size={32} color="var(--text-secondary)" style={{ margin: '0 auto 12px' }} />
-          <h3 className="font-heading" style={{ fontSize: '1.125rem', marginBottom: 6 }}>
-            No products found
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 20 }}>
-            Add your first product to activate AI catalog intelligence.
-          </p>
-          <Button variant="primary" onClick={openCreateModal}>
-            <Plus size={16} /> Add First Product
-          </Button>
-        </Card>
-      ) : (
-        <div className="table-container card" style={{ padding: 0 }}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Inventory</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((p) => (
-                <tr key={p.id}>
-                  <td>
-                    <p style={{ fontWeight: 600 }}>{p.name}</p>
-                    {p.sku && <span className="font-mono text-xs text-tertiary">SKU: {p.sku}</span>}
-                  </td>
-                  <td>
-                    <span className="badge badge-neutral">{p.category || 'General'}</span>
-                  </td>
-                  <td>
-                    <span className="font-heading font-bold">{formatCurrency(p.price)}</span>
-                    {p.compareAtPrice && (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textDecoration: 'line-through', marginLeft: 6 }}>
-                        {formatCurrency(p.compareAtPrice)}
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <span style={{ fontWeight: 500, color: p.inventory < 10 ? 'var(--error)' : 'var(--text-primary)' }}>
-                      {p.inventory} in stock
-                    </span>
-                  </td>
-                  <td>
-                    <Badge variant={p.isActive ? 'success' : 'neutral'}>
-                      {p.isActive ? 'ACTIVE' : 'INACTIVE'}
-                    </Badge>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button
-                        type="button"
-                        onClick={() => openEditModal(p)}
-                        className="btn btn-ghost btn-icon"
-                        aria-label="Edit product"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(p.id, p.name)}
-                        className="btn btn-ghost btn-icon"
-                        style={{ color: 'var(--error)' }}
-                        aria-label="Delete product"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
+      {/* Products Table */}
+      <div className="editorial-card" style={{ padding: 0, overflow: 'hidden' }}>
+        {isLoading ? (
+          <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Skeleton height={40} />
+            <Skeleton height={40} />
+            <Skeleton height={40} />
+          </div>
+        ) : products.length > 0 ? (
+          <div style={{ overflowX: 'auto' }}>
+            <table className="editorial-table">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock Buffer</th>
+                  <th>AI Features Tagged</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <div className="font-heading" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9375rem' }}>
+                        {p.name}
+                      </div>
+                      {p.shortDescription && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                          {p.shortDescription}
+                        </div>
+                      )}
+                    </td>
+
+                    <td>
+                      <span className="badge badge-neutral" style={{ fontSize: '0.6875rem' }}>
+                        {p.category || 'General'}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className="font-mono" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {formatCurrency(p.price)}
+                      </div>
+                      {p.compareAtPrice && (
+                        <div className="font-mono" style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', textDecoration: 'line-through' }}>
+                          {formatCurrency(p.compareAtPrice)}
+                        </div>
+                      )}
+                    </td>
+
+                    <td>
+                      <span className={`badge ${p.inventory > 10 ? 'badge-fintech' : 'badge-warning'}`} style={{ fontSize: '0.6875rem' }}>
+                        {p.inventory} in stock
+                      </span>
+                    </td>
+
+                    <td>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {p.features?.slice(0, 3).map((f, i) => (
+                          <span key={i} style={{ fontSize: '0.6875rem', padding: '2px 6px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)' }}>
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+
+                    <td>
+                      <Button variant="ghost" size="sm" onClick={() => openEditModal(p)}>
+                        <Edit2 size={13} />
+                        <span>Edit</span>
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+            <Package size={36} style={{ margin: '0 auto 12px', opacity: 0.6 }} />
+            <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 4 }}>
+              No Products in Catalog
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
+              Add items to enable autonomous bundling and buyer discovery.
+            </p>
+            <Button variant="primary" onClick={openCreateModal}>
+              <Plus size={14} /> Add First Product
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Create / Edit Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingId ? 'Edit Product' : 'Add New Product'}
-        description="All fields are persisted to PostgreSQL and indexed for AI discovery"
+        title={editingId ? 'Edit Product' : 'Add Catalog Product'}
+        size="lg"
       >
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Input
             label="Product Name"
-            required
-            placeholder="e.g. Velocity Pro Carbon Running Shoes"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="e.g. Apex HyperLight 2 Running Shoes"
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <Input
               label="Price (₹ INR)"
               type="number"
               step="0.01"
-              required
-              placeholder="4499"
               value={priceRupees}
               onChange={(e) => setPriceRupees(e.target.value)}
+              required
+              placeholder="4499"
             />
             <Input
-              label="Compare At Price (₹)"
+              label="Compare-at Price (₹ INR)"
               type="number"
               step="0.01"
-              placeholder="5999 (optional)"
               value={compareAtPriceRupees}
               onChange={(e) => setCompareAtPriceRupees(e.target.value)}
+              placeholder="5999"
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Input
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <Select
               label="Category"
-              placeholder="Footwear, Electronics, etc."
               value={category}
               onChange={(e) => setCategory(e.target.value)}
+              options={[
+                { value: 'Footwear', label: 'Footwear' },
+                { value: 'Apparel', label: 'Apparel' },
+                { value: 'Accessories', label: 'Accessories' },
+                { value: 'Electronics', label: 'Electronics' },
+                { value: 'Fitness', label: 'Fitness' },
+              ]}
             />
             <Input
-              label="Inventory"
+              label="Inventory Stock"
               type="number"
-              required
-              placeholder="50"
               value={inventory}
               onChange={(e) => setInventory(e.target.value)}
+              required
             />
           </div>
 
           <Textarea
             label="Description"
-            rows={2}
-            placeholder="Detailed description of features and materials..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            placeholder="Product details, specs, and materials..."
           />
 
           <Input
-            label="Features (comma-separated)"
-            placeholder="Carbon Fiber Plate, Nitrogen Foam, Mesh"
+            label="AI Features (comma-separated)"
             value={featuresStr}
             onChange={(e) => setFeaturesStr(e.target.value)}
+            placeholder="Carbon plate, Breathable mesh, Daily running"
           />
 
-          <Input
-            label="Tags (comma-separated)"
-            placeholder="running, marathon, sports"
-            value={tagsStr}
-            onChange={(e) => setTagsStr(e.target.value)}
-          />
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
-            <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
+            <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={isSubmitting}>
-              {editingId ? 'Update Product' : 'Create Product'}
+            <Button variant="primary" type="submit" isLoading={isSubmitting}>
+              {editingId ? 'Save Changes' : 'Create Product'}
             </Button>
           </div>
         </form>

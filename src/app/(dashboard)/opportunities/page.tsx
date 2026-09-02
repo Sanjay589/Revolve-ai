@@ -1,10 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, ShieldCheck, CheckCircle2, XCircle, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import {
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertTriangle,
+  RefreshCw,
+  Brain,
+  Layers
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
@@ -54,33 +65,6 @@ export default function OpportunitiesPage() {
     fetchActions();
   }, []);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PROPOSED':
-        return <Badge variant="neutral">PROPOSED</Badge>;
-      case 'POLICY_CHECK':
-        return <Badge variant="warning">POLICY CHECK</Badge>;
-      case 'AWAITING_APPROVAL':
-        return <Badge variant="warning">AWAITING APPROVAL</Badge>;
-      case 'APPROVED':
-        return <Badge variant="info">APPROVED</Badge>;
-      case 'EXECUTING':
-        return <Badge variant="ai">EXECUTING</Badge>;
-      case 'SUCCESS':
-        return <Badge variant="success">SUCCESS</Badge>;
-      case 'FAILED':
-        return <Badge variant="error">FAILED</Badge>;
-      case 'REJECTED':
-        return <Badge variant="error">REJECTED</Badge>;
-      case 'EXPIRED':
-        return <Badge variant="neutral">EXPIRED</Badge>;
-      case 'EXECUTION_UNKNOWN':
-        return <Badge variant="warning">UNKNOWN</Badge>;
-      default:
-        return <Badge variant="neutral">{status}</Badge>;
-    }
-  };
-
   const handleApprove = async (actionId: string) => {
     setIsProcessing(true);
     try {
@@ -96,219 +80,185 @@ export default function OpportunitiesPage() {
     }
   };
 
-  const handleReject = async (actionId: string) => {
-    setIsProcessing(true);
-    try {
-      const res = await fetch(`/api/ai/actions/${actionId}/reject`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: 'Merchant rejected from opportunity pipeline' }),
-      });
-      if (!res.ok) throw new Error('Failed to reject');
-      success('Rejected', 'Action cancelled.');
-      setSelectedAction(null);
-      fetchActions();
-    } catch (err: unknown) {
-      error('Error', err instanceof Error ? err.message : 'Could not reject');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span className="badge badge-ai">
-              <Sparkles size={12} /> PIPELINE & EXECUTION
+              <Sparkles size={12} /> LIFECYCLE PIPELINE
             </span>
           </div>
-          <h1 className="page-title">Growth Opportunity Pipeline</h1>
-          <p className="page-subtitle">
-            Lifecycle tracking: PROPOSED → POLICY_CHECK → AWAITING_APPROVAL → APPROVED → EXECUTING → SUCCESS
+          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+            Opportunities &amp; Actions Pipeline
+          </h1>
+          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+            Track AI action lifecycles from proposal through policy validation to execution.
           </p>
         </div>
 
-        <Button variant="secondary" onClick={fetchActions} isLoading={isLoading}>
-          <RefreshCw size={14} /> Refresh Pipeline
+        <Button variant="outline" size="sm" onClick={fetchActions} disabled={isLoading}>
+          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+          <span>Refresh</span>
         </Button>
       </div>
 
-      {/* Pipeline Lifecycle Visualizer */}
-      <div style={{
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-primary)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '16px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 8,
-        overflowX: 'auto',
-      }}>
-        {['PROPOSED', 'POLICY_CHECK', 'AWAITING_APPROVAL', 'APPROVED', 'EXECUTING', 'SUCCESS'].map((stage, idx) => (
-          <div key={stage} style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <span className="font-mono text-xs" style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>
-              {stage}
-            </span>
-            {idx < 5 && <ArrowRight size={14} color="var(--text-tertiary)" />}
+      {/* Pipeline Stage Indicators */}
+      <div className="editorial-card" style={{ padding: '16px 20px', background: 'var(--bg-secondary)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', fontWeight: 600 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--text-tertiary)' }} />
+            <span>1. PROPOSED ({actions.filter((a) => a.status === 'PROPOSED').length})</span>
           </div>
-        ))}
+          <span style={{ color: 'var(--text-tertiary)' }}>→</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', fontWeight: 600 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--warning)' }} />
+            <span>2. POLICY CHECK ({actions.filter((a) => a.status === 'POLICY_CHECK' || a.status === 'AWAITING_APPROVAL').length})</span>
+          </div>
+          <span style={{ color: 'var(--text-tertiary)' }}>→</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', fontWeight: 600 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ai-primary)' }} />
+            <span>3. APPROVED ({actions.filter((a) => a.status === 'APPROVED').length})</span>
+          </div>
+          <span style={{ color: 'var(--text-tertiary)' }}>→</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', fontWeight: 600 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />
+            <span>4. SUCCESS ({actions.filter((a) => a.status === 'SUCCESS').length})</span>
+          </div>
+        </div>
       </div>
 
-      {/* Opportunities Table */}
-      {actions.length === 0 ? (
-        <Card style={{ textAlign: 'center', padding: '48px 24px' }}>
-          <Sparkles size={32} color="var(--ai-primary)" style={{ margin: '0 auto 12px' }} />
-          <h3 className="font-heading" style={{ fontSize: '1.125rem', marginBottom: 6 }}>
-            No actions in the pipeline
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            Go to the AI Agent page to scan and propose new growth opportunities.
-          </p>
-        </Card>
-      ) : (
-        <div className="table-container card" style={{ padding: 0 }}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Opportunity / Action</th>
-                <th>Type</th>
-                <th>Projected Value</th>
-                <th>Policy Status</th>
-                <th>State</th>
-                <th>Timestamp</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {actions.map((act) => (
-                <tr key={act.id} onClick={() => setSelectedAction(act)} style={{ cursor: 'pointer' }}>
-                  <td>
-                    <p style={{ fontWeight: 600 }}>{act.title}</p>
-                    {act.description && (
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {act.description}
-                      </p>
-                    )}
-                  </td>
-                  <td>
-                    <span className="badge badge-neutral" style={{ fontSize: '0.6875rem' }}>
-                      {act.type}
-                    </span>
-                  </td>
-                  <td className="font-heading font-bold" style={{ color: 'var(--success)' }}>
-                    {act.amount ? formatCurrency(act.amount) : '—'}
-                  </td>
-                  <td>
-                    {act.policyResult?.passed ? (
-                      <span className="badge badge-success" style={{ gap: 4 }}>
-                        <ShieldCheck size={10} /> Passed
-                      </span>
-                    ) : (
-                      <span className="badge badge-error">Blocked</span>
-                    )}
-                  </td>
-                  <td>{getStatusBadge(act.status)}</td>
-                  <td className="font-mono text-tertiary" style={{ fontSize: '0.75rem' }}>
-                    {formatDateTime(act.createdAt)}
-                  </td>
-                  <td>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedAction(act);
-                      }}
-                    >
-                      Details
-                    </Button>
-                  </td>
+      {/* Opportunities List */}
+      <div className="editorial-card" style={{ padding: 0, overflow: 'hidden' }}>
+        {isLoading ? (
+          <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Skeleton height={40} />
+            <Skeleton height={40} />
+            <Skeleton height={40} />
+          </div>
+        ) : actions.length > 0 ? (
+          <div style={{ overflowX: 'auto' }}>
+            <table className="editorial-table">
+              <thead>
+                <tr>
+                  <th>Opportunity</th>
+                  <th>Type</th>
+                  <th>Projected Value</th>
+                  <th>Risk Rating</th>
+                  <th>Pipeline State</th>
+                  <th>Created</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {actions.map((act) => (
+                  <tr key={act.id} onClick={() => setSelectedAction(act)} style={{ cursor: 'pointer' }}>
+                    <td>
+                      <div className="font-heading" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+                        {act.title}
+                      </div>
+                      {act.description && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', maxWidth: 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {act.description}
+                        </div>
+                      )}
+                    </td>
 
-      {/* Detail & Action Modal */}
+                    <td>
+                      <span className="badge badge-ai" style={{ fontSize: '0.6875rem' }}>
+                        {act.type}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className="font-mono" style={{ fontWeight: 700, color: 'var(--fintech-primary)' }}>
+                        {act.amount ? `+${formatCurrency(act.amount)}` : '—'}
+                      </div>
+                    </td>
+
+                    <td>
+                      <span className={`badge ${act.riskLevel === 'LOW' ? 'badge-fintech' : 'badge-warning'}`} style={{ fontSize: '0.6875rem' }}>
+                        {act.riskLevel}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className={`badge ${act.status === 'SUCCESS' || act.status === 'APPROVED' ? 'badge-fintech' : act.status === 'AWAITING_APPROVAL' ? 'badge-warning' : 'badge-neutral'}`}>
+                        {act.status}
+                      </span>
+                    </td>
+
+                    <td style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                      {formatDateTime(act.createdAt)}
+                    </td>
+
+                    <td style={{ textAlign: 'right' }}>
+                      <Button variant="outline" size="sm">
+                        Details
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+            <Sparkles size={36} style={{ margin: '0 auto 12px', opacity: 0.6 }} />
+            <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 4 }}>
+              No Actions in Pipeline
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+              Authorize recommendations from the AI Agent page to start actions.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Action Detail Modal */}
       {selectedAction && (
         <Modal
-          isOpen={true}
+          isOpen={Boolean(selectedAction)}
           onClose={() => setSelectedAction(null)}
-          title="Opportunity Pipeline Details"
-          description={`ID: ${selectedAction.id}`}
+          title="Opportunity Lifecycle Details"
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
-                Title
-              </span>
-              <p style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text-primary)' }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                <span className="badge badge-ai">{selectedAction.type}</span>
+                <span className="badge badge-neutral">{selectedAction.status}</span>
+              </div>
+              <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700 }}>
                 {selectedAction.title}
+              </h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: 4 }}>
+                {selectedAction.description}
               </p>
             </div>
 
-            {selectedAction.description && (
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
-                  Rationale
-                </span>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  {selectedAction.description}
-                </p>
-              </div>
-            )}
-
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
-              padding: 12,
               background: 'var(--bg-tertiary)',
+              padding: '12px 16px',
               borderRadius: 'var(--radius-md)',
             }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Current State</span>
-                <div style={{ marginTop: 4 }}>{getStatusBadge(selectedAction.status)}</div>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Projected Value</span>
-                <p className="font-heading font-bold" style={{ color: 'var(--success)' }}>
-                  {selectedAction.amount ? formatCurrency(selectedAction.amount) : 'N/A'}
-                </p>
+              <div className="stat-label">Projected Monthly Value</div>
+              <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
+                {selectedAction.amount ? `+${formatCurrency(selectedAction.amount)}` : 'N/A'}
               </div>
             </div>
 
-            {selectedAction.policyResult && (
-              <div style={{ padding: 12, background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
-                <p style={{ fontWeight: 600, fontSize: '0.8125rem', marginBottom: 4 }}>Policy Guardrail Reasons:</p>
-                <ul style={{ paddingLeft: 16, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                  {selectedAction.policyResult.reasons.map((r, i) => (
-                    <li key={i}>{r}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
             {selectedAction.status === 'AWAITING_APPROVAL' && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
-                <Button
-                  variant="danger"
-                  onClick={() => handleReject(selectedAction.id)}
-                  isLoading={isProcessing}
-                >
-                  Reject Proposal
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
+                <Button variant="ghost" onClick={() => setSelectedAction(null)}>
+                  Close
                 </Button>
                 <Button
                   variant="primary"
                   onClick={() => handleApprove(selectedAction.id)}
                   isLoading={isProcessing}
                 >
-                  Approve Action
+                  <CheckCircle2 size={16} /> Authorize Action
                 </Button>
               </div>
             )}

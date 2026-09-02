@@ -1,12 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Clock } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Clock, Shield } from 'lucide-react';
 import { ApprovalCard } from '@/components/approval-card';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ApprovalItem {
   id: string;
@@ -52,37 +50,36 @@ export default function ApprovalsPage() {
   }, [filter]);
 
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span className="badge badge-warning">
-              <ShieldCheck size={12} /> HUMAN-IN-THE-LOOP CONTROL
+              <ShieldCheck size={12} /> HUMAN-IN-THE-LOOP AUTHORIZATION
             </span>
           </div>
-          <h1 className="page-title">Approval Security Center</h1>
-          <p className="page-subtitle">
-            Sensitive AI actions and automated workflows require explicit merchant authorization.
+          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+            Approval Security Center
+          </h1>
+          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+            High-impact AI campaigns & financial changes require explicit merchant verification.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <Button variant="secondary" onClick={fetchApprovals} isLoading={isLoading}>
-            <RefreshCw size={14} /> Refresh
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={fetchApprovals} disabled={isLoading}>
+          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+          <span>Refresh</span>
+        </Button>
       </div>
 
       {/* Safety Principle Banner */}
-      <div style={{
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-primary)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '16px 20px',
+      <div className="editorial-card" style={{
+        padding: '18px 24px',
         display: 'flex',
         alignItems: 'center',
         gap: 16,
+        background: 'var(--bg-secondary)',
       }}>
         <div style={{
           width: 40,
@@ -94,52 +91,79 @@ export default function ApprovalsPage() {
           justifyContent: 'center',
           flexShrink: 0,
         }}>
-          <ShieldCheck size={22} color="var(--warning)" />
+          <ShieldCheck size={22} style={{ color: 'var(--warning)' }} />
         </div>
         <div>
-          <h4 style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-            Financial Safety Principle
+          <h4 className="font-heading" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+            Financial Guardrail Guarantee
           </h4>
-          <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-            Revolve AI never moves money or launches financial campaigns without passing your strict Policy Engine constraints and merchant approval.
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+            AI proposes opportunities based on catalog affinity. The Policy Engine validates bounds, but no funds move without merchant sign-off.
           </p>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--border-primary)', paddingBottom: 8 }}>
         <button
-          type="button"
           onClick={() => setFilter('pending')}
-          className={`btn btn-sm ${filter === 'pending' ? 'btn-primary' : 'btn-secondary'}`}
+          style={{
+            padding: '8px 16px',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid',
+            borderColor: filter === 'pending' ? 'var(--border-primary)' : 'transparent',
+            background: filter === 'pending' ? 'var(--bg-secondary)' : 'transparent',
+            color: filter === 'pending' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            cursor: 'pointer',
+          }}
         >
-          Pending Approvals ({approvals.filter((a) => a.status === 'PENDING').length})
+          Pending Review ({approvals.filter((a) => a.status === 'PENDING').length})
         </button>
         <button
-          type="button"
           onClick={() => setFilter('all')}
-          className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+          style={{
+            padding: '8px 16px',
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid',
+            borderColor: filter === 'all' ? 'var(--border-primary)' : 'transparent',
+            background: filter === 'all' ? 'var(--bg-secondary)' : 'transparent',
+            color: filter === 'all' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            cursor: 'pointer',
+          }}
         >
-          All History
+          All Approvals History
         </button>
       </div>
 
       {/* Approvals List */}
-      {approvals.length === 0 ? (
-        <EmptyState
-          icon={ShieldCheck}
-          title="All Clear — No Pending Approvals"
-          description="Your store is safely operating within configured bounds. When the AI proposes an action requiring sign-off, it will appear here."
-        />
-      ) : (
+      {isLoading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {approvals.map((app) => (
+          <Skeleton height={180} />
+          <Skeleton height={180} />
+        </div>
+      ) : approvals.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {approvals.map((approval) => (
             <ApprovalCard
-              key={app.id}
-              {...app}
+              key={approval.id}
+              {...approval}
               onProcessed={fetchApprovals}
             />
           ))}
+        </div>
+      ) : (
+        <div className="editorial-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
+          <CheckCircle2 size={36} style={{ color: 'var(--success)', margin: '0 auto 12px' }} />
+          <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 4 }}>
+            Security Queue Clear
+          </h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            No pending AI actions requiring authorization at this time.
+          </p>
         </div>
       )}
     </div>

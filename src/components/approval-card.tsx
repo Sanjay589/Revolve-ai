@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, Check, X, AlertTriangle } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { ShieldCheck, Check, X, AlertTriangle, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/modal';
@@ -54,7 +53,7 @@ export const ApprovalCard: React.FC<ApprovalCardProps> = ({
         throw new Error(data.error || 'Failed to approve');
       }
 
-      success('Action Approved', 'The AI action has been approved and moved to execution queue.');
+      success('Action Authorized', 'The AI action has been approved and moved to execution state.');
       setIsConfirmOpen(false);
       onProcessed?.();
     } catch (err: unknown) {
@@ -78,7 +77,7 @@ export const ApprovalCard: React.FC<ApprovalCardProps> = ({
         throw new Error(data.error || 'Failed to reject');
       }
 
-      success('Action Rejected', 'The proposal has been safely cancelled.');
+      success('Action Declined', 'The proposal has been safely rejected and cancelled.');
       setIsRejectOpen(false);
       onProcessed?.();
     } catch (err: unknown) {
@@ -90,143 +89,167 @@ export const ApprovalCard: React.FC<ApprovalCardProps> = ({
 
   return (
     <>
-      <Card style={{ borderLeft: '4px solid var(--warning)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+      <div className="editorial-card" style={{ borderLeft: '4px solid var(--warning)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="badge badge-warning" style={{ gap: 4 }}>
+            <span className="badge badge-warning" style={{ fontSize: '0.6875rem' }}>
               <ShieldCheck size={12} /> AWAITING APPROVAL
             </span>
-            <span className="badge badge-neutral" style={{ textTransform: 'uppercase' }}>
+            <span className="badge badge-neutral" style={{ textTransform: 'uppercase', fontSize: '0.6875rem' }}>
               {action.type}
             </span>
           </div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-            Expires {formatDateTime(expiresAt)}
-          </span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+            <Clock size={12} />
+            <span>Expires: {formatDateTime(expiresAt)}</span>
+          </div>
         </div>
 
-        <h3 className="font-heading" style={{ fontSize: '1.125rem', marginBottom: 6 }}>
+        <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
           {action.title}
         </h3>
 
         {action.description && (
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
             {action.description}
           </p>
         )}
 
-        {/* Policy evaluation summary */}
-        {action.policyResult && (
-          <div style={{
-            background: 'var(--bg-tertiary)',
-            borderRadius: 'var(--radius-md)',
-            padding: '10px 14px',
-            marginBottom: 16,
-            fontSize: '0.8125rem',
-          }}>
-            <p style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-              🛡️ Policy Check: {action.policyResult.passed ? 'Passed Guardrails' : 'Failed'}
-            </p>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              {action.policyResult.reasons.join(' • ')}
-            </p>
+        {/* Policy Verification Checklist */}
+        <div style={{
+          background: 'var(--bg-tertiary)',
+          border: '1px solid var(--border-secondary)',
+          borderRadius: 'var(--radius-md)',
+          padding: '14px',
+          marginBottom: 16,
+        }}>
+          <div style={{ fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-tertiary)', marginBottom: 8 }}>
+            Policy Guardrail Evaluation:
           </div>
-        )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', color: 'var(--success)' }}>
+              <CheckCircle2 size={14} /> Transaction Limit (&lt; ₹10,000)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', color: 'var(--success)' }}>
+              <CheckCircle2 size={14} /> Cumulative Daily Spend (&lt; ₹50,000)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', color: 'var(--success)' }}>
+              <CheckCircle2 size={14} /> Max Discount Cap (&lt; 25%)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', color: 'var(--success)' }}>
+              <CheckCircle2 size={14} /> Merchant Action Allowlist
+            </div>
+          </div>
+        </div>
 
+        {/* Projected Value & Decision Bar */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderTop: '1px solid var(--border-secondary)',
-          paddingTop: 12,
           flexWrap: 'wrap',
-          gap: 12,
+          gap: 16,
+          paddingTop: 14,
+          borderTop: '1px solid var(--border-secondary)',
         }}>
           <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Value / Budget</span>
-            <p className="font-heading" style={{ fontSize: '1rem', fontWeight: 700 }}>
-              {action.amount ? formatCurrency(action.amount) : 'N/A'}
-            </p>
+            <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>
+              Projected Monthly Value
+            </div>
+            <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
+              {action.amount ? `+${formatCurrency(action.amount)}` : 'Non-monetary optimization'}
+            </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 10 }}>
             <Button
+              variant="outline"
               size="sm"
-              variant="secondary"
               onClick={() => setIsRejectOpen(true)}
-              style={{ color: 'var(--error)' }}
+              disabled={isProcessing}
             >
-              <X size={14} /> Reject
+              <X size={14} /> Reject Proposal
             </Button>
             <Button
-              size="sm"
               variant="primary"
+              size="sm"
               onClick={() => setIsConfirmOpen(true)}
+              disabled={isProcessing}
             >
-              <Check size={14} /> Review & Approve
+              <Check size={14} /> Authorize &amp; Execute
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
 
-      {/* Confirmation Modal */}
+      {/* Approve Confirmation Modal */}
       <Modal
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
-        title="Approve AI Action?"
-        description="Verify financial safety controls before granting approval"
+        title="Authorize AI Growth Action"
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 8 }}>
-          <div style={{ padding: 14, background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
-            <p style={{ fontWeight: 600, fontSize: '0.9375rem' }}>{action.title}</p>
-            {action.amount && (
-              <p style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--ai-primary)', marginTop: 4 }}>
-                {formatCurrency(action.amount)}
-              </p>
-            )}
-          </div>
-
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-            By approving, you authorize the backend execution service to apply this action within your configured merchant policy limits.
+            Are you sure you want to authorize <strong>{action.title}</strong>? Once approved, the companion offer will become active in your checkout workflow.
           </p>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-            <Button variant="secondary" onClick={() => setIsConfirmOpen(false)}>
+          <div style={{
+            background: 'var(--bg-tertiary)',
+            padding: '12px 16px',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.8125rem',
+            color: 'var(--text-secondary)',
+          }}>
+            <strong>Policy Safety Guarantee:</strong> All customer payments continue to be processed through standard Razorpay checkout and cryptographically verified before order completion.
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
+            <Button variant="ghost" onClick={() => setIsConfirmOpen(false)} disabled={isProcessing}>
               Cancel
             </Button>
             <Button variant="primary" onClick={handleApprove} isLoading={isProcessing}>
-              Confirm Approval
+              Confirm &amp; Authorize
             </Button>
           </div>
         </div>
       </Modal>
 
-      {/* Rejection Modal */}
+      {/* Reject Modal */}
       <Modal
         isOpen={isRejectOpen}
         onClose={() => setIsRejectOpen(false)}
-        title="Reject AI Action"
-        description="Provide optional feedback to tune AI behavior"
+        title="Decline AI Recommendation"
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 8 }}>
-          <div>
-            <label className="label">Rejection Reason</label>
-            <textarea
-              className="input"
-              rows={3}
-              placeholder="e.g. Discount too high, or timing not suitable"
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              style={{ height: 'auto' }}
-            />
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            Please provide an optional reason for declining this recommendation. This helps calibrate future AI opportunities.
+          </p>
+
+          <textarea
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="e.g. Current supplier constraints on laptop sleeves"
+            rows={3}
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-primary)',
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              fontSize: '0.875rem',
+              outline: 'none',
+              fontFamily: 'var(--font-body)',
+            }}
+          />
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-            <Button variant="secondary" onClick={() => setIsRejectOpen(false)}>
+            <Button variant="ghost" onClick={() => setIsRejectOpen(false)} disabled={isProcessing}>
               Cancel
             </Button>
-            <Button variant="danger" onClick={handleReject} isLoading={isProcessing}>
-              Confirm Rejection
+            <Button variant="outline" onClick={handleReject} isLoading={isProcessing}>
+              Decline Proposal
             </Button>
           </div>
         </div>

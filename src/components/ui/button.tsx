@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ai' | 'success' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'fintech' | 'ai' | 'success' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   isLoading?: boolean;
 }
@@ -12,10 +12,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, disabled, children, ...props }, ref) => {
     const variantClass = {
       primary: 'btn-primary',
-      secondary: 'btn-secondary',
-      ai: 'btn-ai',
-      success: 'btn-success',
-      danger: 'btn-danger',
+      secondary: 'btn-outline',
+      outline: 'btn-outline',
+      fintech: 'btn-fintech',
+      ai: 'badge-ai',
+      success: 'badge-fintech',
+      danger: 'btn-primary',
       ghost: 'btn-ghost',
     }[variant];
 

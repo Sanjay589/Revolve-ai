@@ -6,7 +6,7 @@ import { MobileNav } from '@/components/mobile-nav';
 import { ToastProvider } from '@/components/ui/toast';
 import { AgentStatus } from '@/components/agent-status';
 import { NotificationBell } from '@/components/notification-bell';
-import { Shield } from 'lucide-react';
+import { Shield, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -15,14 +15,7 @@ export default function DashboardLayout({
 }) {
   return (
     <ToastProvider>
-      <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
-        {/* Top Test Mode Banner */}
-        <div className="test-mode-banner">
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <Shield size={12} /> RAZORPAY TEST MODE ENVIRONMENT • SYNTHESIZING LIVE MERCHANT GROWTH
-          </span>
-        </div>
-
+      <div className="dashboard-shell">
         {/* Desktop Sidebar */}
         <Sidebar />
 
@@ -30,20 +23,36 @@ export default function DashboardLayout({
         <MobileNav />
 
         {/* Main Content Area */}
-        <div className="main-content">
-          {/* Desktop Top Header Bar */}
+        <main className="main-content">
+          {/* Top Bar for Desktop */}
           <div className="hidden lg:flex" style={{
-            justifyContent: 'flex-end',
             alignItems: 'center',
-            gap: 12,
+            justifyContent: 'space-between',
+            padding: '12px 20px',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-lg)',
             marginBottom: 24,
+            boxShadow: 'var(--shadow-xs)',
           }}>
-            <AgentStatus />
-            <NotificationBell />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span className="badge badge-fintech" style={{ fontSize: '0.6875rem' }}>
+                <Shield size={12} /> RAZORPAY TEST MODE • BOUNDED AI COMMERCE
+              </span>
+              <span style={{ fontSize: '0.8125rem', color: 'var(--text-tertiary)' }}>
+                Policy Guardrails Active (₹10,000 max / tx)
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <AgentStatus />
+              <div style={{ width: 1, height: 20, background: 'var(--border-primary)' }} />
+              <NotificationBell />
+            </div>
           </div>
 
           {children}
-        </div>
+        </main>
       </div>
     </ToastProvider>
   );

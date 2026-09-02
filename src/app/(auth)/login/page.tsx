@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Sparkles, ArrowRight, Lock, Mail, ShieldAlert } from 'lucide-react';
+import { Sparkles, ArrowRight, Lock, Mail, ShieldAlert, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/form';
 
@@ -55,118 +55,114 @@ export default function LoginPage() {
       padding: '24px',
       background: 'var(--bg-primary)',
     }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
+      <div style={{ width: '100%', maxWidth: 440 }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{
             width: 44,
             height: 44,
-            background: 'var(--ai-primary)',
-            borderRadius: 'var(--radius-lg)',
+            background: 'var(--text-primary)',
+            color: 'var(--text-inverse)',
+            borderRadius: 'var(--radius-md)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 16px',
+            fontFamily: 'var(--font-heading)',
+            fontSize: '1.25rem',
+            fontWeight: 800,
           }}>
-            <Sparkles size={24} color="white" />
+            R
           </div>
-          <h1 className="font-heading" style={{ fontSize: '1.5rem', marginBottom: 6 }}>
-            Welcome back to Revolve AI
+          <h1 className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: 6, color: 'var(--text-primary)' }}>
+            Welcome to Revolve AI
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            AI growth engine with bounded financial safety controls
+            Commerce operating system for autonomous growth &amp; policy safety
           </p>
         </div>
 
         {/* Demo Fast Login Helper */}
         <div style={{
-          background: 'var(--ai-bg)',
-          border: '1px solid var(--ai-border)',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-primary)',
           borderRadius: 'var(--radius-md)',
           padding: '12px 16px',
           marginBottom: 20,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          boxShadow: 'var(--shadow-xs)',
         }}>
           <div>
-            <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--ai-text)' }}>
-              Hackathon Evaluator Credentials
+            <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fintech-text)' }}>
+              Evaluator Test Account
             </p>
-            <p style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
+            <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
               admin@apexgear.io / DemoMerchant@2026
             </p>
           </div>
           <button
             type="button"
             onClick={fillDemo}
-            className="btn btn-ghost btn-sm"
-            style={{ fontSize: '0.6875rem', padding: '4px 8px', color: 'var(--ai-primary)' }}
+            className="btn btn-fintech btn-sm"
           >
-            Auto-fill
+            Autofill
           </button>
         </div>
 
-        {/* Form Card */}
-        <div className="card">
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+        {/* Login Card */}
+        <div className="editorial-card" style={{ padding: '32px' }}>
+          {error && (
+            <div style={{
+              background: 'var(--error-bg)',
+              border: '1px solid var(--error-border)',
+              color: 'var(--error)',
+              padding: '10px 14px',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '0.8125rem',
+              marginBottom: 18,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}>
+              <ShieldAlert size={16} />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <Input
               label="Merchant Email"
               type="email"
-              placeholder="name@company.com"
-              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="admin@apexgear.io"
             />
 
             <Input
               label="Password"
               type="password"
-              placeholder="••••••••••••"
-              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••••••"
             />
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
-              <Link
-                href="/forgot-password"
-                style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', textDecoration: 'none' }}
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            {error && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '10px 12px',
-                background: 'var(--error-bg)',
-                borderRadius: 'var(--radius-md)',
-                color: 'var(--error)',
-                fontSize: '0.8125rem',
-                marginBottom: 16,
-              }}>
-                <ShieldAlert size={16} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <Button type="submit" variant="primary" size="lg" isLoading={isLoading}>
-              Sign In to Dashboard <ArrowRight size={16} />
+            <Button variant="primary" type="submit" isLoading={isLoading} style={{ width: '100%', marginTop: 8 }}>
+              <span>Sign In to Workspace</span>
+              <ArrowRight size={16} />
             </Button>
           </form>
         </div>
 
-        {/* Footer */}
-        <div style={{ textAlign: 'center', marginTop: 24, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-          Don&apos;t have an account?{' '}
-          <Link href="/register" style={{ color: 'var(--ai-primary)', fontWeight: 600, textDecoration: 'none' }}>
-            Register new merchant
+        <p style={{ textAlign: 'center', fontSize: '0.8125rem', color: 'var(--text-tertiary)', marginTop: 24 }}>
+          Don&apos;t have a merchant account?{' '}
+          <Link href="/register" style={{ color: 'var(--text-primary)', fontWeight: 600, textDecoration: 'none' }}>
+            Register Store
           </Link>
-        </div>
+        </p>
       </div>
     </div>
   );

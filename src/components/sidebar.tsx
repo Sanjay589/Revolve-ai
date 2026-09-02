@@ -16,20 +16,43 @@ import {
   FileText,
   Settings,
   LogOut,
+  ChevronRight,
+  Shield
 } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 
-const NAV_ITEMS = [
-  { href: '/overview', label: 'Overview', icon: LayoutDashboard },
-  { href: '/ai-agent', label: 'AI Agent', icon: Brain },
-  { href: '/opportunities', label: 'Opportunities', icon: Sparkles },
-  { href: '/approvals', label: 'Approvals', icon: ShieldCheck },
-  { href: '/ai-buyers', label: 'AI Buyers', icon: Bot },
-  { href: '/products', label: 'Products', icon: Package },
-  { href: '/catalog', label: 'Catalog', icon: BookOpen },
-  { href: '/campaigns', label: 'Campaigns', icon: Megaphone },
-  { href: '/transactions', label: 'Transactions', icon: CreditCard },
-  { href: '/audit', label: 'Audit Trail', icon: FileText },
+const NAV_GROUPS = [
+  {
+    title: 'OPERATE',
+    items: [
+      { href: '/overview', label: 'Overview', icon: LayoutDashboard },
+      { href: '/ai-agent', label: 'AI Agent', icon: Brain },
+      { href: '/opportunities', label: 'Opportunities', icon: Sparkles },
+      { href: '/approvals', label: 'Approvals', icon: ShieldCheck },
+    ],
+  },
+  {
+    title: 'COMMERCE',
+    items: [
+      { href: '/ai-buyers', label: 'AI Buyers', icon: Bot },
+      { href: '/products', label: 'Products', icon: Package },
+      { href: '/catalog', label: 'Catalog', icon: BookOpen },
+      { href: '/campaigns', label: 'Campaigns', icon: Megaphone },
+    ],
+  },
+  {
+    title: 'CONTROL',
+    items: [
+      { href: '/transactions', label: 'Transactions', icon: CreditCard },
+      { href: '/audit', label: 'Audit Trail', icon: FileText },
+    ],
+  },
+  {
+    title: 'SYSTEM',
+    items: [
+      { href: '/settings', label: 'Settings', icon: Settings },
+    ],
+  },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -49,74 +72,123 @@ export const Sidebar: React.FC = () => {
     <aside className="sidebar">
       {/* Brand Header */}
       <div style={{
-        padding: '20px 24px 16px',
-        borderBottom: '1px solid var(--border-secondary)',
+        padding: '20px 20px 16px',
+        borderBottom: '1px solid var(--border-primary)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
       }}>
-        <Link href="/overview" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+        <Link href="/overview" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <div style={{
-            width: 28,
-            height: 28,
-            background: 'var(--ai-primary)',
+            width: 32,
+            height: 32,
+            background: 'var(--text-primary)',
+            color: 'var(--text-inverse)',
             borderRadius: 'var(--radius-md)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            fontWeight: 800,
+            fontSize: '0.9375rem',
+            fontFamily: 'var(--font-heading)',
           }}>
-            <Sparkles size={16} color="white" />
+            R
           </div>
-          <span className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            REVOLVE AI
-          </span>
+          <div>
+            <div className="font-heading" style={{ fontSize: '0.9375rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              REVOLVE AI
+            </div>
+            <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>
+              Commerce Operating OS
+            </div>
+          </div>
         </Link>
         <ThemeToggle />
       </div>
 
-      {/* Navigation Links */}
-      <nav style={{ flex: 1, padding: '16px 0', display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+      {/* Grouped Navigation Links */}
+      <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
+        {NAV_GROUPS.map((group) => (
+          <div key={group.title} style={{ marginBottom: 12 }}>
+            <div className="sidebar-section-title">{group.title}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-            >
-              <Icon size={18} className="nav-icon" />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
+                  >
+                    <Icon size={17} className="nav-icon" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Footer / Account */}
+      {/* Merchant Workspace Profile (Replacing any placeholder/dev button) */}
       <div style={{
-        padding: '16px',
-        borderTop: '1px solid var(--border-secondary)',
+        padding: '14px 16px',
+        borderTop: '1px solid var(--border-primary)',
+        background: 'var(--bg-secondary)',
         display: 'flex',
-        flexDirection: 'column',
-        gap: 4,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 8,
       }}>
-        <Link
-          href="/settings"
-          className={`sidebar-nav-item ${pathname === '/settings' ? 'active' : ''}`}
-          style={{ width: '100%', margin: 0 }}
-        >
-          <Settings size={18} className="nav-icon" />
-          <span>Settings</span>
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
+          <div style={{
+            width: 32,
+            height: 32,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--fintech-bg)',
+            color: 'var(--fintech-text)',
+            border: '1px solid var(--fintech-border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.8125rem',
+            fontWeight: 700,
+            flexShrink: 0,
+            fontFamily: 'var(--font-heading)',
+          }}>
+            A
+          </div>
+          <div style={{ overflow: 'hidden' }}>
+            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+              Apex Athletics & Gear
+            </div>
+            <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span>Merchant Admin</span>
+            </div>
+          </div>
+        </div>
+
         <button
-          type="button"
           onClick={handleLogout}
-          className="sidebar-nav-item"
-          style={{ width: '100%', margin: 0, color: 'var(--error)' }}
+          title="Sign Out"
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-tertiary)',
+            cursor: 'pointer',
+            padding: 6,
+            borderRadius: 'var(--radius-sm)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'color var(--transition-fast)',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--error)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-tertiary)')}
         >
-          <LogOut size={18} />
-          <span>Sign Out</span>
+          <LogOut size={16} />
         </button>
       </div>
     </aside>

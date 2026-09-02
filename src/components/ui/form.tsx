@@ -5,29 +5,51 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   label?: string;
   error?: string;
   hint?: string;
+  helperText?: string;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, id, ...props }, ref) => {
+  ({ className, label, error, hint, helperText, id, ...props }, ref) => {
     const inputId = id || props.name;
+    const subText = helperText || hint;
 
     return (
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 14 }}>
         {label && (
-          <label htmlFor={inputId} className="label">
+          <label htmlFor={inputId} style={{
+            display: 'block',
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            marginBottom: 6,
+          }}>
             {label}
           </label>
         )}
         <input
           id={inputId}
           ref={ref}
-          className={cn('input', error && 'input-error', className)}
+          className={cn(
+            'w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:border-teal-600 transition',
+            error && 'border-red-500',
+            className
+          )}
+          style={{
+            width: '100%',
+            padding: '9px 14px',
+            borderRadius: 'var(--radius-md)',
+            border: `1px solid ${error ? 'var(--error)' : 'var(--border-primary)'}`,
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            fontSize: '0.875rem',
+            outline: 'none',
+          }}
           {...props}
         />
-        {error && <p className="error-text">{error}</p>}
-        {hint && !error && (
+        {error && <p style={{ fontSize: '0.75rem', color: 'var(--error)', marginTop: 4 }}>{error}</p>}
+        {subText && !error && (
           <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
-            {hint}
+            {subText}
           </p>
         )}
       </div>
@@ -41,16 +63,24 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
   label?: string;
   error?: string;
   hint?: string;
+  helperText?: string;
 }
 
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, hint, id, rows = 3, ...props }, ref) => {
+  ({ className, label, error, hint, helperText, id, rows = 3, ...props }, ref) => {
     const textareaId = id || props.name;
+    const subText = helperText || hint;
 
     return (
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 14 }}>
         {label && (
-          <label htmlFor={textareaId} className="label">
+          <label htmlFor={textareaId} style={{
+            display: 'block',
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            marginBottom: 6,
+          }}>
             {label}
           </label>
         )}
@@ -58,14 +88,24 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={textareaId}
           ref={ref}
           rows={rows}
-          className={cn('input', error && 'input-error', className)}
-          style={{ minHeight: 'unset', height: 'auto', padding: '10px 14px', resize: 'vertical' }}
+          style={{
+            width: '100%',
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-md)',
+            border: `1px solid ${error ? 'var(--error)' : 'var(--border-primary)'}`,
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            fontSize: '0.875rem',
+            outline: 'none',
+            fontFamily: 'var(--font-body)',
+            resize: 'vertical',
+          }}
           {...props}
         />
-        {error && <p className="error-text">{error}</p>}
-        {hint && !error && (
+        {error && <p style={{ fontSize: '0.75rem', color: 'var(--error)', marginTop: 4 }}>{error}</p>}
+        {subText && !error && (
           <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
-            {hint}
+            {subText}
           </p>
         )}
       </div>
@@ -86,16 +126,31 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     const selectId = id || props.name;
 
     return (
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 14 }}>
         {label && (
-          <label htmlFor={selectId} className="label">
+          <label htmlFor={selectId} style={{
+            display: 'block',
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            marginBottom: 6,
+          }}>
             {label}
           </label>
         )}
         <select
           id={selectId}
           ref={ref}
-          className={cn('input', error && 'input-error', className)}
+          style={{
+            width: '100%',
+            padding: '9px 14px',
+            borderRadius: 'var(--radius-md)',
+            border: `1px solid ${error ? 'var(--error)' : 'var(--border-primary)'}`,
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            fontSize: '0.875rem',
+            outline: 'none',
+          }}
           {...props}
         >
           {options.map((opt) => (
@@ -104,7 +159,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && <p className="error-text">{error}</p>}
+        {error && <p style={{ fontSize: '0.75rem', color: 'var(--error)', marginTop: 4 }}>{error}</p>}
       </div>
     );
   }

@@ -1,8 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bot, Send, Sparkles, ShoppingBag, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import {
+  Bot,
+  Send,
+  Sparkles,
+  ShoppingBag,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+  Tag,
+  Zap
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckoutModal } from '@/components/checkout-modal';
@@ -34,13 +43,13 @@ export default function AIBuyersPage() {
     {
       id: 'm1',
       sender: 'agent',
-      text: 'Hello! I am your AI Buyer Agent. Tell me what you are looking for (e.g. "I need running shoes under ₹5,000" or "Show me laptop accessories for travel"). I will discover matching items from the catalog and can initiate a secure bounded purchase.',
+      text: 'Welcome to Agentic Commerce. I am your autonomous AI shopping assistant. Tell me what you are looking for (e.g., "I need running shoes under ₹5,000" or "Show me laptop accessories for travel"). I will match items against the live merchant catalog and prepare a secure Razorpay checkout.',
     },
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutProduct, setCheckoutProduct] = useState<{ id: string; name: string; price: number; description?: string | null } | null>(null);
-  const { success, error } = useToast();
+  const { error } = useToast();
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +80,7 @@ export default function AIBuyersPage() {
       const agentMsg: Message = {
         id: `agt_${Date.now()}`,
         sender: 'agent',
-        text: aiResponse.summary || 'I analyzed the catalog for your request.',
+        text: aiResponse.summary || 'I evaluated the merchant catalog for your criteria.',
         products: aiResponse.products || [],
         recommendation: aiResponse.recommendation,
       };
@@ -89,7 +98,7 @@ export default function AIBuyersPage() {
   };
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>
@@ -98,149 +107,244 @@ export default function AIBuyersPage() {
               <Bot size={12} /> AGENTIC COMMERCE
             </span>
           </div>
-          <h1 className="page-title">AI Buyer Discovery</h1>
-          <p className="page-subtitle">
-            Autonomous agent product discovery, recommendation explanations & bounded Razorpay purchase flow.
+          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+            AI Buyer Discovery
+          </h1>
+          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
+            Natural language product discovery, intelligent feature ranking & bounded Razorpay checkouts.
           </p>
         </div>
       </div>
 
-      {/* Suggested Quick Prompts */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {[
-          'I need running shoes under ₹5,000',
-          'Show me laptop accessories for travel',
-          'Find high performance athletic socks',
-          'What is the best smartwatch for cardio?',
-        ].map((prompt) => (
-          <button
-            key={prompt}
-            type="button"
-            onClick={() => handleFastQuery(prompt)}
-            className="btn btn-secondary btn-sm"
-            style={{ fontSize: '0.75rem', borderRadius: 'var(--radius-full)' }}
-          >
-            {prompt}
-          </button>
-        ))}
+      {/* Agentic Flow Indicator */}
+      <div className="editorial-card" style={{ padding: '12px 18px', background: 'var(--bg-secondary)' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 8,
+          fontSize: '0.75rem',
+          color: 'var(--text-tertiary)',
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-primary)', fontWeight: 600 }}>
+            1. Query Intent
+          </span>
+          <span>→</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-primary)', fontWeight: 600 }}>
+            2. Catalog Search
+          </span>
+          <span>→</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-primary)', fontWeight: 600 }}>
+            3. AI Reasoning
+          </span>
+          <span>→</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--fintech-primary)', fontWeight: 600 }}>
+            4. Razorpay Checkout
+          </span>
+          <span>→</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--success)', fontWeight: 600 }}>
+            5. HMAC Verification
+          </span>
+        </div>
       </div>
 
-      {/* Chat Container */}
-      <Card style={{ padding: '24px', minHeight: 480, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-        {/* Messages Stream */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, overflowY: 'auto', marginBottom: 20 }}>
-          {messages.map((m) => (
-            <div
-              key={m.id}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start',
-              }}
-            >
+      {/* Chat Messages Area */}
+      <div className="editorial-card" style={{ minHeight: 460, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, overflowY: 'auto', maxHeight: 520, paddingRight: 4 }}>
+          {messages.map((m) => {
+            const isAgent = m.sender === 'agent';
+
+            return (
               <div
+                key={m.id}
                 style={{
-                  maxWidth: '85%',
-                  padding: '14px 18px',
-                  borderRadius: 'var(--radius-lg)',
-                  background: m.sender === 'user' ? 'var(--text-primary)' : 'var(--bg-tertiary)',
-                  color: m.sender === 'user' ? 'var(--text-inverse)' : 'var(--text-primary)',
-                  fontSize: '0.9375rem',
-                  lineHeight: 1.5,
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'flex-start',
+                  flexDirection: isAgent ? 'row' : 'row-reverse',
                 }}
               >
-                {m.text}
-              </div>
+                {isAgent && (
+                  <div style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--ai-bg)',
+                    color: 'var(--ai-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <Bot size={18} />
+                  </div>
+                )}
 
-              {/* Product Cards Carousel / Grid */}
-              {m.products && m.products.length > 0 && (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                  gap: 16,
-                  width: '100%',
-                  marginTop: 16,
-                }}>
-                  {m.products.map((p) => (
-                    <div
-                      key={p.id}
-                      className="card"
-                      style={{
-                        background: 'var(--bg-secondary)',
-                        border: m.recommendation?.productId === p.id ? '2px solid var(--ai-primary)' : '1px solid var(--border-primary)',
-                        padding: 16,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <div>
-                        {m.recommendation?.productId === p.id && (
-                          <span className="badge badge-ai" style={{ marginBottom: 8, fontSize: '0.6875rem' }}>
-                            <Sparkles size={10} /> TOP MATCH
-                          </span>
-                        )}
-                        <h4 className="font-heading" style={{ fontSize: '1rem', marginBottom: 4 }}>
-                          {p.name}
-                        </h4>
-                        <p className="font-heading font-bold" style={{ fontSize: '1.125rem', color: 'var(--ai-primary)', marginBottom: 8 }}>
-                          {formatCurrency(p.price)}
-                        </p>
-                        {p.reasoning && (
-                          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'var(--bg-tertiary)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', marginBottom: 12 }}>
-                            💡 {p.reasoning}
-                          </p>
-                        )}
-                      </div>
+                <div style={{ maxWidth: '85%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{
+                    padding: '12px 18px',
+                    borderRadius: 'var(--radius-lg)',
+                    background: isAgent ? 'var(--bg-tertiary)' : 'var(--text-primary)',
+                    color: isAgent ? 'var(--text-primary)' : 'var(--text-inverse)',
+                    fontSize: '0.875rem',
+                    lineHeight: 1.5,
+                  }}>
+                    {m.text}
+                  </div>
 
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={() => setCheckoutProduct(p)}
-                        style={{ marginTop: 8 }}
-                      >
-                        <ShoppingBag size={14} /> Buy with Razorpay
-                      </Button>
+                  {/* Products Grid if Returned */}
+                  {m.products && m.products.length > 0 && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, marginTop: 4 }}>
+                      {m.products.map((p) => (
+                        <div
+                          key={p.id}
+                          className="editorial-card"
+                          style={{
+                            padding: '16px',
+                            background: 'var(--bg-secondary)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            border: '1px solid var(--border-primary)',
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                              <span className="badge badge-neutral" style={{ fontSize: '0.6875rem' }}>
+                                {p.category || 'Product'}
+                              </span>
+                              <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                                {formatCurrency(p.price)}
+                              </div>
+                            </div>
+
+                            <h4 className="font-heading" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+                              {p.name}
+                            </h4>
+
+                            {p.reasoning && (
+                              <div style={{
+                                fontSize: '0.75rem',
+                                color: 'var(--fintech-text)',
+                                background: 'var(--fintech-bg)',
+                                padding: '4px 8px',
+                                borderRadius: 'var(--radius-sm)',
+                                marginBottom: 10,
+                                display: 'inline-block',
+                              }}>
+                                <strong>Why this pick:</strong> {p.reasoning}
+                              </div>
+                            )}
+
+                            {p.features && p.features.length > 0 && (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
+                                {p.features.slice(0, 3).map((f, i) => (
+                                  <span key={i} style={{ fontSize: '0.6875rem', padding: '2px 6px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)' }}>
+                                    {f}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <Button
+                            variant="fintech"
+                            size="sm"
+                            style={{ width: '100%' }}
+                            onClick={() => setCheckoutProduct({
+                              id: p.id,
+                              name: p.name,
+                              price: p.price,
+                              description: p.description,
+                            })}
+                          >
+                            <ShoppingBag size={14} />
+                            <span>Buy with Razorpay</span>
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
 
           {isLoading && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
-              <span className="ai-pulse" />
-              <span>AI Buyer is searching catalog and comparing options...</span>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
+              <Bot size={18} className="animate-spin" />
+              <span>Analyzing catalog and ranking matching items...</span>
             </div>
           )}
         </div>
 
-        {/* Chat Input Bar */}
-        <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: 10, borderTop: '1px solid var(--border-secondary)', paddingTop: 16 }}>
-          <input
-            type="text"
-            className="input"
-            placeholder="Ask AI Buyer for any product, budget limit or feature..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            disabled={isLoading}
-            style={{ flex: 1 }}
-          />
-          <Button type="submit" variant="ai" disabled={!inputText.trim() || isLoading}>
-            <Send size={16} /> Send
-          </Button>
-        </form>
-      </Card>
+        {/* Query Input Form */}
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border-secondary)' }}>
+          {/* Quick Prompts */}
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 12, paddingBottom: 4 }}>
+            <span style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Zap size={11} /> TRY:
+            </span>
+            {[
+              'Running shoes under ₹5,000',
+              'Best laptop sleeve for travel',
+              'High-performance laptop accessories',
+              'Water-resistant backpack',
+            ].map((prompt) => (
+              <button
+                key={prompt}
+                onClick={() => handleFastQuery(prompt)}
+                type="button"
+                className="command-chip"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
 
-      {/* Checkout Modal Integration for Real Test Mode Payment */}
+          <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: 10 }}>
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Describe what you want to buy (e.g. daily running shoes under ₹5,000)..."
+              disabled={isLoading}
+              style={{
+                flex: 1,
+                padding: '12px 18px',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border-primary)',
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                fontSize: '0.875rem',
+                outline: 'none',
+                fontFamily: 'var(--font-body)',
+              }}
+            />
+            <Button variant="primary" type="submit" disabled={isLoading || !inputText.trim()}>
+              <Send size={15} />
+              <span>Send</span>
+            </Button>
+          </form>
+        </div>
+      </div>
+
+      {/* Checkout Modal */}
       {checkoutProduct && (
         <CheckoutModal
-          isOpen={true}
+          isOpen={Boolean(checkoutProduct)}
           onClose={() => setCheckoutProduct(null)}
           product={checkoutProduct}
           onSuccess={() => {
-            success('Purchase Complete', `Order for ${checkoutProduct.name} successfully created and verified.`);
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `ord_${Date.now()}`,
+                sender: 'agent',
+                text: `Payment verified for ${checkoutProduct.name}! Your order has been recorded with HMAC signature verification.`,
+              },
+            ]);
           }}
         />
       )}
