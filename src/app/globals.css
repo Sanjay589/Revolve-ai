@@ -10,7 +10,7 @@
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Surfaces & Canvas (Warm Soft Canvas & Crisp Elevated Cards) */
+  /* Surfaces & Canvas */
   --bg-canvas: #f0f2f5;
   --bg-primary: #f4f6f9;
   --bg-secondary: #ffffff;
@@ -31,14 +31,16 @@
   --border-subtle: rgba(0, 0, 0, 0.05);
 
   /* Accents */
-  --brand-primary: #ea580c; /* Warm coral/orange active accent from reference */
+  --brand-primary: #ea580c;
   --brand-primary-light: #ffedd5;
+  --fintech-primary: #0d9488;
   --fintech-teal: #0d9488;
   --fintech-emerald: #10b981;
   --fintech-bg: #ecfdf5;
   --fintech-border: #a7f3d0;
   --fintech-text: #065f46;
 
+  --ai-primary: #6366f1;
   --ai-indigo: #6366f1;
   --ai-bg: #eef2ff;
   --ai-border: #c7d2fe;
@@ -59,6 +61,8 @@
   --info-border: #bae6fd;
 
   /* Elevated Fintech Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   --shadow-fintech-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   --shadow-fintech-card: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
   --shadow-fintech-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
@@ -124,7 +128,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 /* ─── Application Shell Structure ────────────────────────── */
 
-.finpilot-shell {
+.finpilot-shell, .dashboard-shell {
   min-height: 100vh;
   display: flex;
   background: var(--bg-canvas);
@@ -133,14 +137,14 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 @media (max-width: 1024px) {
-  .finpilot-shell {
+  .finpilot-shell, .dashboard-shell {
     padding: 10px;
     gap: 10px;
   }
 }
 
 /* Floating Clean Sidebar */
-.finpilot-sidebar {
+.finpilot-sidebar, .sidebar {
   width: var(--sidebar-width);
   background: var(--bg-secondary);
   border-radius: var(--radius-xl);
@@ -157,13 +161,13 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 @media (max-width: 1024px) {
-  .finpilot-sidebar {
+  .finpilot-sidebar, .sidebar {
     display: none;
   }
 }
 
 /* Main Content Surface */
-.finpilot-main {
+.finpilot-main, .main-content {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -185,7 +189,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 /* ─── Navigation Item Styles ─────────────────────────────── */
 
-.nav-section-header {
+.nav-section-header, .sidebar-section-title {
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -194,7 +198,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   padding: 10px 12px 4px;
 }
 
-.nav-pill-item {
+.nav-pill-item, .sidebar-nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -208,25 +212,25 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   margin-bottom: 2px;
 }
 
-.nav-pill-item:hover {
+.nav-pill-item:hover, .sidebar-nav-item:hover {
   color: var(--text-primary);
   background: var(--bg-tertiary);
 }
 
-.nav-pill-item.active {
+.nav-pill-item.active, .sidebar-nav-item.active {
   color: #ffffff;
-  background: #ea580c; /* Bold Coral Active pill from FinPilot reference */
+  background: #ea580c;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
 }
 
-.nav-pill-item.active .nav-icon {
+.nav-pill-item.active .nav-icon, .sidebar-nav-item.active .nav-icon {
   color: #ffffff;
 }
 
 /* ─── Elevated FinPilot Cards ────────────────────────────── */
 
-.fintech-card {
+.fintech-card, .editorial-card, .card {
   background: var(--bg-secondary);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-primary);
@@ -235,8 +239,15 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
-.fintech-card:hover {
+.fintech-card:hover, .editorial-card:hover, .card:hover {
   box-shadow: var(--shadow-fintech-lg);
+}
+
+.dominant-stat-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-fintech-card);
 }
 
 /* Hero Balance / Gradient Card */
@@ -273,7 +284,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 /* ─── Quick Filter Chips & Micro Buttons ─────────────────── */
 
-.fintech-chip {
+.fintech-chip, .command-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -289,10 +300,22 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   transition: all 150ms ease;
 }
 
-.fintech-chip:hover {
+.fintech-chip:hover, .command-chip:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
   border-color: #cbd5e1;
+}
+
+.ai-command-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-xs);
+  width: 100%;
 }
 
 /* ─── Metric Typography ──────────────────────────────────── */
@@ -305,7 +328,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   color: var(--text-primary);
 }
 
-.fintech-stat-metric {
+.fintech-stat-metric, .metric-value {
   font-family: var(--font-mono);
   font-size: 1.375rem;
   font-weight: 700;
@@ -313,13 +336,47 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   color: var(--text-primary);
 }
 
-.fintech-stat-label {
+.fintech-stat-label, .stat-label, .metric-label {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-tertiary);
   margin-bottom: 4px;
+}
+
+/* ─── AI Pulse Indicator ─────────────────────────────────── */
+
+.ai-pulse {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.ai-pulse::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.4);
+  animation: pulse-ring 2s infinite ease-out;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
 }
 
 /* ─── Badges ─────────────────────────────────────────────── */
@@ -435,21 +492,83 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   background: var(--bg-hover);
 }
 
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .btn-sm {
   padding: 6px 12px;
   font-size: 0.8125rem;
   border-radius: var(--radius-sm);
 }
 
+/* ─── Overlay & Modals ───────────────────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-fintech-lg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skeleton {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  animation: skeleton-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes skeleton-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
 /* ─── Tables ─────────────────────────────────────────────── */
 
-.editorial-table {
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.editorial-table, .table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
 }
 
-.editorial-table th {
+.editorial-table th, .table th {
   padding: 10px 14px;
   font-size: 0.6875rem;
   font-weight: 700;
@@ -459,17 +578,17 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   border-bottom: 1px solid var(--border-primary);
 }
 
-.editorial-table td {
+.editorial-table td, .table td {
   padding: 12px 14px;
   font-size: 0.8125rem;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-secondary);
 }
 
-.editorial-table tr:last-child td {
+.editorial-table tr:last-child td, .table tr:last-child td {
   border-bottom: none;
 }
 
-.editorial-table tr:hover td {
+.editorial-table tr:hover td, .table tr:hover td {
   background: var(--bg-hover);
 }
