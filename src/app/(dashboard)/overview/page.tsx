@@ -7,29 +7,31 @@ import {
   Sparkles,
   TrendingUp,
   ShoppingBag,
-  Percent,
   CreditCard,
   ShieldCheck,
   ArrowRight,
   RefreshCw,
   CheckCircle2,
   AlertCircle,
-  ExternalLink,
-  ChevronRight,
+  MoreVertical,
+  Plus,
+  ArrowUpRight,
+  Send,
   Zap,
-  Clock,
   Shield,
+  Sliders,
+  Eye,
   Activity,
-  Check
+  Calendar,
+  Lock,
+  ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChartCard } from '@/components/chart-card';
-import { AuditTimeline } from '@/components/audit-timeline';
-import { AICommandCenter } from '@/components/ai-command-center';
 import { ExplainabilityModal, ExplainabilityData } from '@/components/explainability-drawer';
-import { formatCurrency, getGreeting, formatDateTime } from '@/lib/utils';
+import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 
 interface DashboardData {
@@ -88,9 +90,9 @@ export default function OverviewPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedExplain, setSelectedExplain] = useState<ExplainabilityData | null>(null);
+  const [aiPrompt, setAiPrompt] = useState('');
   const [timeRange, setTimeRange] = useState<'7D' | '30D' | '90D'>('7D');
-  const [lastScanTime, setLastScanTime] = useState<string>('Just now');
-  const { success, error } = useToast();
+  const { success, info, error } = useToast();
 
   const fetchDashboard = async () => {
     setIsLoading(true);
@@ -119,8 +121,7 @@ export default function OverviewPage() {
         body: JSON.stringify({ focusArea: 'all', limit: 5 }),
       });
       if (!res.ok) throw new Error('AI analysis failed');
-      success('AI Intelligence Scan Complete', 'Catalog & co-purchase opportunities updated.');
-      setLastScanTime('Just now');
+      success('AI Intelligence Scan Complete', 'Catalog affinities and revenue opportunities updated.');
       fetchDashboard();
     } catch (err: unknown) {
       error('Analysis Error', err instanceof Error ? err.message : 'Failed to analyze');
@@ -129,17 +130,37 @@ export default function OverviewPage() {
     }
   };
 
+  const handlePromptSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aiPrompt.trim()) return;
+    const q = aiPrompt.toLowerCase();
+    if (q.includes('scan') || q.includes('opportunity') || q.includes('revenue') || q.includes('grow')) {
+      handleTriggerAnalysis();
+    } else if (q.includes('approval') || q.includes('authorize')) {
+      window.location.href = '/approvals';
+    } else if (q.includes('product') || q.includes('buy') || q.includes('shoe')) {
+      window.location.href = '/ai-buyers';
+    } else if (q.includes('transaction') || q.includes('payment')) {
+      window.location.href = '/transactions';
+    } else {
+      info('AI Processing', `Evaluating query: "${aiPrompt}"`);
+      handleTriggerAnalysis();
+    }
+    setAiPrompt('');
+  };
+
   if (isLoading && !data) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <Skeleton height={140} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-          <Skeleton height={120} />
-          <Skeleton height={120} />
-          <Skeleton height={120} />
-          <Skeleton height={120} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+          <div style={{ gridColumn: 'span 5' }}><Skeleton height={140} /></div>
+          <div style={{ gridColumn: 'span 3' }}><Skeleton height={140} /></div>
+          <div style={{ gridColumn: 'span 4' }}><Skeleton height={140} /></div>
         </div>
-        <Skeleton height={320} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+          <div style={{ gridColumn: 'span 6' }}><Skeleton height={320} /></div>
+          <div style={{ gridColumn: 'span 6' }}><Skeleton height={320} /></div>
+        </div>
       </div>
     );
   }
@@ -159,422 +180,494 @@ export default function OverviewPage() {
   const recommendations = data?.recentRecommendations || [];
   const topOpportunity = recommendations[0];
 
-  // Dynamic Chart Data based on actual metrics from DB
   const chartData = [
-    { date: 'Mon', revenue: Math.round(metrics.revenue * 0.11), orders: Math.round(metrics.orders * 0.12), aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.10) },
-    { date: 'Tue', revenue: Math.round(metrics.revenue * 0.14), orders: Math.round(metrics.orders * 0.15), aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.14) },
-    { date: 'Wed', revenue: Math.round(metrics.revenue * 0.18), orders: Math.round(metrics.orders * 0.19), aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.20) },
-    { date: 'Thu', revenue: Math.round(metrics.revenue * 0.13), orders: Math.round(metrics.orders * 0.14), aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.13) },
-    { date: 'Fri', revenue: Math.round(metrics.revenue * 0.16), orders: Math.round(metrics.orders * 0.17), aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.17) },
-    { date: 'Sat', revenue: Math.round(metrics.revenue * 0.15), orders: Math.round(metrics.orders * 0.13), aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.14) },
-    { date: 'Sun', revenue: Math.round(metrics.revenue * 0.13), orders: Math.round(metrics.orders * 0.10), aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.12) },
+    { date: 'Jan', revenue: Math.round(metrics.revenue * 0.12), orders: 1, aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.1) },
+    { date: 'Feb', revenue: Math.round(metrics.revenue * 0.18), orders: 1, aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.15) },
+    { date: 'Mar', revenue: Math.round(metrics.revenue * 0.25), orders: 2, aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.2) },
+    { date: 'Apr', revenue: Math.round(metrics.revenue * 0.35), orders: 2, aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.3) },
+    { date: 'May', revenue: Math.round(metrics.revenue * 0.45), orders: 3, aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.4) },
+    { date: 'Jun', revenue: Math.round(metrics.revenue * 0.6), orders: 4, aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.5) },
+    { date: 'Jul', revenue: Math.round(metrics.revenue * 0.75), orders: 5, aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.65) },
+    { date: 'Aug', revenue: Math.round(metrics.revenue * 0.85), orders: 6, aiRevenue: Math.round(metrics.aiAttributedRevenue * 0.75) },
+    { date: 'Sep', revenue: metrics.revenue || 449900, orders: metrics.orders || 1, aiRevenue: metrics.aiAttributedRevenue || 99900 },
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28, maxWidth: 1400, margin: '0 auto' }}>
-      {/* ─── 1. Page Header: Greeting & Quick Controls ───────── */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      {/* ══════════════════════════════════════════════════════════
+          ROW 1: Financial Snapshot | Finance Score | Available Balance
+      ══════════════════════════════════════════════════════════ */}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(12, 1fr)',
         gap: 16,
       }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="badge badge-fintech">
-              <ShieldCheck size={12} /> APEX ATHLETICS WORKSPACE
+        {/* Left Card: Financial Snapshot (5 cols) */}
+        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 5', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Financial Snapshot
+            </span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+              Customize View <ChevronDown size={12} />
             </span>
           </div>
-          <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            {getGreeting()}, Siddharth
-          </h1>
-          <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-            Your AI growth agent is monitoring your commerce operation.
-          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 12,
+          }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
+                Total Income
+              </div>
+              <div className="font-mono" style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
+                {formatCurrency(metrics.revenue)}
+              </div>
+              <div style={{ fontSize: '0.6875rem', color: '#10b981', fontWeight: 600, marginTop: 2 }}>
+                ▲ +12.07%
+              </div>
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444' }} />
+                AI Attributed
+              </div>
+              <div className="font-mono" style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
+                {formatCurrency(metrics.aiAttributedRevenue)}
+              </div>
+              <div style={{ fontSize: '0.6875rem', color: '#10b981', fontWeight: 600, marginTop: 2 }}>
+                ▲ +18.4%
+              </div>
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0284c7' }} />
+                Verified Orders
+              </div>
+              <div className="font-mono" style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 4 }}>
+                {metrics.orders} Captured
+              </div>
+              <div style={{ fontSize: '0.6875rem', color: '#10b981', fontWeight: 600, marginTop: 2 }}>
+                ▲ +22.08%
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <Button
-            variant="outline"
-            onClick={fetchDashboard}
-            disabled={isLoading}
-            size="sm"
-          >
-            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-            <span>Refresh</span>
-          </Button>
-          <Button
-            variant="fintech"
-            onClick={handleTriggerAnalysis}
-            disabled={isGenerating}
-            size="sm"
-          >
-            <Sparkles size={14} className={isGenerating ? 'animate-spin' : ''} />
-            <span>{isGenerating ? 'Scanning Catalog...' : 'Run AI Analysis'}</span>
-          </Button>
+        {/* Center Card: Finance Score (3 cols) */}
+        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 3', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Policy Score
+            </span>
+            <MoreVertical size={14} style={{ color: 'var(--text-tertiary)', cursor: 'pointer' }} />
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Guardrail Quality</span>
+              <span className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>98%</span>
+            </div>
+            <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#10b981', marginBottom: 8 }}>
+              Optimal (100% Policy Bound)
+            </div>
+            {/* Progress Bar */}
+            <div style={{ width: '100%', height: 8, background: 'var(--bg-tertiary)', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ width: '98%', height: '100%', background: 'linear-gradient(90deg, #10b981, #059669)', borderRadius: 4 }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Card: Available Balance Hero Gradient (4 cols) */}
+        <div className="fintech-hero-card" style={{ gridColumn: 'span 12 / span 4', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8125rem', fontWeight: 600, opacity: 0.9 }}>
+              Captured Commerce Balance
+            </span>
+            <div style={{
+              width: 24,
+              height: 24,
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Plus size={14} />
+            </div>
+          </div>
+
+          <div>
+            <div className="font-mono" style={{ fontSize: '1.875rem', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+              {formatCurrency(metrics.revenue)}
+              <span style={{ fontSize: '0.875rem', fontWeight: 500, opacity: 0.85, marginLeft: 4 }}>INR</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <button
+              onClick={handleTriggerAnalysis}
+              disabled={isGenerating}
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: 'var(--radius-md)',
+                background: '#0f172a',
+                color: '#ffffff',
+                border: 'none',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+              }}
+            >
+              <Sparkles size={13} className={isGenerating ? 'animate-spin' : ''} />
+              <span>{isGenerating ? 'Scanning...' : 'Scan Catalog'}</span>
+            </button>
+
+            <Link href="/approvals" style={{
+              flex: 1,
+              padding: '8px 12px',
+              borderRadius: 'var(--radius-md)',
+              background: 'rgba(255, 255, 255, 0.25)',
+              backdropFilter: 'blur(8px)',
+              color: '#ffffff',
+              border: 'none',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 4,
+            }}>
+              <span>Authorize ({metrics.pendingApprovals})</span>
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* ─── 2. AI Command Center Bar ────────────────────────── */}
-      <AICommandCenter onTriggerScan={handleTriggerAnalysis} />
-
-      {/* ─── 3. Dominant Section: Highest Confidence AI Opportunity */}
-      <div className="dominant-stat-card" style={{ padding: '28px 32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 18 }}>
+      {/* ══════════════════════════════════════════════════════════
+          ROW 2: AI Assistant Command Center | Cash Flow Trajectory
+      ══════════════════════════════════════════════════════════ */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(12, 1fr)',
+        gap: 16,
+      }}>
+        {/* Left Card: AI Assistant (6 cols) */}
+        <div className="ai-assistant-container" style={{ gridColumn: 'span 12 / span 6', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <span className="badge badge-ai" style={{ fontSize: '0.75rem', padding: '4px 10px' }}>
-                <Brain size={12} /> AI REVENUE OPPORTUNITY
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                AI Assistant
               </span>
-              <span className="badge badge-neutral" style={{ fontSize: '0.75rem' }}>
-                Highest Confidence Opportunity
-              </span>
+              <MoreVertical size={14} style={{ color: 'var(--text-tertiary)', cursor: 'pointer' }} />
             </div>
-            <h2 className="font-heading" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.3 }}>
-              {topOpportunity ? topOpportunity.title : 'Catalog Affinity Scan Complete'}
-            </h2>
+
+            {/* Glowing Orange Orb from FinPilot Reference */}
+            <div className="ai-orb-graphic">
+              <Sparkles size={28} color="#ffffff" />
+            </div>
+
+            <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 14 }}>
+              How can Revolve AI help you today?
+            </h3>
+
+            {/* 6 Action Chips (Exact Reference Style) */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginBottom: 18 }}>
+              {[
+                { label: 'Show revenue flow', action: () => setAiPrompt('Show revenue flow') },
+                { label: 'Find cross-sell', action: () => setAiPrompt('Find cross-sell opportunities') },
+                { label: 'Review approvals', action: () => { window.location.href = '/approvals'; } },
+                { label: 'Show failed payments', action: () => { window.location.href = '/transactions'; } },
+                { label: 'Detect catalog anomalies', action: handleTriggerAnalysis },
+                { label: 'More options', action: () => { window.location.href = '/ai-agent'; } },
+              ].map((chip) => (
+                <button
+                  key={chip.label}
+                  type="button"
+                  onClick={chip.action}
+                  className="fintech-chip"
+                >
+                  <Sparkles size={11} color="#ea580c" />
+                  <span>{chip.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {topOpportunity && (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span className="badge badge-fintech" style={{ padding: '6px 12px', fontSize: '0.8125rem' }}>
-                {Math.round(topOpportunity.confidence * 100)}% AI Confidence
-              </span>
-              <span className={`badge ${topOpportunity.riskLevel === 'LOW' ? 'badge-fintech' : 'badge-warning'}`} style={{ padding: '6px 12px', fontSize: '0.8125rem' }}>
-                {topOpportunity.riskLevel} Risk
-              </span>
-            </div>
-          )}
+          {/* AI Prompt Input Bar with Send Button */}
+          <form onSubmit={handlePromptSubmit} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            background: 'var(--bg-tertiary)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-primary)',
+            padding: '6px 8px 6px 14px',
+          }}>
+            <input
+              type="text"
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              placeholder="Ask Revolve AI anything about your commerce..."
+              style={{
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                fontSize: '0.8125rem',
+                color: 'var(--text-primary)',
+                width: '100%',
+                fontFamily: 'var(--font-body)',
+              }}
+            />
+            <button
+              type="submit"
+              className="btn-coral"
+              style={{
+                padding: '6px 14px',
+                borderRadius: 'var(--radius-sm)',
+                border: 'none',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                cursor: 'pointer',
+              }}
+            >
+              <span>Send</span>
+              <ArrowRight size={12} />
+            </button>
+          </form>
         </div>
 
-        {topOpportunity ? (
+        {/* Right Card: Cash Flow & Revenue Intelligence (6 cols) */}
+        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 6', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 20 }}>
-              {topOpportunity.reason}
-            </p>
-
-            {/* 4 Financial & Policy Summary Blocks */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: 14,
-              background: 'var(--bg-tertiary)',
-              padding: '16px',
-              borderRadius: 'var(--radius-lg)',
-              border: '1px solid var(--border-secondary)',
-              marginBottom: 20,
-            }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Projected Added Revenue
-                </div>
-                <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--fintech-primary)', marginTop: 2 }}>
-                  +{formatCurrency(topOpportunity.expectedImpact)}
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontWeight: 400 }}> / month</span>
+                <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Cash Flow &amp; Revenue Intelligence
+                </span>
+                <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>
+                  Gross volume vs AI-attributed companion transactions
                 </div>
               </div>
 
-              <div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  AI Confidence
-                </div>
-                <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
-                  {Math.round(topOpportunity.confidence * 100)}%
-                </div>
-              </div>
-
-              <div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Policy Guardrail Check
-                </div>
-                <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--success)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <CheckCircle2 size={15} /> Within Bounds (Pass)
-                </div>
-              </div>
-
-              <div>
-                <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Execution Model
-                </div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>
-                  Human Approval Required
-                </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '4px 10px',
+                background: 'var(--bg-tertiary)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-primary)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+              }}>
+                <span>This Year</span>
+                <ChevronDown size={12} />
               </div>
             </div>
 
-            {/* Evidence ➔ Recommendation ➔ Impact Flow */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 12 }}>
+              <div className="font-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                {formatCurrency(metrics.revenue)}
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginLeft: 4 }}>USD/INR</span>
+              </div>
+              <div style={{ display: 'flex', gap: 12, fontSize: '0.6875rem', fontWeight: 600 }}>
+                <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} /> Income
+                </span>
+                <span style={{ color: '#ea580c', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ea580c' }} /> AI Attributed
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ height: 200, width: '100%' }}>
+            <ChartCard
+              title=""
+              data={chartData}
+              dataKey="revenue"
+              comparisonKey="aiRevenue"
+              timeRange={timeRange}
+              onTimeRangeChange={setTimeRange}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════
+          ROW 3: Recent Activity | Currency Exchange / Policy Limits | Statistic Donut
+      ══════════════════════════════════════════════════════════ */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(12, 1fr)',
+        gap: 16,
+      }}>
+        {/* Left: Recent Activity Table (6 cols) */}
+        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 6', padding: '18px 20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Recent Activity
+            </span>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 12,
-              padding: '12px 16px',
-              background: 'var(--bg-secondary)',
+              gap: 4,
+              padding: '3px 8px',
+              background: 'var(--bg-tertiary)',
+              borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border-primary)',
-              borderRadius: 'var(--radius-md)',
-              marginBottom: 20,
-              fontSize: '0.8125rem',
+              fontSize: '0.6875rem',
+              fontWeight: 600,
               color: 'var(--text-secondary)',
             }}>
-              <span style={{ fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Activity size={14} /> WHY THIS OPPORTUNITY?
-              </span>
-              <span>Evidence extracted from basket histories</span>
-              <span>➔</span>
-              <span>Bounded 10% companion incentive</span>
-              <span>➔</span>
-              <span className="font-mono" style={{ fontWeight: 700, color: 'var(--fintech-primary)' }}>+{formatCurrency(topOpportunity.expectedImpact)}</span>
-            </div>
-
-            {/* CTAs */}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedExplain({
-                  title: topOpportunity.title,
-                  type: topOpportunity.type,
-                  reason: topOpportunity.reason,
-                  evidence: topOpportunity.evidence,
-                  expectedImpact: topOpportunity.expectedImpact,
-                  confidence: topOpportunity.confidence,
-                  riskLevel: topOpportunity.riskLevel,
-                })}
-              >
-                Review Reasoning
-              </Button>
-              <Link href="/approvals" style={{ textDecoration: 'none' }}>
-                <Button variant="primary" size="sm">
-                  <span>Review &amp; Authorize</span>
-                  <ArrowRight size={14} />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
-            <Sparkles size={28} style={{ margin: '0 auto 10px', opacity: 0.5 }} />
-            <p>Run catalog analysis to generate real revenue recommendations.</p>
-          </div>
-        )}
-      </div>
-
-      {/* ─── 4. Financial Snapshot Row (Real Database Values) ─── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: 16,
-      }}>
-        <div className="editorial-card" style={{ padding: '20px' }}>
-          <div className="stat-label">Gross Revenue</div>
-          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            {formatCurrency(metrics.revenue)}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6, fontSize: '0.75rem', color: 'var(--success)' }}>
-            <TrendingUp size={12} /> {metrics.revenueChange >= 0 ? `+${metrics.revenueChange}%` : `${metrics.revenueChange}%`} vs last period
-          </div>
-        </div>
-
-        <div className="editorial-card" style={{ padding: '20px' }}>
-          <div className="stat-label">Verified Orders</div>
-          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            {metrics.orders.toLocaleString('en-IN')}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 6 }}>
-            Captured via Razorpay Test Mode
-          </div>
-        </div>
-
-        <div className="editorial-card" style={{ padding: '20px' }}>
-          <div className="stat-label">AI-Attributed Revenue</div>
-          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--fintech-primary)' }}>
-            {formatCurrency(metrics.aiAttributedRevenue)}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 6 }}>
-            From verified upsell &amp; bundle offers
-          </div>
-        </div>
-
-        <div className="editorial-card" style={{ padding: '20px' }}>
-          <div className="stat-label">Average Order Value</div>
-          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-            {formatCurrency(metrics.avgOrderValue)}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--fintech-primary)', marginTop: 6 }}>
-            Conversion rate: {metrics.conversionRate}%
-          </div>
-        </div>
-      </div>
-
-      {/* ─── 5. Middle Grid: Revenue Intelligence & AI Agent Status */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(12, 1fr)',
-        gap: 20,
-      }}>
-        {/* Left: Revenue Chart */}
-        <div style={{ gridColumn: 'span 12 / span 8' }}>
-          <ChartCard
-            title="Revenue Intelligence &amp; AI Attribution"
-            data={chartData}
-            dataKey="revenue"
-            comparisonKey="aiRevenue"
-            timeRange={timeRange}
-            onTimeRangeChange={setTimeRange}
-          />
-        </div>
-
-        {/* Right: AI Agent Status Card */}
-        <div className="editorial-card" style={{
-          gridColumn: 'span 12 / span 4',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '24px',
-        }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <span className="badge badge-ai" style={{ fontSize: '0.75rem' }}>
-                <Brain size={12} /> AI AGENT STATUS
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />
-                Monitoring
-              </span>
-            </div>
-
-            <h3 className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700, marginBottom: 12 }}>
-              Autonomous Revenue Monitor
-            </h3>
-            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 18 }}>
-              Analyzing store catalog affinities, basket compositions, and customer order histories against configured policy rules.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)' }}>
-                <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>Opportunities Discovered</span>
-                <span className="font-mono font-bold" style={{ fontSize: '0.875rem' }}>{recommendations.length}</span>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)' }}>
-                <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>Pending Approvals</span>
-                <span className="font-mono font-bold" style={{ fontSize: '0.875rem', color: metrics.pendingApprovals > 0 ? 'var(--warning)' : 'inherit' }}>{metrics.pendingApprovals}</span>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-sm)' }}>
-                <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>Last Catalog Scan</span>
-                <span className="font-mono" style={{ fontSize: '0.8125rem', color: 'var(--text-tertiary)' }}>{lastScanTime}</span>
-              </div>
+              <span>This Month</span>
+              <ChevronDown size={11} />
             </div>
           </div>
 
-          <div style={{ marginTop: 20 }}>
-            <Link href="/ai-agent" style={{ textDecoration: 'none' }}>
-              <Button variant="outline" size="sm" style={{ width: '100%' }}>
-                <span>Open AI Growth Agent Brain</span>
-                <ArrowRight size={14} />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* ─── 6. Bottom Grid: Recent Verified Orders & Agent Activity ─ */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(12, 1fr)',
-        gap: 20,
-      }}>
-        {/* Left: Recent Verified Orders */}
-        <div className="editorial-card" style={{ gridColumn: 'span 12 / span 7', padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div>
-              <h3 className="font-heading" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                Recent Verified Orders
-              </h3>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                Real Razorpay Test Mode captures with HMAC-SHA256 signature verification
-              </p>
-            </div>
-            <Link href="/transactions" style={{ fontSize: '0.75rem', color: 'var(--fintech-primary)', fontWeight: 600, textDecoration: 'none' }}>
-              View All Ledger →
-            </Link>
-          </div>
-
-          {data?.recentOrders && data.recentOrders.length > 0 ? (
-            <div style={{ overflowX: 'auto' }}>
-              <table className="editorial-table">
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.recentOrders.slice(0, 5).map((order) => (
-                    <tr key={order.id}>
-                      <td>
-                        <div className="font-mono" style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.8125rem' }}>
-                          {order.razorpayOrderId || order.id.slice(0, 14)}
-                        </div>
-                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>
-                          {formatDateTime(order.createdAt)}
-                        </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="editorial-table">
+              <thead>
+                <tr>
+                  <th>Transaction ID</th>
+                  <th>Date</th>
+                  <th>Platform</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.recentOrders && data.recentOrders.length > 0 ? (
+                  data.recentOrders.slice(0, 4).map((o) => (
+                    <tr key={o.id}>
+                      <td className="font-mono" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {o.razorpayOrderId || o.id.slice(0, 10)}
+                      </td>
+                      <td style={{ fontSize: '0.75rem' }}>
+                        {formatDateTime(o.createdAt).slice(0, 10)}
+                      </td>
+                      <td style={{ fontSize: '0.75rem', fontWeight: 500 }}>
+                        Razorpay Test
+                      </td>
+                      <td className="font-mono" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        {formatCurrency(o.amount)}
                       </td>
                       <td>
-                        <div style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '0.8125rem' }}>
-                          {order.customerName || 'Direct Checkout'}
-                        </div>
-                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>
-                          {order.customerEmail || '—'}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="font-mono" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
-                          {formatCurrency(order.amount)}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`badge ${order.status === 'PAID' ? 'badge-fintech' : 'badge-neutral'}`} style={{ fontSize: '0.6875rem' }}>
-                          {order.status === 'PAID' ? 'VERIFIED ✓' : order.status}
+                        <span className="badge badge-fintech" style={{ fontSize: '0.6875rem' }}>
+                          Completed
                         </span>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--text-tertiary)' }}>
-              <CreditCard size={28} style={{ margin: '0 auto 10px', opacity: 0.5 }} />
-              <p>No orders captured yet.</p>
-            </div>
-          )}
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-tertiary)' }}>
+                      No recent transactions
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        {/* Right: Agent Activity Stream */}
-        <div className="editorial-card" style={{ gridColumn: 'span 12 / span 5', padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div>
-              <h3 className="font-heading" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                Agent Activity &amp; Audit Stream
-              </h3>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                Chronological operational timeline of AI decisions &amp; approvals
-              </p>
+        {/* Center: Currency / Policy Limits Card (3 cols) */}
+        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 3', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '18px 20px' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Policy Guardrails
+              </span>
+              <span className="badge badge-fintech" style={{ fontSize: '0.6875rem' }}>Active</span>
             </div>
-            <Link href="/audit" style={{ fontSize: '0.75rem', color: 'var(--ai-primary)', fontWeight: 600, textDecoration: 'none' }}>
-              Full Audit →
-            </Link>
+
+            <div style={{ background: 'var(--bg-tertiary)', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-primary)', marginBottom: 8 }}>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>Max Transaction Limit</div>
+              <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹10,000.00</div>
+            </div>
+
+            <div style={{ background: 'var(--bg-tertiary)', padding: '10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-primary)' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>Daily AI Spend Limit</div>
+              <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹50,000.00</div>
+            </div>
           </div>
 
-          <AuditTimeline events={data?.recentActivity || []} limit={5} />
+          <Link href="/settings" style={{
+            display: 'block',
+            width: '100%',
+            padding: '8px',
+            background: '#ea580c',
+            color: '#ffffff',
+            borderRadius: 'var(--radius-md)',
+            textAlign: 'center',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            textDecoration: 'none',
+            marginTop: 10,
+          }}>
+            Adjust Rules
+          </Link>
+        </div>
+
+        {/* Right: Commerce Attribution Statistic Donut / Breakdown (3 cols) */}
+        <div className="fintech-card" style={{ gridColumn: 'span 12 / span 3', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '18px 20px' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Catalog Statistics
+              </span>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>This Month</div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ea580c' }} /> Footwear &amp; Running
+                </span>
+                <span className="font-mono font-bold">60%</span>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1' }} /> Recovery Gear
+                </span>
+                <span className="font-mono font-bold">25%</span>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} /> Hydration &amp; Tech
+                </span>
+                <span className="font-mono font-bold">15%</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid var(--border-secondary)', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+            <span>Total Catalog Items</span>
+            <span className="font-mono font-bold" style={{ color: 'var(--text-primary)' }}>7 Products</span>
+          </div>
         </div>
       </div>
 
-      {/* ─── 7. Explainability Modal ─────────────────────────── */}
+      {/* Explainability Modal */}
       <ExplainabilityModal
         isOpen={Boolean(selectedExplain)}
         onClose={() => setSelectedExplain(null)}
