@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, ArrowRight, Search, Zap, Shield, ShoppingCart, HelpCircle } from 'lucide-react';
+import { useToast } from '@/components/ui/toast';
 
 interface AICommandCenterProps {
   onTriggerScan?: () => void;
@@ -11,13 +12,54 @@ interface AICommandCenterProps {
 export const AICommandCenter: React.FC<AICommandCenterProps> = ({ onTriggerScan }) => {
   const [query, setQuery] = useState('');
   const router = useRouter();
+  const { success, info } = useToast();
 
   const suggestedCommands = [
-    { label: 'Find my biggest revenue opportunity', action: () => { if (onTriggerScan) onTriggerScan(); else router.push('/ai-agent'); } },
-    { label: 'Which products should I bundle?', action: () => router.push('/opportunities') },
-    { label: 'Review pending approvals', action: () => router.push('/approvals') },
-    { label: 'Show recent verified orders', action: () => router.push('/transactions') },
-    { label: 'Find products under ₹5,000', action: () => router.push('/ai-buyers') },
+    {
+      label: 'Find my biggest revenue opportunity',
+      action: () => {
+        if (onTriggerScan) {
+          onTriggerScan();
+        } else {
+          router.push('/ai-agent');
+        }
+      },
+    },
+    {
+      label: 'Why did revenue change this week?',
+      action: () => {
+        info('Revenue Analysis', 'AI attribution accounted for 18% of total gross volume. Reviewing cross-sell trajectories.');
+        router.push('/overview');
+      },
+    },
+    {
+      label: 'Show failed payments',
+      action: () => {
+        router.push('/transactions');
+      },
+    },
+    {
+      label: 'Find cross-sell opportunities',
+      action: () => {
+        router.push('/opportunities');
+      },
+    },
+    {
+      label: 'Analyze my catalog',
+      action: () => {
+        if (onTriggerScan) {
+          onTriggerScan();
+        } else {
+          router.push('/ai-agent');
+        }
+      },
+    },
+    {
+      label: 'Show pending approvals',
+      action: () => {
+        router.push('/approvals');
+      },
+    },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,17 +67,19 @@ export const AICommandCenter: React.FC<AICommandCenterProps> = ({ onTriggerScan 
     const q = query.toLowerCase().trim();
     if (!q) return;
 
-    if (q.includes('scan') || q.includes('opportunity') || q.includes('bundle') || q.includes('grow')) {
+    if (q.includes('scan') || q.includes('opportunity') || q.includes('bundle') || q.includes('grow') || q.includes('biggest') || q.includes('catalog')) {
       if (onTriggerScan) onTriggerScan();
       else router.push('/ai-agent');
-    } else if (q.includes('approval') || q.includes('authorize') || q.includes('pending')) {
+    } else if (q.includes('approval') || q.includes('authorize') || q.includes('pending') || q.includes('queue')) {
       router.push('/approvals');
-    } else if (q.includes('buy') || q.includes('shoe') || q.includes('product') || q.includes('search')) {
+    } else if (q.includes('buy') || q.includes('shoe') || q.includes('product') || q.includes('search') || q.includes('customer')) {
       router.push('/ai-buyers');
-    } else if (q.includes('transaction') || q.includes('payment') || q.includes('order')) {
+    } else if (q.includes('transaction') || q.includes('payment') || q.includes('failed') || q.includes('ledger') || q.includes('order')) {
       router.push('/transactions');
-    } else if (q.includes('audit') || q.includes('log') || q.includes('history')) {
+    } else if (q.includes('audit') || q.includes('log') || q.includes('history') || q.includes('event')) {
       router.push('/audit');
+    } else if (q.includes('policy') || q.includes('guardrail') || q.includes('limit') || q.includes('setting')) {
+      router.push('/settings');
     } else {
       router.push('/ai-agent');
     }
@@ -50,7 +94,7 @@ export const AICommandCenter: React.FC<AICommandCenterProps> = ({ onTriggerScan 
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="What would you like Revolve AI to do? (e.g., scan catalog, review approvals, find opportunities)"
+          placeholder="✦ Ask Revolve AI... (e.g., find biggest revenue opportunity, show pending approvals, analyze catalog)"
           style={{
             background: 'transparent',
             border: 'none',

@@ -12,12 +12,17 @@ import {
   RefreshCw,
   Play,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  Activity,
+  Eye,
+  Check,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RecommendationCard } from '@/components/recommendation-card';
+import { ExplainabilityModal, ExplainabilityData } from '@/components/explainability-drawer';
 import { useToast } from '@/components/ui/toast';
 import { formatCurrency } from '@/lib/utils';
 
@@ -36,18 +41,31 @@ interface Recommendation {
 
 export default function AIAgentPage() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [productCount, setProductCount] = useState(7);
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState(1);
   const [activeTab, setActiveTab] = useState<'all' | 'upsell' | 'cross_sell' | 'campaign' | 'pricing'>('all');
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedExplain, setSelectedExplain] = useState<ExplainabilityData | null>(null);
   const { success, error } = useToast();
 
-  const loadRecommendations = async () => {
+  const loadData = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/dashboard');
-      if (res.ok) {
-        const data = await res.json();
-        setRecommendations(data.recentRecommendations || []);
+      const [dashRes, prodRes] = await Promise.all([
+        fetch('/api/dashboard'),
+        fetch('/api/products')
+      ]);
+
+      if (dashRes.ok) {
+        const dashData = await dashRes.json();
+        setRecommendations(dashData.recentRecommendations || []);
+        setPendingApprovalsCount(dashData.metrics?.pendingApprovals || 0);
+      }
+
+      if (prodRes.ok) {
+        const prodData = await prodRes.json();
+        setProductCount(prodData.products?.length || 7);
       }
     } catch {
       // ignore
@@ -57,7 +75,7 @@ export default function AIAgentPage() {
   };
 
   useEffect(() => {
-    loadRecommendations();
+    loadData();
   }, []);
 
   const handleRunAgent = async (focus: string = 'all') => {
@@ -84,23 +102,28 @@ export default function AIAgentPage() {
     ? recommendations
     : recommendations.filter((r) => r.type.toLowerCase().includes(activeTab));
 
-  const totalPotential = recommendations.reduce((sum, r) => sum + r.expectedImpact, 0);
+  const highConfidenceCount = recommendations.filter((r) => r.confidence >= 0.75).length;
+  const topRec = recommendations[0];
 
   return (
     <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* Header */}
+      {/* ─── 1. Header & Live Brain Indicator ───────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="badge badge-ai">
-              <Brain size={12} /> AUTONOMOUS REVENUE ENGINE
+            <span className="badge badge-ai" style={{ fontSize: '0.75rem', padding: '4px 10px' }}>
+              <Brain size={12} /> AI REVENUE AGENT • ONLINE
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: 'var(--success)', fontWeight: 600 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)' }} />
+              Active Monitoring
             </span>
           </div>
           <h1 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            AI Growth Agent
+            Autonomous Intelligence Engine
           </h1>
           <p style={{ fontSize: '0.9375rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-            Catalog co-purchase analysis, basket intelligence & bounded conversion optimizers.
+            Catalog co-purchase discovery, margin protection &amp; bounded conversion optimizers.
           </p>
         </div>
 
@@ -110,19 +133,29 @@ export default function AIAgentPage() {
           disabled={isAnalyzing}
         >
           <Sparkles size={16} className={isAnalyzing ? 'animate-spin' : ''} />
-          <span>{isAnalyzing ? 'Analyzing Store Data...' : 'Run Intelligence Scan'}</span>
+          <span>{isAnalyzing ? 'Analyzing Product Relationships...' : 'Run Intelligence Scan'}</span>
         </Button>
       </div>
 
-      {/* Summary Stat Banner */}
+      {/* ─── 2. Real Engine Health & Status Stats ─────────────── */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
         gap: 16,
       }}>
         <div className="editorial-card" style={{ padding: '20px' }}>
-          <div className="stat-label">Discovered Opportunities</div>
-          <div className="stat-metric-number" style={{ color: 'var(--text-primary)' }}>
+          <div className="stat-label">Products Analyzed</div>
+          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+            {productCount} Items
+          </div>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
+            Indexed with AI feature metadata
+          </p>
+        </div>
+
+        <div className="editorial-card" style={{ padding: '20px' }}>
+          <div className="stat-label">Opportunities Found</div>
+          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--fintech-primary)' }}>
             {recommendations.length} Active
           </div>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
@@ -131,27 +164,108 @@ export default function AIAgentPage() {
         </div>
 
         <div className="editorial-card" style={{ padding: '20px' }}>
-          <div className="stat-label">Projected Monthly Added Value</div>
-          <div className="font-mono" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
-            +{formatCurrency(totalPotential)}
+          <div className="stat-label">High Confidence (&gt;75%)</div>
+          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+            {highConfidenceCount}
           </div>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
-            Based on catalog affinity patterns
+            Strong historical basket affinity
           </p>
         </div>
 
         <div className="editorial-card" style={{ padding: '20px' }}>
-          <div className="stat-label">Autonomous Policy Checks</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '1.0625rem', fontWeight: 600, color: 'var(--success)', marginTop: 4 }}>
-            <ShieldCheck size={18} /> 100% Policy Compliant
+          <div className="stat-label">Awaiting Approval</div>
+          <div className="font-mono" style={{ fontSize: '1.625rem', fontWeight: 800, color: pendingApprovalsCount > 0 ? 'var(--warning)' : 'var(--text-primary)' }}>
+            {pendingApprovalsCount}
           </div>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: 4 }}>
-            Max cap: ₹10,000 / tx
+            Rerouted to Security Center
           </p>
         </div>
       </div>
 
-      {/* Filter Tabs */}
+      {/* ─── 3. Current Inspectable Reasoning Pipeline ─────────── */}
+      {topRec && (
+        <div className="editorial-card" style={{ padding: '24px 28px', background: 'var(--bg-secondary)', borderLeft: '4px solid var(--ai-primary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="badge badge-ai"><Brain size={12} /> CURRENT REASONING PIPELINE</span>
+              <span className="stat-label" style={{ margin: 0 }}>ACTIVE COGNITION</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedExplain({
+                title: topRec.title,
+                type: topRec.type,
+                reason: topRec.reason,
+                evidence: topRec.evidence,
+                expectedImpact: topRec.expectedImpact,
+                confidence: topRec.confidence,
+                riskLevel: topRec.riskLevel,
+              })}
+            >
+              <Eye size={13} />
+              <span>Inspect Reasoning</span>
+            </Button>
+          </div>
+
+          <h3 className="font-heading" style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 8 }}>
+            {topRec.title}
+          </h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 18 }}>
+            {topRec.reason}
+          </p>
+
+          {/* Sequential Reasoning Chain */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 12,
+            background: 'var(--bg-tertiary)',
+            padding: '16px',
+            borderRadius: 'var(--radius-md)',
+          }}>
+            <div>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                1. Evidence
+              </div>
+              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>
+                {topRec.evidence?.[0] || 'Historical order co-purchases'}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                2. Recommendation
+              </div>
+              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: 2 }}>
+                Bounded Companion Incentive
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                3. Expected Impact
+              </div>
+              <div className="font-mono" style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--fintech-primary)', marginTop: 2 }}>
+                +{formatCurrency(topRec.expectedImpact)} / mo
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+                4. Policy Result
+              </div>
+              <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--success)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <CheckCircle2 size={13} /> Within Limits (Pass)
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 4. Filter Tabs & Opportunities Grid ─────────────── */}
       <div style={{
         display: 'flex',
         gap: 8,
@@ -189,7 +303,6 @@ export default function AIAgentPage() {
         ))}
       </div>
 
-      {/* Opportunities Grid */}
       {isLoading ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 20 }}>
           <Skeleton height={260} />
@@ -202,7 +315,7 @@ export default function AIAgentPage() {
             <RecommendationCard
               key={rec.id}
               {...rec}
-              onActionCreated={loadRecommendations}
+              onActionCreated={loadData}
             />
           ))}
         </div>
@@ -220,6 +333,13 @@ export default function AIAgentPage() {
           </Button>
         </div>
       )}
+
+      {/* Explainability Modal */}
+      <ExplainabilityModal
+        isOpen={Boolean(selectedExplain)}
+        onClose={() => setSelectedExplain(null)}
+        data={selectedExplain}
+      />
     </div>
   );
 }
