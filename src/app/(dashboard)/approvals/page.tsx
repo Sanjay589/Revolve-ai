@@ -5,6 +5,7 @@ import { ShieldCheck, CheckCircle2, RefreshCw, Lock, AlertTriangle, Shield } fro
 import { PageHeader } from '@/components/ui/page-header';
 import { ApprovalCard } from '@/components/approval-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
 
 interface ApprovalItem {
   id: string;
@@ -52,7 +53,9 @@ export default function ApprovalsPage() {
   const pendingCount = approvals.filter((a) => a.status === 'PENDING').length;
 
   return (
-    <>
+    <div className="relative">
+      <FloatingCommerceObjects intensity="approvals" />
+
       {/* ── Page Header ────────────────────────────────────── */}
       <PageHeader
         badgeText="HUMAN-IN-THE-LOOP AUTHORIZATION"
@@ -175,6 +178,6 @@ export default function ApprovalsPage() {
           </p>
         </div>
       )}
-    </>
+    </div>
   );
 }

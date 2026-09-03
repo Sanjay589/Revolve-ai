@@ -102,10 +102,6 @@ export class AIEngine {
       recommendations.push(...this.generateCrossSellRecommendations(products, orders));
     }
 
-    if (focusArea === 'all' || focusArea === 'campaign') {
-      recommendations.push(...this.generateCampaignRecommendations(products, orders, customers));
-    }
-
     if (focusArea === 'all' || focusArea === 'pricing') {
       recommendations.push(...this.generatePricingRecommendations(products, orders));
     }
@@ -114,7 +110,7 @@ export class AIEngine {
   }
 
   /**
-   * Analyze catalog for AI buyer product matching.
+   * Analyze catalog for AI buyer product matching with robust natural language search pipeline.
    */
   static async searchCatalog(
     merchantId: string,
@@ -137,93 +133,291 @@ export class AIEngine {
       include: { variants: true },
     });
 
-    const provider = (process.env.AI_PROVIDER || '').toLowerCase();
-    const grokKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
+    if (!products || products.length === 0) {
+      return {
+        products: [],
+        summary: `No active products found in the merchant catalog for merchant ID: ${merchantId}.`,
+      };
+    }
 
-    // Optional Grok semantic enhancement for buyer discovery
+    const provider = (process.env.AI_PROVIDER || '').toLowerCase();
+    const rawGrokKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY || '';
+    const isRealGrokKey = Boolean(rawGrokKey && rawGrokKey.trim().length > 10 && !rawGrokKey.includes('placeholder'));
+    const grokKey = isRealGrokKey ? rawGrokKey.trim() : '';
+
+    // Optional Groq / xAI semantic enhancement for buyer discovery
     if ((provider === 'grok' || provider === 'xai') && grokKey && products.length > 0) {
       try {
         const grokResult = await this.searchWithGrok({
           apiKey: grokKey,
-          model: process.env.GROK_MODEL || 'grok-2-latest',
+          model: process.env.GROK_MODEL || (grokKey.startsWith('gsk_') ? 'llama-3.3-70b-versatile' : 'grok-2-latest'),
           query,
           products,
         });
-        if (grokResult) return grokResult;
+        if (grokResult && grokResult.products && grokResult.products.length > 0) {
+          return grokResult;
+        }
       } catch (err) {
-        console.warn('[AIEngine] Grok buyer search failed, using built-in matcher:', err);
+        console.warn('[AIEngine] Grok buyer search failed, using robust built-in pipeline:', err);
       }
     }
 
-    const queryLower = query.toLowerCase();
-    const queryWords = queryLower.split(/\s+/).filter(Boolean);
-
-    // Score products based on query relevance
-    const scored = products
-      .map((p) => {
-        let score = 0;
-        const nameLower = p.name.toLowerCase();
-        const descLower = (p.description || '').toLowerCase();
-        const categoryLower = (p.category || '').toLowerCase();
-        const tags = p.tags.map((t) => t.toLowerCase());
-        const features = p.features.map((f) => f.toLowerCase());
-
-        // Name matches
-        queryWords.forEach((word) => {
-          if (nameLower.includes(word)) score += 10;
-          if (descLower.includes(word)) score += 5;
-          if (categoryLower.includes(word)) score += 8;
-          if (tags.some((t) => t.includes(word))) score += 6;
-          if (features.some((f) => f.includes(word))) score += 4;
-        });
-
-        // Price extraction from query
-        const priceMatch = query.match(/(?:under|below|less than|max|upto|up to)\s*(?:₹|rs\.?|inr)?\s*(\d[\d,]*)/i);
-        if (priceMatch) {
-          const maxPrice = parseInt(priceMatch[1].replace(/,/g, '')) * 100;
-          if (p.price <= maxPrice) {
-            score += 15;
-          } else {
-            score -= 20;
-          }
-        }
-
-        // Build reasoning
-        let reasoning = '';
-        if (score > 0) {
-          const matchReasons: string[] = [];
-          if (nameLower.includes(queryLower) || queryWords.some((w) => nameLower.includes(w)))
-            matchReasons.push('matches your search terms');
-          if (priceMatch && p.price <= parseInt(priceMatch[1].replace(/,/g, '')) * 100)
-            matchReasons.push('fits within your budget');
-          if (features.length > 0)
-            matchReasons.push(`offers ${p.features.length} key features`);
-          reasoning = matchReasons.length > 0 ? matchReasons.join(', ') : 'relevant product';
-        }
-
-        return {
-          id: p.id,
-          name: p.name,
-          price: p.price,
-          description: p.description,
-          features: p.features,
-          category: p.category,
-          score,
-          reasoning: reasoning.charAt(0).toUpperCase() + reasoning.slice(1),
-        };
-      })
-      .filter((p) => p.score > 0)
-      .sort((a, b) => b.score - a.score);
-
-    const summary =
-      scored.length > 0
-        ? `Found ${scored.length} products matching "${query}". The top match is ${scored[0].name} at ₹${(scored[0].price / 100).toLocaleString('en-IN')}.`
-        : `No products found matching "${query}". Try a different search term.`;
-
-    return { products: scored, summary };
+    // ─── Robust Deterministic Search Pipeline ──────────────────
+    return this.executeDeterministicSearch(products, query);
   }
 
-  // ─── xAI Grok Integration ────────────────────────────────
+  /**
+   * High-accuracy deterministic search pipeline supporting natural language,
+   * specifications, categories, synonyms, budget extraction, and multi-field ranking.
+   */
+  public static executeDeterministicSearch(
+    products: any[],
+    query: string
+  ): {
+    products: Array<{
+      id: string;
+      name: string;
+      price: number;
+      description: string | null;
+      features: string[];
+      category: string | null;
+      score: number;
+      reasoning: string;
+    }>;
+    summary: string;
+  } {
+    const rawQueryLower = query.toLowerCase();
+
+    // 1. Punctuation & stopword normalization
+    const cleanedQuery = rawQueryLower.replace(/[^\w\s₹\-]/g, ' ');
+    const stopwords = new Set([
+      'with', 'for', 'the', 'a', 'an', 'in', 'to', 'and', 'or', 'of',
+      'at', 'by', 'from', 'on', 'is', 'are', 'me', 'show', 'find', 'get',
+      'give', 'looking', 'need', 'want', 'something', 'please', 'i', 'my',
+      'any', 'some', 'can', 'you'
+    ]);
+
+    const allTokens = cleanedQuery.split(/\s+/).filter(Boolean);
+    const queryTokens = allTokens.filter((token) => !stopwords.has(token));
+
+    // 2. Attribute & Spec Extractions
+    const ramMatch = rawQueryLower.match(/(\d+)\s*(?:gb|g)\s*(?:ram|lpddr\w*|memory)?/i) || rawQueryLower.match(/\b(16gb|32gb|8gb|64gb)\b/i);
+    const requestedRam = ramMatch ? (ramMatch[1] || ramMatch[0]).toLowerCase().replace(/\s+/g, '') : null;
+
+    const storageMatch = rawQueryLower.match(/(\d+)\s*(?:tb|gb)\s*(?:ssd|nvme|storage)?/i);
+    const requestedStorage = storageMatch ? storageMatch[0].toLowerCase().replace(/\s+/g, '') : null;
+
+    // Budget / Price constraint extraction
+    const budgetMatch = rawQueryLower.match(/(?:under|below|less than|max|upto|up to|budget of)\s*(?:₹|rs\.?|inr)?\s*(\d[\d,]*)(?:\s*(?:k|thousand))?/i);
+    let maxBudgetPaise: number | null = null;
+    if (budgetMatch) {
+      let num = parseFloat(budgetMatch[1].replace(/,/g, ''));
+      if (budgetMatch[0].includes('k') || budgetMatch[0].includes('thousand')) {
+        num = num * 1000;
+      }
+      maxBudgetPaise = Math.round(num * 100);
+    }
+
+    const wantsCheapest = /\b(cheapest|lowest price|budget friendly|inexpensive|most affordable)\b/i.test(rawQueryLower);
+    const wantsPremium = /\b(premium|flagship|best|high-end|top tier|powerhouse)\b/i.test(rawQueryLower);
+    const wantsWaterResistant = /\b(water resistant|waterproof|spill resistant|water-resistant|all-weather|aquaguard)\b/i.test(rawQueryLower);
+
+    // 3. Synonym dictionary for semantic expansion
+    const synonymMap: Record<string, string[]> = {
+      laptop: ['ultrabook', 'notebook', 'computer', 'pc', 'creator', 'developer'],
+      laptops: ['ultrabook', 'notebook', 'computer', 'pc', 'creator', 'developer'],
+      computer: ['laptop', 'ultrabook', 'notebook', 'desktop'],
+      productivity: ['developer', 'creator', 'office', 'work', 'builder', 'powerhouse', 'ergonomic'],
+      work: ['productivity', 'office', 'developer', 'creator', 'commute'],
+      office: ['productivity', 'desk', 'ergonomic', 'work'],
+      shoes: ['running', 'footwear', 'marathon', 'sneakers', 'trainer', 'athletes'],
+      shoe: ['running', 'footwear', 'marathon', 'sneakers', 'trainer', 'athletes'],
+      running: ['shoes', 'footwear', 'marathon', 'socks', 'athletes', 'runner'],
+      socks: ['compression', 'footwear', 'accessories', 'running'],
+      watch: ['smartwatch', 'gps', 'cardio', 'fitness', 'biometric', 'electronics'],
+      smartwatch: ['watch', 'gps', 'cardio', 'fitness', 'electronics'],
+      mouse: ['wireless', 'bluetooth', 'ergonomic', 'productivity', 'accessories'],
+      sleeve: ['case', 'protective', 'cordura', 'laptop-accessory', 'accessories'],
+      backpack: ['travel', 'bags', 'commute', 'carry-on', 'waterproof'],
+      bag: ['backpack', 'travel', 'bags', 'commute'],
+      accessories: ['sleeve', 'mouse', 'socks', 'case', 'gear'],
+    };
+
+    // Expand search terms with synonyms
+    const expandedTerms = new Set<string>(queryTokens);
+    for (const token of queryTokens) {
+      const syns = synonymMap[token];
+      if (syns) {
+        syns.forEach((s) => expandedTerms.add(s));
+      }
+    }
+
+    // 4. Score each product against the query and constraints
+    const scoredProducts = products.map((p) => {
+      let score = 0;
+      const matchReasons: string[] = [];
+
+      const nameLower = (p.name || '').toLowerCase();
+      const descLower = (p.description || '').toLowerCase();
+      const shortDescLower = (p.shortDescription || '').toLowerCase();
+      const categoryLower = (p.category || '').toLowerCase();
+      const tags = (p.tags || []).map((t: string) => t.toLowerCase());
+      const features = (p.features || []).map((f: string) => f.toLowerCase());
+      const fullText = `${nameLower} ${descLower} ${shortDescLower} ${categoryLower} ${tags.join(' ')} ${features.join(' ')}`;
+
+      // A. Exact phrase matches
+      if (cleanedQuery.length > 2 && fullText.includes(cleanedQuery)) {
+        score += 60;
+        matchReasons.push('exact search match');
+      }
+
+      // B. Token matches with field-specific weights
+      let matchedTokenCount = 0;
+      for (const token of queryTokens) {
+        let tokenMatched = false;
+        if (nameLower.includes(token)) {
+          score += 25;
+          tokenMatched = true;
+        }
+        if (categoryLower.includes(token)) {
+          score += 20;
+          tokenMatched = true;
+        }
+        if (tags.some((t: string) => t.includes(token))) {
+          score += 15;
+          tokenMatched = true;
+        }
+        if (features.some((f: string) => f.includes(token))) {
+          score += 12;
+          tokenMatched = true;
+        }
+        if (descLower.includes(token) || shortDescLower.includes(token)) {
+          score += 8;
+          tokenMatched = true;
+        }
+
+        if (tokenMatched) {
+          matchedTokenCount++;
+        }
+      }
+
+      // Bonus if most user query tokens matched
+      if (queryTokens.length > 0 && matchedTokenCount === queryTokens.length) {
+        score += 30;
+      }
+
+      // C. Synonym matches
+      for (const syn of expandedTerms) {
+        if (!queryTokens.includes(syn)) {
+          if (nameLower.includes(syn) || categoryLower.includes(syn) || tags.includes(syn)) {
+            score += 10;
+          } else if (features.some((f: string) => f.includes(syn)) || descLower.includes(syn)) {
+            score += 6;
+          }
+        }
+      }
+
+      // D. RAM / Spec matches
+      if (requestedRam) {
+        const hasRam = fullText.includes(requestedRam) ||
+          fullText.includes(requestedRam.replace('gb', ' gb')) ||
+          features.some((f: string) => f.includes(requestedRam) || f.includes(requestedRam.replace('gb', ' gb')));
+        if (hasRam) {
+          score += 40;
+          matchReasons.push(`verified ${requestedRam.toUpperCase()} RAM specification`);
+        } else if (rawQueryLower.includes('ram')) {
+          score -= 15;
+        }
+      }
+
+      // E. Storage matches
+      if (requestedStorage) {
+        const hasStorage = fullText.includes(requestedStorage) ||
+          fullText.includes(requestedStorage.replace('tb', ' tb').replace('gb', ' gb'));
+        if (hasStorage) {
+          score += 30;
+          matchReasons.push(`matches ${requestedStorage.toUpperCase()} storage`);
+        }
+      }
+
+      // F. Water Resistance matches
+      if (wantsWaterResistant) {
+        const isWaterResistant = fullText.includes('water') ||
+          fullText.includes('water-repellent') ||
+          fullText.includes('spill-resistant') ||
+          fullText.includes('aquaguard') ||
+          fullText.includes('5 atm');
+        if (isWaterResistant) {
+          score += 35;
+          matchReasons.push('water-resistant build');
+        }
+      }
+
+      // G. Budget constraint scoring
+      if (maxBudgetPaise !== null) {
+        if (p.price <= maxBudgetPaise) {
+          score += 35;
+          matchReasons.push(`within budget (₹${(p.price / 100).toLocaleString('en-IN')})`);
+        } else {
+          score -= 50; // heavily penalize exceeding user budget
+        }
+      }
+
+      // H. Modifiers: Cheapest vs Premium
+      if (wantsCheapest && score > 0) {
+        score += Math.max(0, 30 - Math.floor(p.price / 100000));
+        matchReasons.push('competitive price point');
+      }
+      if (wantsPremium && score > 0) {
+        score += Math.min(30, Math.floor(p.price / 100000) * 5);
+        if (p.price > 500000) matchReasons.push('flagship performance tier');
+      }
+
+      // Generate explainable reasoning
+      let reasoning = '';
+      if (score > 0) {
+        if (matchReasons.length === 0) {
+          if (nameLower.includes(rawQueryLower) || queryTokens.some((t) => nameLower.includes(t))) {
+            matchReasons.push('matches your keywords');
+          }
+          if (p.features && p.features.length > 0) {
+            matchReasons.push(`includes ${p.features[0]}`);
+          }
+        }
+        reasoning = matchReasons.length > 0
+          ? matchReasons.join(' • ')
+          : 'Catalog match based on specifications and relevance';
+      }
+
+      return {
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        description: p.description,
+        features: p.features || [],
+        category: p.category,
+        score,
+        reasoning: reasoning.charAt(0).toUpperCase() + reasoning.slice(1),
+      };
+    });
+
+    // 5. Filter and rank with query-length relevance threshold
+    const minScore = queryTokens.length >= 3 ? 20 : 10;
+    const matchingProducts = scoredProducts
+      .filter((p) => p.score >= minScore)
+      .sort((a, b) => b.score - a.score);
+
+    const summary = matchingProducts.length > 0
+      ? `Found ${matchingProducts.length} product${matchingProducts.length > 1 ? 's' : ''} in the merchant catalog matching "${query}". Top recommendation: ${matchingProducts[0].name} at ₹${(matchingProducts[0].price / 100).toLocaleString('en-IN')}.`
+      : `No products found matching "${query}". Try a different search term or explore categories like Computers, Footwear, or Accessories.`;
+
+    return {
+      products: matchingProducts,
+      summary,
+    };
+  }
+
+  // ─── xAI Grok / Groq Integration ──────────────────────────
 
   private static async generateWithGrok(params: {
     apiKey: string;
@@ -254,7 +448,7 @@ export class AIEngine {
     }));
 
     const prompt = `
-You are the Revolve AI Growth Engine powered by xAI Grok.
+You are the Revolve AI Revenue Growth Engine powered by xAI Grok / Groq.
 Analyze the following merchant catalog and historical order records to generate high-ROI revenue recommendations.
 
 Focus Area: ${focusArea}
@@ -284,7 +478,7 @@ Each recommendation object MUST have the following structure:
       ? 'https://api.groq.com/openai/v1/chat/completions'
       : 'https://api.x.ai/v1/chat/completions';
     const effectiveModel = isGroq
-      ? (model.startsWith('grok') ? 'openai/gpt-oss-120b' : model)
+      ? (model.startsWith('grok') ? 'llama-3.3-70b-versatile' : model)
       : model;
 
     const res = await fetch(endpoint, {
@@ -347,7 +541,7 @@ Each recommendation object MUST have the following structure:
       ? 'https://api.groq.com/openai/v1/chat/completions'
       : 'https://api.x.ai/v1/chat/completions';
     const effectiveModel = isGroq
-      ? (model.startsWith('grok') ? 'openai/gpt-oss-120b' : model)
+      ? (model.startsWith('grok') ? 'llama-3.3-70b-versatile' : model)
       : model;
 
     const res = await fetch(endpoint, {
@@ -397,14 +591,14 @@ Each recommendation object MUST have the following structure:
           features: p.features,
           category: p.category,
           score: 100 - index * 10,
-          reasoning: content.reasons?.[id] || 'Matched by Grok semantic analysis',
+          reasoning: content.reasons?.[id] || 'Matched by AI semantic analysis',
         };
       })
       .filter(Boolean) as any[];
 
     return {
       products: matchedProducts,
-      summary: content.summary || `Grok found ${matchedProducts.length} matching items for "${query}".`,
+      summary: content.summary || `AI found ${matchedProducts.length} matching items for "${query}".`,
     };
   }
 

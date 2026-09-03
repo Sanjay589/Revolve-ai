@@ -15,9 +15,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       secondary: 'btn-outline',
       outline: 'btn-outline',
       fintech: 'btn-fintech',
-      ai: 'badge-ai',
-      success: 'badge-fintech',
-      danger: 'btn-primary',
+      ai: 'btn-ai',
+      success: 'btn-success',
+      danger: 'btn-danger',
       ghost: 'btn-ghost',
     }[variant];
 
@@ -35,7 +35,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn('btn', variantClass, sizeClass, className)}
         {...props}
       >
-        {isLoading && <Loader2 className="animate-spin" size={16} />}
+        {isLoading && <Loader2 className="animate-spin mr-1.5" size={14} />}
         {children}
       </button>
     );

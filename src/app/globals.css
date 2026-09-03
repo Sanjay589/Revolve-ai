@@ -8,9 +8,9 @@
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  --font-heading: 'Sora', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-heading: var(--font-sora), 'Sora', system-ui, sans-serif;
+  --font-body: var(--font-inter), 'Inter', system-ui, sans-serif;
+  --font-mono: var(--font-mono), 'JetBrains Mono', monospace;
 
   /* ── 1. Surfaces (Light Mode Primary) ─────────────────── */
   --bg-canvas: #F7F8FA;
@@ -359,6 +359,16 @@ h1, h2, h3, h4, h5, h6, .font-heading { font-family: var(--font-heading); letter
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: 20px 24px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.card-interactive {
+  cursor: pointer;
+}
+.card-interactive:hover {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .card-compact {
@@ -370,6 +380,32 @@ h1, h2, h3, h4, h5, h6, .font-heading { font-family: var(--font-heading); letter
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
+}
+
+.card-elevated {
+  box-shadow: var(--shadow-md);
+}
+
+.card-featured {
+  border-color: var(--ai-border);
+  background: linear-gradient(145deg, var(--bg-secondary) 0%, var(--ai-bg) 100%);
+}
+
+.card-ai {
+  border-color: var(--ai-border);
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(238, 242, 255, 0.4) 100%);
+}
+
+.card-success {
+  border-color: var(--success-border);
+}
+
+.card-warning {
+  border-color: var(--warning-border);
+}
+
+.card-danger {
+  border-color: var(--error-border);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -440,6 +476,14 @@ h1, h2, h3, h4, h5, h6, .font-heading { font-family: var(--font-heading); letter
 }
 .btn-fintech:hover, .btn-success:hover { background: #047857; }
 
+/* Danger / Destructive Action: Red */
+.btn-danger {
+  background: var(--error);
+  color: #ffffff;
+  border-color: var(--error);
+}
+.btn-danger:hover { background: #B91C1C; }
+
 /* Secondary Action: White background with subtle border */
 .btn-outline {
   background: var(--bg-secondary);
@@ -459,14 +503,30 @@ h1, h2, h3, h4, h5, h6, .font-heading { font-family: var(--font-heading); letter
   background: var(--bg-hover);
 }
 
-.btn-sm { padding: 5px 10px; font-size: 0.75rem; border-radius: var(--radius-sm); }
-.btn-lg { padding: 10px 20px; font-size: 0.9375rem; border-radius: var(--radius-md); }
+.btn:active {
+  transform: scale(0.98);
+}
+
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.btn-sm { padding: 5px 12px; font-size: 0.75rem; border-radius: var(--radius-sm); }
+.btn-lg { padding: 12px 24px; font-size: 0.9375rem; border-radius: var(--radius-md); }
 
 .btn-icon {
-  width: 34px; height: 34px; padding: 0;
+  width: 36px; height: 36px; padding: 0;
   border-radius: var(--radius-md);
   display: flex; align-items: center; justify-content: center;
+  min-width: 36px; min-height: 36px;
 }
+
 
 /* ═══════════════════════════════════════════════════════════
    AI COMMAND BAR
@@ -639,4 +699,138 @@ h1, h2, h3, h4, h5, h6, .font-heading { font-family: var(--font-heading); letter
   0% { opacity: 0.5; }
   50% { opacity: 1; }
   100% { opacity: 0.5; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FLOATING COMMERCE OBJECT MOTION SYSTEM
+   ═══════════════════════════════════════════════════════════ */
+
+.floating-commerce-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes floatOrganic1 {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  25% { transform: translate3d(14px, -24px, 0) rotate(4deg); }
+  50% { transform: translate3d(-10px, -48px, 0) rotate(-3deg); }
+  75% { transform: translate3d(16px, -20px, 0) rotate(2deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+}
+
+@keyframes floatOrganic2 {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  33% { transform: translate3d(-18px, 22px, 0) rotate(-5deg); }
+  66% { transform: translate3d(16px, 40px, 0) rotate(4deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+}
+
+@keyframes floatOrganic3 {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(24px, -36px, 0) rotate(6deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+}
+
+@keyframes floatOrganic4 {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  35% { transform: translate3d(-12px, -30px, 0) rotate(-6deg); }
+  70% { transform: translate3d(18px, -15px, 0) rotate(3deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+}
+
+.anim-float-1 { animation: floatOrganic1 14s ease-in-out infinite; }
+.anim-float-2 { animation: floatOrganic2 18s ease-in-out infinite; }
+.anim-float-3 { animation: floatOrganic3 22s ease-in-out infinite; }
+.anim-float-4 { animation: floatOrganic4 26s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-commerce-wrapper * {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   1C. FLOATING VALUE TREATMENT FOR MONETARY FIGURES
+   ═══════════════════════════════════════════════════════════ */
+
+.value-float {
+  display: inline-block;
+  position: relative;
+  z-index: 2;
+  transform: translateZ(0);
+  /* Stacked multi-stop shadow: tight dark occlusion + wide diffuse ambient glow */
+  text-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.14),
+    0 4px 12px rgba(15, 23, 42, 0.08),
+    0 12px 28px rgba(99, 102, 241, 0.14);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.04));
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              text-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, text-shadow;
+}
+
+/* Hover lift on parent card or on value itself */
+.card:hover .value-float,
+.editorial-card:hover .value-float,
+.card-interactive:hover .value-float,
+.value-float:hover {
+  transform: translateY(-2.5px);
+  text-shadow:
+    0 2px 3px rgba(15, 23, 42, 0.18),
+    0 8px 18px rgba(15, 23, 42, 0.10),
+    0 16px 36px rgba(99, 102, 241, 0.22);
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.07));
+}
+
+/* Companion floating element (trend %, sparkline, badge) offset slightly */
+.companion-float {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  transform: translateZ(0);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 4px 10px rgba(0, 0, 0, 0.03);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card:hover .companion-float,
+.editorial-card:hover .companion-float {
+  transform: translateY(-1.5px) translateX(1px);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Static layered-shadow appearance on mobile (no hover jumps on touch) */
+@media (max-width: 768px) {
+  .card:hover .value-float,
+  .editorial-card:hover .value-float,
+  .value-float:hover,
+  .card:hover .companion-float,
+  .editorial-card:hover .companion-float {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .value-float,
+  .companion-float {
+    transition: none !important;
+    transform: none !important;
+  }
+  .card:hover .value-float,
+  .editorial-card:hover .value-float,
+  .value-float:hover,
+  .card:hover .companion-float,
+  .editorial-card:hover .companion-float {
+    transform: none !important;
+  }
 }

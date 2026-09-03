@@ -8,7 +8,10 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:migrate": "prisma migrate deploy",
+    "db:export": "npx tsx scratch/export_database.ts",
+    "db:import": "npx tsx scratch/import_to_render.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

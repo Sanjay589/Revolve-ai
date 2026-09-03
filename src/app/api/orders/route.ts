@@ -30,9 +30,24 @@ export async function POST(req: Request) {
     }
 
     const requestId = generateRequestId();
+    console.log('[Server][Step 1 - Order Creation Request]', {
+      merchantId: session.merchantId,
+      productId: validated.data.productId,
+      quantity: validated.data.quantity,
+      customerEmail: validated.data.customerEmail,
+      requestId,
+    });
+
     const result = await PaymentService.createOrder({
       merchantId: session.merchantId,
       ...validated.data,
+    });
+
+    console.log('[Server][Step 1 - Order Created Successfully]', {
+      orderId: result.order.id,
+      razorpayOrderId: result.razorpayOrderId,
+      amount: result.amount,
+      alreadyExists: result.alreadyExists,
     });
 
     if (!result.alreadyExists) {
@@ -60,6 +75,7 @@ export async function POST(req: Request) {
       requestId,
     }, { status: result.alreadyExists ? 200 : 201 });
   } catch (error) {
+    console.error('[Server][Step 1 - Order Creation Failed]', error);
     if (error instanceof Error && error.name === 'AuthError') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }

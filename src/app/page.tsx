@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
 import { formatCurrency } from '@/lib/utils';
 
 export default function LandingPage() {
@@ -59,17 +60,31 @@ export default function LandingPage() {
     }, 400);
   };
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navigateToDemoTab = (tab: 'overview' | 'scanner' | 'explain' | 'policy' | 'ledger' | 'buyer', targetId: string = 'product-tour') => {
+    setActiveDemoTab(tab);
+    setMobileMenuOpen(false);
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div style={{ background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)', overflowX: 'hidden' }}>
+    <div style={{ position: 'relative', background: 'var(--bg-primary)', minHeight: '100vh', color: 'var(--text-primary)', overflowX: 'hidden' }}>
+      {/* Floating Organic Digital Commerce Objects (Parallax / Depth) */}
+      <FloatingCommerceObjects intensity="landing" />
+
       {/* ─── Top Brand Navigation ────────────────────────────── */}
       <nav style={{
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        background: 'rgba(248, 249, 250, 0.88)',
+        background: 'rgba(248, 249, 250, 0.92)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--border-primary)',
-        padding: '16px 32px',
+        padding: '14px 24px',
       }}>
         <div style={{
           maxWidth: 1320,
@@ -105,14 +120,40 @@ export default function LandingPage() {
           </Link>
 
           <div style={{ display: 'none', alignItems: 'center', gap: 24, fontSize: '0.875rem', fontWeight: 500 }} className="md:flex">
-            <a href="#product-tour" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Product Tour</a>
-            <a href="#pipeline" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Safety Pipeline</a>
-            <a href="#explainability" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>AI Explainability</a>
-            <a href="#policy-engine" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Policy Engine</a>
-            <a href="#agentic-buyer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>AI Buyer</a>
+            <button
+              type="button"
+              onClick={() => navigateToDemoTab('overview', 'product-tour')}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}
+            >
+              Product Tour
+            </button>
+            <a href="#pipeline" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>
+              Safety Pipeline
+            </a>
+            <button
+              type="button"
+              onClick={() => navigateToDemoTab('explain', 'explainability')}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}
+            >
+              AI Explainability
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateToDemoTab('policy', 'policy-engine')}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}
+            >
+              Policy Engine
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateToDemoTab('buyer', 'agentic-buyer')}
+              style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500 }}
+            >
+              AI Buyer
+            </button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Link href="/login" className="btn btn-outline btn-sm">
               Sign In
             </Link>
@@ -120,8 +161,65 @@ export default function LandingPage() {
               <span>Launch Workspace</span>
               <ArrowRight size={14} />
             </Link>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle Navigation Menu"
+              style={{ padding: '6px' }}
+            >
+              <Activity size={18} />
+            </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div style={{
+            padding: '14px 0 6px',
+            borderTop: '1px solid var(--border-primary)',
+            marginTop: 12,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+          }}>
+            <button
+              type="button"
+              onClick={() => navigateToDemoTab('overview', 'product-tour')}
+              style={{ background: 'none', border: 'none', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 500, padding: '4px 0' }}
+            >
+              Product Tour
+            </button>
+            <a
+              href="#pipeline"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, padding: '4px 0' }}
+            >
+              Safety Pipeline
+            </a>
+            <button
+              type="button"
+              onClick={() => navigateToDemoTab('explain', 'explainability')}
+              style={{ background: 'none', border: 'none', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 500, padding: '4px 0' }}
+            >
+              AI Explainability
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateToDemoTab('policy', 'policy-engine')}
+              style={{ background: 'none', border: 'none', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 500, padding: '4px 0' }}
+            >
+              Policy Engine
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateToDemoTab('buyer', 'agentic-buyer')}
+              style={{ background: 'none', border: 'none', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 500, padding: '4px 0' }}
+            >
+              AI Buyer
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* ─── 01. HERO SECTION ────────────────────────────────── */}
@@ -247,13 +345,17 @@ export default function LandingPage() {
         </div>
 
         {/* Tab Selector */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: 8,
-          marginBottom: 20,
-          flexWrap: 'wrap',
-        }}>
+        <div
+          role="tablist"
+          aria-label="Interactive Product Simulation Stages"
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 8,
+            marginBottom: 20,
+            flexWrap: 'wrap',
+          }}
+        >
           {[
             { id: 'overview', label: '1. Dashboard Overview', icon: Activity },
             { id: 'scanner', label: '2. AI Opportunity Scanner', icon: Brain },
@@ -267,6 +369,10 @@ export default function LandingPage() {
             return (
               <button
                 key={tab.id}
+                role="tab"
+                id={`demo-tab-${tab.id}`}
+                aria-controls={`demo-panel-${tab.id}`}
+                aria-selected={isActive}
                 onClick={() => setActiveDemoTab(tab.id as any)}
                 type="button"
                 style={{
@@ -329,6 +435,9 @@ export default function LandingPage() {
               {activeDemoTab === 'overview' && (
                 <motion.div
                   key="overview"
+                  id="demo-panel-overview"
+                  role="tabpanel"
+                  aria-labelledby="demo-tab-overview"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -353,7 +462,7 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
                     <div className="editorial-card" style={{ padding: '16px' }}>
                       <div className="stat-label">Gross Volume</div>
                       <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 700 }}>₹42,85,000</div>
@@ -378,11 +487,14 @@ export default function LandingPage() {
               {activeDemoTab === 'scanner' && (
                 <motion.div
                   key="scanner"
+                  id="demo-panel-scanner"
+                  role="tabpanel"
+                  aria-labelledby="demo-tab-scanner"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}
+                  style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}
                 >
                   <div className="editorial-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -436,12 +548,15 @@ export default function LandingPage() {
               {activeDemoTab === 'explain' && (
                 <motion.div
                   key="explain"
+                  id="explainability"
+                  role="tabpanel"
+                  aria-labelledby="demo-tab-explain"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   className="editorial-card"
-                  style={{ padding: '24px' }}
+                  style={{ padding: '24px', scrollMarginTop: 100 }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <div>
@@ -453,7 +568,7 @@ export default function LandingPage() {
                     <span className="badge badge-fintech" style={{ padding: '6px 12px' }}>82% AI Confidence Score</span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 20 }}>
                     <div style={{ background: 'var(--bg-tertiary)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
                       <div className="stat-label">Expected Monthly Gain</div>
                       <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>+₹6,79,992</div>
@@ -490,12 +605,15 @@ export default function LandingPage() {
               {activeDemoTab === 'policy' && (
                 <motion.div
                   key="policy"
+                  id="policy-engine"
+                  role="tabpanel"
+                  aria-labelledby="demo-tab-policy"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   className="editorial-card"
-                  style={{ padding: '24px' }}
+                  style={{ padding: '24px', scrollMarginTop: 100 }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <div>
@@ -507,7 +625,7 @@ export default function LandingPage() {
                     <span className="badge badge-fintech">All 4 Gates Verified ✓</span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
                     <div style={{ padding: '14px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-secondary)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: '0.875rem', color: 'var(--success)' }}>
                         <CheckCircle2 size={16} /> Maximum Transaction Limit
@@ -551,6 +669,9 @@ export default function LandingPage() {
               {activeDemoTab === 'ledger' && (
                 <motion.div
                   key="ledger"
+                  id="demo-panel-ledger"
+                  role="tabpanel"
+                  aria-labelledby="demo-tab-ledger"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -561,33 +682,35 @@ export default function LandingPage() {
                   <div style={{ padding: '16px 20px', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-primary)' }}>
                     <span className="badge badge-fintech"><Lock size={12} /> RAZORPAY TEST MODE LEDGER &amp; HMAC AUDIT</span>
                   </div>
-                  <table className="editorial-table">
-                    <thead>
-                      <tr>
-                        <th>Razorpay Order ID</th>
-                        <th>Amount</th>
-                        <th>Signature Verification</th>
-                        <th>Webhook Status</th>
-                        <th>Ledger Commit</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="font-mono">order_TX6oxexSYw2Vvh</td>
-                        <td className="font-mono font-bold">₹4,499.00</td>
-                        <td><span className="badge badge-fintech"><CheckCircle2 size={11} /> HMAC-SHA256 Valid</span></td>
-                        <td><span className="badge badge-fintech">Confirmed ✓</span></td>
-                        <td><span className="badge badge-neutral">IMMUTABLE LOGGED</span></td>
-                      </tr>
-                      <tr>
-                        <td className="font-mono">order_88K2laox109vla</td>
-                        <td className="font-mono font-bold">₹8,999.00</td>
-                        <td><span className="badge badge-fintech"><CheckCircle2 size={11} /> HMAC-SHA256 Valid</span></td>
-                        <td><span className="badge badge-fintech">Confirmed ✓</span></td>
-                        <td><span className="badge badge-neutral">IMMUTABLE LOGGED</span></td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table className="editorial-table">
+                      <thead>
+                        <tr>
+                          <th>Razorpay Order ID</th>
+                          <th>Amount</th>
+                          <th>Signature Verification</th>
+                          <th>Webhook Status</th>
+                          <th>Ledger Commit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="font-mono">order_TX6oxexSYw2Vvh</td>
+                          <td className="font-mono font-bold">₹4,499.00</td>
+                          <td><span className="badge badge-fintech"><CheckCircle2 size={11} /> HMAC-SHA256 Valid</span></td>
+                          <td><span className="badge badge-fintech">Confirmed ✓</span></td>
+                          <td><span className="badge badge-neutral">IMMUTABLE LOGGED</span></td>
+                        </tr>
+                        <tr>
+                          <td className="font-mono">order_88K2laox109vla</td>
+                          <td className="font-mono font-bold">₹8,999.00</td>
+                          <td><span className="badge badge-fintech"><CheckCircle2 size={11} /> HMAC-SHA256 Valid</span></td>
+                          <td><span className="badge badge-fintech">Confirmed ✓</span></td>
+                          <td><span className="badge badge-neutral">IMMUTABLE LOGGED</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </motion.div>
               )}
 
@@ -595,12 +718,15 @@ export default function LandingPage() {
               {activeDemoTab === 'buyer' && (
                 <motion.div
                   key="buyer"
+                  id="agentic-buyer"
+                  role="tabpanel"
+                  aria-labelledby="demo-tab-buyer"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                   className="editorial-card"
-                  style={{ padding: '24px' }}
+                  style={{ padding: '24px', scrollMarginTop: 100 }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <div>
@@ -641,11 +767,39 @@ export default function LandingPage() {
                     >
                       💻 Travel laptop accessories
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRunBuyerPrompt(
+                        'Noise-cancelling gym headphones',
+                        'Apex SonicPro Hybrid ANC Earbuds',
+                        349900,
+                        'IPX7 sweatproof wireless earbuds with active noise cancellation and secure ergonomic ear hooks.',
+                        ['Active Noise Cancellation', 'IPX7 Sweatproof', '32h Total Battery']
+                      )}
+                      className="command-chip"
+                      style={{ background: activeBuyerPrompt.includes('headphones') ? 'var(--text-primary)' : 'var(--bg-tertiary)', color: activeBuyerPrompt.includes('headphones') ? 'white' : 'var(--text-secondary)' }}
+                    >
+                      🎧 Gym ANC headphones
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRunBuyerPrompt(
+                        'Ergonomic desk mat and wrist rest',
+                        'Apex Glide Pro Desk Mat & Wrist Rest',
+                        129900,
+                        'High-density memory foam wrist support with stitched edges and water-repellent vegan leather finish.',
+                        ['Ergonomic Memory Foam', 'Water-Repellent Surface', 'Non-Slip Rubber Base']
+                      )}
+                      className="command-chip"
+                      style={{ background: activeBuyerPrompt.includes('desk') ? 'var(--text-primary)' : 'var(--bg-tertiary)', color: activeBuyerPrompt.includes('desk') ? 'white' : 'var(--text-secondary)' }}
+                    >
+                      ⌨️ Ergonomic desk bundle
+                    </button>
                   </div>
 
                   {/* Result Card */}
                   <div style={{ padding: '18px', background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-lg)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
                       <div>
                         <span className="badge badge-neutral" style={{ fontSize: '0.6875rem', marginBottom: 6 }}>AI MATCHED PRODUCT</span>
                         <h4 className="font-heading" style={{ fontSize: '1.0625rem', fontWeight: 700 }}>{buyerResult.title}</h4>

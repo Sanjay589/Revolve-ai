@@ -250,39 +250,103 @@ export class PaymentService {
   }
 
   /**
-   * Handle Razorpay timeout: set EXECUTION_UNKNOWN and attempt to resolve.
+   * Handle Razorpay timeout / reconcile order: resolve EXECUTION_UNKNOWN via live Razorpay queries.
    */
   static async handleTimeout(orderId: string, merchantId: string) {
     const order = await prisma.order.findFirst({
       where: { id: orderId, merchantId },
-      include: { payments: true },
+      include: { payments: true, items: true },
     });
 
     if (!order) return null;
 
-    // If already in a terminal state, return as-is
-    if (['PAID', 'FAILED', 'CANCELLED'].includes(order.status)) {
-      return order;
+    // If already in a terminal state and paid, return as-is
+    if (order.status === 'PAID') {
+      return { order, resolved: true, status: 'PAID' };
     }
 
-    // Try to fetch order status from Razorpay
+    if (!order.razorpayOrderId) {
+      return { order, resolved: false, status: order.status, message: 'No Razorpay order ID found' };
+    }
+
+    // Try to fetch order and payments status directly from Razorpay
     try {
       const razorpay = await getRazorpay();
-      if (order.razorpayOrderId) {
-        const rzpOrder = await razorpay.orders.fetch(order.razorpayOrderId);
-        if (rzpOrder.status === 'paid') {
-          await prisma.order.update({
+      const rzpOrder = await razorpay.orders.fetch(order.razorpayOrderId);
+      const rzpPayments = await razorpay.orders.fetchPayments(order.razorpayOrderId);
+      
+      const capturedPayment = rzpPayments.items?.find((p: any) => p.status === 'captured');
+
+      if (rzpOrder.status === 'paid' || capturedPayment) {
+        // Resolve to PAID
+        await prisma.$transaction(async (tx) => {
+          await tx.order.update({
             where: { id: order.id },
             data: { status: 'PAID' },
           });
-          return { ...order, status: 'PAID' as const };
-        }
-      }
-    } catch {
-      // Can't verify — leave in unknown state
-    }
 
-    return order;
+          if (capturedPayment) {
+            await tx.payment.upsert({
+              where: { razorpayPaymentId: capturedPayment.id },
+              create: {
+                merchantId,
+                orderId: order.id,
+                razorpayPaymentId: capturedPayment.id,
+                razorpayOrderId: order.razorpayOrderId!,
+                status: 'CAPTURED',
+                amount: Number(capturedPayment.amount),
+                currency: (capturedPayment.currency as string) || 'INR',
+                method: (capturedPayment.method as string) || undefined,
+                verifiedAt: new Date(),
+              },
+              update: {
+                status: 'CAPTURED',
+                verifiedAt: new Date(),
+              },
+            });
+          }
+
+          // If linked to an AI action, update action status to SUCCESS
+          if (order.aiActionId) {
+            await tx.aIAgentAction.updateMany({
+              where: { id: order.aiActionId },
+              data: { status: 'SUCCESS' },
+            });
+          }
+
+          // Immutable audit record
+          await tx.auditEvent.create({
+            data: {
+              merchantId,
+              actor: 'system:payment_reconciler',
+              action: 'EXECUTION_UNKNOWN_RESOLVED',
+              entity: 'Order',
+              entityId: order.id,
+              metadata: {
+                orderId: order.id,
+                razorpayOrderId: order.razorpayOrderId,
+                paymentId: capturedPayment?.id,
+                reconciliationMethod: 'live_razorpay_query',
+              },
+            },
+          });
+        });
+
+        const updated = await prisma.order.findUnique({
+          where: { id: order.id },
+          include: { payments: true },
+        });
+
+        return { order: updated, resolved: true, status: 'PAID' };
+      } else if (rzpOrder.status === 'attempted' && (!rzpPayments.items || rzpPayments.items.length === 0)) {
+        return { order, resolved: false, status: 'ATTEMPTED', message: 'Payment attempted by buyer; waiting for Razorpay webhook or customer action' };
+      } else {
+        return { order, resolved: false, status: order.status, message: `Razorpay status is '${rzpOrder.status}'; payment not captured yet` };
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Razorpay API query failed';
+      return { order, resolved: false, status: order.status, error: msg };
+    }
   }
 }
 

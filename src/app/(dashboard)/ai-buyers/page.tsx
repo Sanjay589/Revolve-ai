@@ -16,6 +16,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckoutModal } from '@/components/checkout-modal';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
 import { formatCurrency } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 
@@ -99,7 +100,9 @@ export default function AIBuyersPage() {
   };
 
   return (
-    <>
+    <div className="relative">
+      <FloatingCommerceObjects intensity="ai" />
+
       {/* ── Page Header ────────────────────────────────────── */}
       <PageHeader
         badgeText="AGENTIC COMMERCE"
@@ -330,6 +333,6 @@ export default function AIBuyersPage() {
           }}
         />
       )}
-    </>
+    </div>
   );
 }

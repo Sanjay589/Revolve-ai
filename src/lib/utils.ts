@@ -96,3 +96,61 @@ export function percentageChange(current: number, previous: number): number {
   if (previous === 0) return current > 0 ? 100 : 0;
   return ((current - previous) / previous) * 100;
 }
+
+export interface StructuredErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    requestId?: string;
+    details?: unknown;
+  };
+}
+
+export function formatStructuredError(
+  code: string,
+  message: string,
+  requestId?: string,
+  details?: unknown
+): StructuredErrorResponse {
+  return {
+    success: false,
+    error: {
+      code,
+      message,
+      requestId: requestId || generateRequestId(),
+      details: details ? details : undefined,
+    },
+  };
+}
+
+export function safeLog(
+  level: 'info' | 'warn' | 'error',
+  message: string,
+  meta?: Record<string, unknown>
+) {
+  const sanitizedMeta = meta ? { ...meta } : {};
+  // Strip sensitive credentials if present
+  delete sanitizedMeta.password;
+  delete sanitizedMeta.passwordHash;
+  delete sanitizedMeta.secret;
+  delete sanitizedMeta.keySecret;
+  delete sanitizedMeta.token;
+  delete sanitizedMeta.apiKey;
+
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    level,
+    message,
+    ...sanitizedMeta,
+  };
+
+  if (level === 'error') {
+    console.error(JSON.stringify(logEntry));
+  } else if (level === 'warn') {
+    console.warn(JSON.stringify(logEntry));
+  } else {
+    console.log(JSON.stringify(logEntry));
+  }
+}
+

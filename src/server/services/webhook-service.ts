@@ -18,10 +18,14 @@ export class WebhookService {
       .update(rawBody)
       .digest('hex');
 
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    );
+    const sigBuf = Buffer.from(signature, 'hex');
+    const expBuf = Buffer.from(expectedSignature, 'hex');
+
+    if (sigBuf.length === 0 || sigBuf.length !== expBuf.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(sigBuf, expBuf);
   }
 
   /**
@@ -137,6 +141,22 @@ export class WebhookService {
         await tx.order.update({
           where: { id: order.id },
           data: { status: 'PAID' },
+        });
+
+        // Immutable append-only audit entry
+        await tx.auditEvent.create({
+          data: {
+            merchantId: order.merchantId,
+            actor: 'system:webhook',
+            action: 'WEBHOOK_PAYMENT_CAPTURED',
+            entity: 'Order',
+            entityId: order.id,
+            metadata: {
+              razorpayPaymentId,
+              razorpayOrderId,
+              method,
+            },
+          },
         });
       }
     });

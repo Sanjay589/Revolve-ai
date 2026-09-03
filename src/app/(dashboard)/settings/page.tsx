@@ -5,6 +5,7 @@ import { Sliders, Shield, Save, CheckCircle2, Lock } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/form';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
 import { useToast } from '@/components/ui/toast';
 
 export default function SettingsPage() {
@@ -20,16 +21,16 @@ export default function SettingsPage() {
   useEffect(() => {
     const fetchPolicy = async () => {
       try {
-        const res = await fetch('/api/policies');
+        const res = await fetch('/api/settings/policies');
         if (res.ok) {
           const data = await res.json();
           const p = data.policy;
           if (p) {
-            setMaxTxRupees((p.maxAutoExecuteAmount / 100).toString());
-            setDailySpendRupees((p.maxDailyBudget / 100).toString());
-            setMaxBudgetRupees((p.maxCampaignBudget / 100).toString());
-            setMaxDiscount(p.maxDiscountPercent.toString());
-            setRequireApproval(p.requireApprovalForHighRisk);
+            setMaxTxRupees((p.maximumTransactionAmount / 100).toString());
+            setDailySpendRupees((p.dailySpendLimit / 100).toString());
+            setMaxBudgetRupees((p.maximumCampaignBudget / 100).toString());
+            setMaxDiscount(p.maximumDiscountPercentage.toString());
+            setRequireApproval(p.requireMerchantApproval);
           }
         }
       } catch {
@@ -48,20 +49,23 @@ export default function SettingsPage() {
 
     try {
       const payload = {
-        maxAutoExecuteAmount: Math.round(parseFloat(maxTxRupees) * 100),
-        maxDailyBudget: Math.round(parseFloat(dailySpendRupees) * 100),
-        maxCampaignBudget: Math.round(parseFloat(maxBudgetRupees) * 100),
-        maxDiscountPercent: parseFloat(maxDiscount),
-        requireApprovalForHighRisk: requireApproval,
+        maximumTransactionAmount: Math.round(parseFloat(maxTxRupees) * 100),
+        dailySpendLimit: Math.round(parseFloat(dailySpendRupees) * 100),
+        maximumCampaignBudget: Math.round(parseFloat(maxBudgetRupees) * 100),
+        maximumDiscountPercentage: parseFloat(maxDiscount),
+        requireMerchantApproval: requireApproval,
       };
 
-      const res = await fetch('/api/policies', {
-        method: 'PUT',
+      const res = await fetch('/api/settings/policies', {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error('Failed to update policies');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to update policies');
+      }
 
       success('Policy Updated', 'Guardrails actively enforced on all AI actions.');
     } catch (err: unknown) {
@@ -72,7 +76,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <>
+    <div className="relative">
+      <FloatingCommerceObjects intensity="minimal" />
+
       {/* ── Page Header ────────────────────────────────────── */}
       <PageHeader
         badgeText="CONTROLS &amp; POLICIES"
@@ -169,6 +175,6 @@ export default function SettingsPage() {
           </div>
         </form>
       </div>
-    </>
+    </div>
   );
 }

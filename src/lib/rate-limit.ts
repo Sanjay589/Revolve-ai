@@ -1,5 +1,5 @@
-// In-memory token bucket rate limiter
-// Suitable for single-instance deployments; use Redis for multi-instance
+// In-memory token bucket rate limiter with multi-tenant / multi-user isolation
+// Suitable for single-instance / local deployments; uses isolated buckets
 
 interface RateLimitEntry {
   tokens: number;
@@ -8,8 +8,8 @@ interface RateLimitEntry {
 
 interface RateLimitConfig {
   maxTokens: number;      // max requests in window
-  refillRate: number;      // tokens per second
-  windowMs?: number;       // cleanup interval
+  refillRate: number;     // tokens per second
+  windowMs?: number;      // cleanup interval
 }
 
 const stores = new Map<string, Map<string, RateLimitEntry>>();
@@ -25,15 +25,19 @@ export function createRateLimiter(name: string, config: RateLimitConfig) {
   const { maxTokens, refillRate } = config;
   const store = getStore(name);
 
-  // Periodic cleanup of old entries
-  setInterval(() => {
+  // Periodic cleanup of old entries with unref to prevent test hangs
+  const cleanupTimer = setInterval(() => {
     const now = Date.now();
     for (const [key, entry] of store.entries()) {
       if (now - entry.lastRefill > 300_000) { // 5 minutes
         store.delete(key);
       }
     }
-  }, 60_000); // every minute
+  }, 60_000);
+
+  if (typeof cleanupTimer.unref === 'function') {
+    cleanupTimer.unref();
+  }
 
   return {
     check(identifier: string): { allowed: boolean; remaining: number; retryAfter?: number } {
@@ -61,29 +65,42 @@ export function createRateLimiter(name: string, config: RateLimitConfig) {
   };
 }
 
-// Pre-configured rate limiters
+// Pre-configured rate limiters sized for realistic multi-user concurrent traffic
 export const authLimiter = createRateLimiter('auth', {
-  maxTokens: 10,    // 10 attempts
-  refillRate: 0.1,  // 1 token per 10 seconds
+  maxTokens: 30,    // 30 attempts per bucket
+  refillRate: 0.5,  // Refills 1 token every 2 seconds
 });
 
 export const aiLimiter = createRateLimiter('ai', {
+  maxTokens: 60,
+  refillRate: 1.0,
+});
+
+export const paymentLimiter = createRateLimiter('payment', {
   maxTokens: 20,
   refillRate: 0.5,
 });
 
-export const paymentLimiter = createRateLimiter('payment', {
-  maxTokens: 5,
-  refillRate: 0.2,
-});
-
 export const webhookLimiter = createRateLimiter('webhook', {
-  maxTokens: 100,
-  refillRate: 10,
+  maxTokens: 200,
+  refillRate: 20,
 });
 
 export function getRateLimitIdentifier(req: Request): string {
+  // Extract client IP with multi-proxy fallback
   const forwarded = req.headers.get('x-forwarded-for');
-  const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-  return ip;
+  const realIp = req.headers.get('x-real-ip');
+  const cfIp = req.headers.get('cf-connecting-ip');
+  const ip = forwarded?.split(',')[0]?.trim() || realIp || cfIp || '127.0.0.1';
+
+  // Extract auth/session token to isolate authenticated users on the same IP/NAT
+  const authHeader = req.headers.get('authorization') || '';
+  const cookieHeader = req.headers.get('cookie') || '';
+  const sessionMatch = cookieHeader.match(/revolve_session=([^;]+)/);
+  const sessionToken = sessionMatch ? sessionMatch[1].slice(-16) : '';
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(-16) : '';
+
+  const userContext = sessionToken || bearerToken || '';
+  return userContext ? `${ip}:${userContext}` : ip;
 }
+

@@ -14,8 +14,19 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // If already authenticated, redirect to overview
+  React.useEffect(() => {
+    fetch('/api/auth/session')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          router.replace('/overview');
+        }
+      })
+      .catch(() => {});
+  }, [router]);
+
+  const performLogin = async (loginEmail: string, loginPass: string) => {
     setError(null);
     setIsLoading(true);
 
@@ -23,13 +34,13 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: loginEmail, password: loginPass }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Invalid credentials');
+        throw new Error(data.error || 'Invalid email or password');
       }
 
       router.push('/overview');
@@ -40,9 +51,20 @@ export default function LoginPage() {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await performLogin(email, password);
+  };
+
   const fillDemo = () => {
     setEmail('admin@apexgear.io');
     setPassword('DemoMerchant@2026');
+  };
+
+  const loginDemoOneClick = () => {
+    setEmail('admin@apexgear.io');
+    setPassword('DemoMerchant@2026');
+    performLogin('admin@apexgear.io', 'DemoMerchant@2026');
   };
 
   return (
@@ -93,6 +115,8 @@ export default function LoginPage() {
           justifyContent: 'space-between',
           alignItems: 'center',
           boxShadow: 'var(--shadow-xs)',
+          flexWrap: 'wrap',
+          gap: 8,
         }}>
           <div>
             <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--fintech-text)' }}>
@@ -102,13 +126,23 @@ export default function LoginPage() {
               admin@apexgear.io / DemoMerchant@2026
             </p>
           </div>
-          <button
-            type="button"
-            onClick={fillDemo}
-            className="btn btn-fintech btn-sm"
-          >
-            Autofill
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              type="button"
+              onClick={fillDemo}
+              className="btn btn-outline btn-sm"
+            >
+              Autofill
+            </button>
+            <button
+              type="button"
+              onClick={loginDemoOneClick}
+              disabled={isLoading}
+              className="btn btn-fintech btn-sm"
+            >
+              Instant Demo Sign In
+            </button>
+          </div>
         </div>
 
         {/* Login Card */}

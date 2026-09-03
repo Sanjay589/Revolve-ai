@@ -16,6 +16,9 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StatusPill } from '@/components/ui/badge';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
+import { useToast } from '@/components/ui/toast';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 
 interface TransactionItem {
@@ -50,6 +53,8 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isReconciling, setIsReconciling] = useState(false);
+  const { success, error } = useToast();
 
   const fetchTransactions = async () => {
     setIsLoading(true);
@@ -66,12 +71,43 @@ export default function TransactionsPage() {
     }
   };
 
+  const handleReconcile = async (txId: string) => {
+    setIsReconciling(true);
+    try {
+      const res = await fetch(`/api/transactions/${txId}/recover`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Reconciliation failed');
+      }
+
+      if (data.result?.resolved) {
+        success('Reconciliation Success', `Order reconciled: Status is now ${data.result.status}`);
+      } else {
+        success('Live Status Checked', data.result?.message || 'Query executed against Razorpay');
+      }
+
+      await fetchTransactions();
+      if (data.result?.order) {
+        setSelectedTx(data.result.order);
+      }
+    } catch (err: unknown) {
+      error('Reconciliation Error', err instanceof Error ? err.message : 'Failed to reconcile');
+    } finally {
+      setIsReconciling(false);
+    }
+  };
+
   useEffect(() => {
     fetchTransactions();
   }, []);
 
   return (
-    <>
+    <div className="relative">
+      <FloatingCommerceObjects intensity="transactions" />
+
       {/* ── Page Header ────────────────────────────────────── */}
       <PageHeader
         badgeText="CRYPTOGRAPHIC FINANCIAL LEDGER"
@@ -167,16 +203,13 @@ export default function TransactionsPage() {
                       </td>
 
                       <td>
-                        <div className="font-mono" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+                        <div className="font-mono value-float" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
                           {formatCurrency(tx.amount)}
                         </div>
                       </td>
 
                       <td>
-                        <span className={`badge ${isPaid ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.6875rem' }}>
-                          {isPaid ? <CheckCircle2 size={10} /> : <Clock size={10} />}
-                          {tx.status}
-                        </span>
+                        <StatusPill status={tx.status} />
                       </td>
 
                       <td>
@@ -249,13 +282,11 @@ export default function TransactionsPage() {
               <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>
                 Captured Gross Amount
               </div>
-              <div className="font-mono" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
+              <div className="font-mono value-float" style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
                 {formatCurrency(selectedTx.amount)}
               </div>
               <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                <span className="badge badge-success">
-                  <CheckCircle2 size={11} /> {selectedTx.status}
-                </span>
+                <StatusPill status={selectedTx.status} />
                 <span className="badge badge-fintech">
                   Razorpay Test Mode
                 </span>
@@ -304,13 +335,25 @@ export default function TransactionsPage() {
               </div>
             </div>
 
-            {/* Close */}
-            <Button variant="outline" onClick={() => setSelectedTx(null)}>
-              Close Details
-            </Button>
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Button
+                variant="fintech"
+                onClick={() => handleReconcile(selectedTx.id)}
+                isLoading={isReconciling}
+                style={{ width: '100%' }}
+              >
+                <ShieldCheck size={16} />
+                <span>Reconcile via Razorpay API (EXECUTION_UNKNOWN Resolver)</span>
+              </Button>
+
+              <Button variant="outline" onClick={() => setSelectedTx(null)} style={{ width: '100%' }}>
+                Close Details
+              </Button>
+            </div>
           </div>
         )}
       </Drawer>
-    </>
+    </div>
   );
 }

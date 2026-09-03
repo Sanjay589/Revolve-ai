@@ -17,9 +17,21 @@ export async function POST(req: Request) {
       );
     }
 
+    console.log('[Server][Step 4 - HMAC Signature Verification Request]', {
+      merchantId: session.merchantId,
+      razorpayOrderId: validated.data.razorpay_order_id,
+      razorpayPaymentId: validated.data.razorpay_payment_id,
+    });
+
     const result = await PaymentService.verifyPayment({
       ...validated.data,
       merchantId: session.merchantId,
+    });
+
+    console.log('[Server][Step 5 - Payment Signature Validated & Order Marked PAID]', {
+      orderId: result.order.id,
+      paymentId: result.payment.id,
+      alreadyVerified: result.alreadyVerified,
     });
 
     if (!result.alreadyVerified) {
@@ -55,6 +67,7 @@ export async function POST(req: Request) {
       alreadyVerified: result.alreadyVerified,
     });
   } catch (error) {
+    console.error('[Server][Step 4/5 - Payment Verification Failed]', error);
     if (error instanceof Error && error.name === 'AuthError') {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }

@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RecommendationCard } from '@/components/recommendation-card';
 import { ExplainabilityModal, ExplainabilityData } from '@/components/explainability-drawer';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
 import { useToast } from '@/components/ui/toast';
 import { formatCurrency } from '@/lib/utils';
 
@@ -103,7 +104,9 @@ export default function AIAgentPage() {
   const topRec = recommendations[0];
 
   return (
-    <>
+    <div className="relative">
+      <FloatingCommerceObjects intensity="ai" />
+
       {/* ── Page Header ────────────────────────────────────── */}
       <PageHeader
         badgeText="AI REVENUE AGENT • ONLINE"
@@ -332,6 +335,6 @@ export default function AIAgentPage() {
         onClose={() => setSelectedExplain(null)}
         data={selectedExplain}
       />
-    </>
+    </div>
   );
 }

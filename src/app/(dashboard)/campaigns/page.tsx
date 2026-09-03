@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Modal } from '@/components/ui/modal';
 import { Input, Textarea } from '@/components/ui/form';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 
@@ -92,7 +93,9 @@ export default function CampaignsPage() {
   };
 
   return (
-    <>
+    <div className="relative">
+      <FloatingCommerceObjects intensity="minimal" />
+
       {/* ── Page Header ────────────────────────────────────── */}
       <PageHeader
         badgeText="PROMOTIONS &amp; CAMPAIGNS"
@@ -237,6 +240,6 @@ export default function CampaignsPage() {
           </div>
         </form>
       </Modal>
-    </>
+    </div>
   );
 }

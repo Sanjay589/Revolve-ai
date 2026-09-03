@@ -44,3 +44,5 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: 'Failed to update policy' }, { status: 500 });
   }
 }
+
+export const PUT = PATCH;

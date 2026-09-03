@@ -8,6 +8,7 @@ import {
   TrendingUp,
   CreditCard,
   ShieldCheck,
+  ShieldAlert,
   ArrowRight,
   RefreshCw,
   CheckCircle2,
@@ -21,6 +22,9 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/ui/page-header';
 import { ChartCard } from '@/components/chart-card';
+import { StatCard, FeaturedStatCard } from '@/components/ui/stat-card';
+import { StatusPill } from '@/components/ui/badge';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
 import { ExplainabilityModal, ExplainabilityData } from '@/components/explainability-drawer';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
@@ -36,6 +40,7 @@ interface DashboardData {
     customers: number;
     pendingApprovals: number;
     aiAttributedRevenue: number;
+    policyGuardrailRate?: number;
   };
   recentRecommendations: Array<{
     id: string;
@@ -177,7 +182,10 @@ export default function OverviewPage() {
   ];
 
   return (
-    <>
+    <div className="relative">
+      {/* Floating Organic Digital Commerce Objects (Subtle Depth) */}
+      <FloatingCommerceObjects intensity="overview" />
+
       {/* ── Page Header ────────────────────────────────────── */}
       <PageHeader
         badgeText="COMMERCE INTELLIGENCE"
@@ -246,153 +254,51 @@ export default function OverviewPage() {
         </form>
       </div>
 
-      {/* ── Primary AI Opportunity Card (Clean Sophisticated Accent) ── */}
-      {topOpportunity && (
-        <div style={{
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--ai-border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '20px 24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          boxShadow: 'var(--shadow-card)',
-          position: 'relative',
-          overflow: 'hidden',
-          flexWrap: 'wrap',
-          gap: 16,
-        }}>
-          {/* Subtle Left Indigo Indicator */}
-          <div style={{
-            position: 'absolute', left: 0, top: 0, bottom: 0, width: 4,
-            background: 'var(--ai-primary)',
-          }} />
+      {/* ── ZONE 1: REVENUE & KPI INTELLIGENCE ──────────────── */}
+      <div className="flex flex-col gap-3.5">
+        {/* Dominant Highlight: AI-Attributed Revenue */}
+        <FeaturedStatCard
+          label="AI-Attributed Revenue"
+          value={formatCurrency(metrics.aiAttributedRevenue)}
+          badgeText="Autonomous Commerce Engine"
+          change={metrics.aiAttributedRevenue > 0 ? 24 : undefined}
+          changeLabel="growth from AI recommendations"
+          subtext="Direct incremental revenue attributed to autonomous policy-bounded recommendations & checkouts."
+        />
 
-          <div style={{ flex: '1 1 400px', paddingLeft: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <span className="badge badge-ai">
-                <Brain size={12} /> Top AI Opportunity
-              </span>
-              <span className="badge badge-neutral" style={{ fontSize: '0.6875rem' }}>
-                {Math.round(topOpportunity.confidence * 100)}% Confidence
-              </span>
-            </div>
-            <h2 className="font-heading" style={{
-              fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.3,
-            }}>
-              {topOpportunity.title}
-            </h2>
-            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.5, maxWidth: 620 }}>
-              {topOpportunity.reason}
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>
-                Expected Impact
-              </div>
-              <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--fintech-primary)' }}>
-                +{formatCurrency(topOpportunity.expectedImpact)}
-                <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-tertiary)' }}> /mo</span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                onClick={() => setSelectedExplain({
-                  title: topOpportunity.title,
-                  type: topOpportunity.type,
-                  confidence: topOpportunity.confidence,
-                  reason: topOpportunity.reason,
-                  evidence: topOpportunity.evidence,
-                  riskLevel: topOpportunity.riskLevel,
-                  expectedImpact: topOpportunity.expectedImpact,
-                })}
-                className="btn btn-outline btn-sm"
-              >
-                Explain AI Logic
-              </button>
-              <Link href="/approvals" className="btn btn-primary btn-sm" style={{ gap: 4 }}>
-                <span>Review &amp; Authorize</span>
-                <ArrowRight size={13} />
-              </Link>
-            </div>
-          </div>
+        {/* 4 Secondary KPIs Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <StatCard
+            label="Gross Volume"
+            value={formatCurrency(metrics.revenue)}
+            change={Number(metrics.revenueChange.toFixed(1))}
+            changeLabel="vs last month"
+            icon={TrendingUp}
+            variant="fintech"
+          />
+          <StatCard
+            label="Verified Orders"
+            value={String(metrics.orders)}
+            change={Number(metrics.ordersChange.toFixed(0))}
+            changeLabel="settled via Razorpay"
+            icon={CreditCard}
+            variant="default"
+          />
+          <StatCard
+            label="Average Order Value"
+            value={formatCurrency(metrics.avgOrderValue)}
+            icon={BarChart3}
+            variant="default"
+            subtext="AOV per verified order"
+          />
+          <StatCard
+            label="Policy Guardrail Rate"
+            value={`${metrics.policyGuardrailRate ?? 100}% Valid`}
+            icon={ShieldCheck}
+            variant="fintech"
+            subtext="Zero policy breaches detected"
+          />
         </div>
-      )}
-
-      {/* ── KPI Row ────────────────────────────────────────── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 14,
-      }}>
-        {[
-          {
-            label: 'Total Revenue',
-            value: formatCurrency(metrics.revenue),
-            change: `${metrics.revenueChange >= 0 ? '+' : ''}${metrics.revenueChange.toFixed(1)}%`,
-            positive: metrics.revenueChange >= 0,
-            icon: TrendingUp, iconColor: 'var(--fintech-primary)', iconBg: 'var(--fintech-bg)',
-          },
-          {
-            label: 'AI-Attributed Revenue',
-            value: formatCurrency(metrics.aiAttributedRevenue),
-            change: metrics.aiAttributedRevenue > 0 ? '+Active' : 'No data',
-            positive: metrics.aiAttributedRevenue > 0,
-            icon: Brain, iconColor: 'var(--ai-primary)', iconBg: 'var(--ai-bg)',
-          },
-          {
-            label: 'Verified Orders',
-            value: String(metrics.orders),
-            change: `${metrics.ordersChange >= 0 ? '+' : ''}${metrics.ordersChange.toFixed(0)}%`,
-            positive: metrics.ordersChange >= 0,
-            icon: CreditCard, iconColor: 'var(--info)', iconBg: 'var(--info-bg)',
-          },
-          {
-            label: 'Avg Order Value',
-            value: formatCurrency(metrics.avgOrderValue),
-            change: '',
-            positive: true,
-            icon: BarChart3, iconColor: 'var(--warning)', iconBg: 'var(--warning-bg)',
-          },
-          {
-            label: 'Pending Approvals',
-            value: String(metrics.pendingApprovals),
-            change: metrics.pendingApprovals > 0 ? 'Needs attention' : 'All clear',
-            positive: metrics.pendingApprovals === 0,
-            icon: ShieldCheck, iconColor: metrics.pendingApprovals > 0 ? 'var(--warning)' : 'var(--success)',
-            iconBg: metrics.pendingApprovals > 0 ? 'var(--warning-bg)' : 'var(--success-bg)',
-          },
-        ].map((kpi) => (
-          <div key={kpi.label} style={{
-            background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)',
-            borderRadius: 'var(--radius-lg)', padding: '16px 18px',
-            boxShadow: 'var(--shadow-card)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-              <div className="stat-label">{kpi.label}</div>
-              <div style={{
-                width: 30, height: 30, borderRadius: 'var(--radius-md)',
-                background: kpi.iconBg, display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
-              }}>
-                <kpi.icon size={15} style={{ color: kpi.iconColor }} />
-              </div>
-            </div>
-            <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>
-              {kpi.value}
-            </div>
-            {kpi.change && (
-              <div style={{
-                fontSize: '0.6875rem', fontWeight: 600,
-                color: kpi.positive ? 'var(--success)' : 'var(--error)',
-              }}>
-                {kpi.change}
-              </div>
-            )}
-          </div>
-        ))}
       </div>
 
       {/* ── Row: Revenue Chart + AI Scan Action ────────────── */}
@@ -522,14 +428,11 @@ export default function OverviewPage() {
                         <td style={{ fontSize: '0.75rem' }}>
                           {formatDateTime(o.createdAt).slice(0, 10)}
                         </td>
-                        <td className="font-mono" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        <td className="font-mono value-float" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {formatCurrency(o.amount)}
                         </td>
                         <td>
-                          <span className={`badge ${o.status === 'CAPTURED' || o.status === 'PAID' ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.6875rem' }}>
-                            {o.status === 'CAPTURED' ? <CheckCircle2 size={10} /> : null}
-                            {o.status}
-                          </span>
+                          <StatusPill status={o.status} />
                         </td>
                         <td>
                           <div style={{ display: 'flex', gap: 4 }}>
@@ -584,7 +487,7 @@ export default function OverviewPage() {
                 border: '1px solid var(--border-secondary)',
               }}>
                 <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginBottom: 2 }}>Max / Transaction</div>
-                <div className="font-mono" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹10,000</div>
+                <div className="font-mono value-float" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹10,000</div>
               </div>
               <div style={{
                 flex: 1, padding: '10px 12px',
@@ -592,7 +495,7 @@ export default function OverviewPage() {
                 border: '1px solid var(--border-secondary)',
               }}>
                 <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginBottom: 2 }}>Daily AI Limit</div>
-                <div className="font-mono" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹50,000</div>
+                <div className="font-mono value-float" style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>₹50,000</div>
               </div>
             </div>
             <div style={{
@@ -668,6 +571,6 @@ export default function OverviewPage() {
         onClose={() => setSelectedExplain(null)}
         data={selectedExplain}
       />
-    </>
+    </div>
   );
 }

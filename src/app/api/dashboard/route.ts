@@ -23,6 +23,8 @@ export async function GET(req: Request) {
       recentOrders,
       recentAuditEvents,
       aiAttributedRevenue,
+      totalActions,
+      passedActions,
     ] = await Promise.all([
       // Current month revenue
       prisma.order.aggregate({
@@ -83,6 +85,17 @@ export async function GET(req: Request) {
         },
         _sum: { amount: true },
       }),
+      // Total AI agent actions evaluated
+      prisma.aIAgentAction.count({
+        where: { merchantId },
+      }),
+      // Actions that successfully passed policy guardrails
+      prisma.aIAgentAction.count({
+        where: {
+          merchantId,
+          status: { notIn: ['FAILED', 'REJECTED'] },
+        },
+      }),
     ]);
 
     const revenue = totalRevenue._sum.amount || 0;
@@ -90,6 +103,9 @@ export async function GET(req: Request) {
     const paidOrders = totalRevenue._count || 0;
     const avgOrderValue = paidOrders > 0 ? Math.round(revenue / paidOrders) : 0;
     const conversionRate = totalOrders > 0 ? Math.round((paidOrders / totalOrders) * 100) : 0;
+    const policyGuardrailRate = totalActions > 0
+      ? Math.round((passedActions / totalActions) * 100)
+      : 100;
 
     return NextResponse.json({
       metrics: {
@@ -102,6 +118,7 @@ export async function GET(req: Request) {
         customers: totalCustomers,
         pendingApprovals,
         aiAttributedRevenue: aiAttributedRevenue._sum.amount || 0,
+        policyGuardrailRate,
       },
       recentRecommendations: aiRecommendations,
       recentOrders,

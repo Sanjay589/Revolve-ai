@@ -5,12 +5,26 @@ import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
-import { Shield, Sparkles, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Shield, Sparkles, CheckCircle2, AlertCircle, XCircle, RotateCcw, ArrowLeft } from 'lucide-react';
 
 interface RazorpayResponse {
   razorpay_payment_id: string;
   razorpay_order_id: string;
   razorpay_signature: string;
+}
+
+interface RazorpayFailureResponse {
+  error: {
+    code: string;
+    description: string;
+    source: string;
+    step: string;
+    reason: string;
+    metadata: {
+      order_id: string;
+      payment_id?: string;
+    };
+  };
 }
 
 interface RazorpayOptions {
@@ -36,6 +50,7 @@ interface RazorpayOptions {
 
 interface RazorpayInstance {
   open: () => void;
+  on: (event: string, callback: (response: any) => void) => void;
 }
 
 declare global {
@@ -57,6 +72,28 @@ export interface CheckoutModalProps {
   onSuccess?: () => void;
 }
 
+// Resilient on-demand script loader for Razorpay Checkout SDK
+async function ensureRazorpayLoaded(): Promise<boolean> {
+  if (typeof window !== 'undefined' && window.Razorpay) {
+    return true;
+  }
+  return new Promise((resolve) => {
+    const existing = document.getElementById('razorpay-checkout-script');
+    if (existing) {
+      existing.addEventListener('load', () => resolve(Boolean(window.Razorpay)));
+      setTimeout(() => resolve(Boolean(window.Razorpay)), 1500);
+      return;
+    }
+    const script = document.createElement('script');
+    script.id = 'razorpay-checkout-script';
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   isOpen,
   onClose,
@@ -68,7 +105,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [customerEmail, setCustomerEmail] = useState('aarav.sharma@example.com');
   const [customerPhone, setCustomerPhone] = useState('+919876543210');
   const [quantity, setQuantity] = useState(1);
-  const [stage, setStage] = useState<'details' | 'creating_order' | 'checkout_active' | 'verifying' | 'success' | 'unknown'>('details');
+  const [stage, setStage] = useState<'details' | 'creating_order' | 'checkout_active' | 'verifying' | 'success' | 'failed' | 'unknown'>('details');
+  const [failureReason, setFailureReason] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const { success: toastSuccess, error: toastError } = useToast();
@@ -76,10 +114,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handleInitiatePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setFailureReason('');
     setStage('creating_order');
 
+    console.log('[Checkout Flow][Step 1: Order Creation Request]', {
+      productId: product.id,
+      productName: product.name,
+      quantity,
+      customerName,
+      customerEmail,
+      customerPhone,
+      aiActionId,
+    });
+
     try {
-      // 1. Create order on backend
+      // 1. Create order on backend (strictly calculated server-side)
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,18 +144,31 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to create Razorpay order');
+        const data = await res.json().catch(() => ({}));
+        const detailedMsg = data.error || `Server responded with HTTP status ${res.status}`;
+        console.error('[Checkout Flow][Step 1 Failed: Order Creation]', detailedMsg);
+        throw new Error(`Order creation failed: ${detailedMsg}`);
       }
 
       const orderData = await res.json();
       const { razorpayOrderId, keyId, amount, currency } = orderData;
 
-      if (!window.Razorpay) {
-        throw new Error('Razorpay SDK is not loaded. Please check your internet connection.');
+      console.log('[Checkout Flow][Step 1: Order Created Successfully]', {
+        razorpayOrderId,
+        amount,
+        currency,
+        keyIdPresent: Boolean(keyId),
+      });
+
+      // Ensure SDK is ready
+      const sdkReady = await ensureRazorpayLoaded();
+      if (!sdkReady || !window.Razorpay) {
+        console.error('[Checkout Flow][Step 2 Failed: SDK Unavailable]');
+        throw new Error('Razorpay Checkout SDK could not be loaded. Please check your network connection or ad-blocker settings.');
       }
 
       setStage('checkout_active');
+      console.log('[Checkout Flow][Step 2: Opening Razorpay Checkout Modal]', { razorpayOrderId });
 
       // 2. Open standard Razorpay Checkout
       const options: RazorpayOptions = {
@@ -117,8 +179,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         description: `Order for ${product.name}`,
         order_id: razorpayOrderId,
         handler: async (response: RazorpayResponse) => {
+          console.log('[Checkout Flow][Step 3: Razorpay Payment Authorized via Modal]', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            signatureReceived: Boolean(response.razorpay_signature),
+          });
+
           setStage('verifying');
           try {
+            console.log('[Checkout Flow][Step 4: Submitting HMAC Signature to Backend]');
             // 3. Backend verifies HMAC signature
             const verifyRes = await fetch('/api/payments/verify', {
               method: 'POST',
@@ -132,19 +201,25 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
             const verifyData = await verifyRes.json();
             if (!verifyRes.ok || !verifyData.verified) {
-              throw new Error(verifyData.error || 'Payment signature verification failed.');
+              const reason = verifyData.error || 'Cryptographic signature mismatch against merchant secret';
+              console.error('[Checkout Flow][Step 4/5 Failed: Signature Verification]', reason);
+              throw new Error(`Signature verification failed: ${reason}`);
             }
 
+            console.log('[Checkout Flow][Step 5: Payment Captured & Verified Successfully]', verifyData);
             setStage('success');
-            toastSuccess('Payment Captured', `Transaction ${response.razorpay_payment_id} verified successfully.`);
+            toastSuccess('Payment Captured', `Transaction ${response.razorpay_payment_id} verified and sealed.`);
             onSuccess?.();
           } catch (verErr: unknown) {
+            console.error('[Checkout Flow][Step 4/5 Error: Inconclusive Verification]', verErr);
             setStage('unknown');
-            setErrorMsg(verErr instanceof Error ? verErr.message : 'Verification error. Status will be confirmed via webhook.');
+            const errDetail = verErr instanceof Error ? verErr.message : 'Verification inconclusive. Check ledger status.';
+            setErrorMsg(errDetail);
           }
         },
         modal: {
           ondismiss: () => {
+            console.log('[Checkout Flow][Modal Dismissed by User]');
             if (stage === 'checkout_active') {
               setStage('details');
             }
@@ -156,15 +231,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           contact: customerPhone,
         },
         theme: {
-          color: '#6366f1',
+          color: '#111827',
         },
       };
 
       const rzp = new window.Razorpay(options);
+
+      // Listen for explicit payment failure event from Razorpay
+      rzp.on('payment.failed', (response: RazorpayFailureResponse) => {
+        const errorDesc = response?.error?.description || response?.error?.reason || 'Transaction declined by bank or test simulator';
+        console.warn('[Checkout Flow][Payment Failed Event from Razorpay]', {
+          code: response?.error?.code,
+          description: errorDesc,
+          source: response?.error?.source,
+          step: response?.error?.step,
+        });
+        setFailureReason(errorDesc);
+        setStage('failed');
+      });
+
       rzp.open();
     } catch (err: unknown) {
       setStage('details');
       const msg = err instanceof Error ? err.message : 'Failed to initiate checkout';
+      console.error('[Checkout Flow][Checkout Initiation Failed]', err);
       setErrorMsg(msg);
       toastError('Checkout Error', msg);
     }
@@ -176,8 +266,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={stage === 'creating_order' || stage === 'verifying' ? () => {} : onClose}
-      title={stage === 'success' ? 'Payment Confirmed' : 'Razorpay Secure Checkout'}
-      description="Razorpay Test Mode standard checkout flow"
+      title={
+        stage === 'success'
+          ? 'Payment Confirmed'
+          : stage === 'failed'
+          ? 'Payment Failed'
+          : stage === 'unknown'
+          ? 'Status Verification'
+          : 'Razorpay Secure Checkout'
+      }
+      description={
+        stage === 'failed'
+          ? 'Razorpay Test Mode transaction outcome'
+          : 'Razorpay Test Mode standard checkout flow'
+      }
     >
       {stage === 'success' ? (
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
@@ -188,11 +290,48 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             Payment Successful!
           </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 24 }}>
-            Your transaction was verified and captured in PostgreSQL. Full audit trail recorded.
+            Your transaction was verified via HMAC-SHA256 and captured in PostgreSQL. Full audit trail recorded.
           </p>
           <Button variant="primary" onClick={onClose}>
             Done
           </Button>
+        </div>
+      ) : stage === 'failed' ? (
+        <div style={{ textAlign: 'center', padding: '24px 0' }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--danger-bg, #fee2e2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <XCircle size={32} color="var(--danger, #ef4444)" />
+          </div>
+          <h3 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+            PAYMENT FAILED
+          </h3>
+          <div style={{
+            background: 'var(--bg-tertiary)',
+            padding: '12px 16px',
+            borderRadius: 'var(--radius-md)',
+            margin: '0 auto 20px',
+            textAlign: 'left',
+            fontSize: '0.8125rem',
+            border: '1px solid var(--border-primary)',
+          }}>
+            <p style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+              Reason:
+            </p>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              Payment could not be completed in Razorpay Test Mode.
+              {failureReason ? ` (${failureReason})` : ''}
+            </p>
+          </div>
+          <p style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', marginBottom: 24 }}>
+            No transaction was created. You can retry with standard Test Mode credentials or return to AI Buyer.
+          </p>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <Button variant="secondary" onClick={onClose}>
+              <ArrowLeft size={14} /> Return to AI Buyer
+            </Button>
+            <Button variant="primary" onClick={() => setStage('details')}>
+              <RotateCcw size={14} /> Try Again
+            </Button>
+          </div>
         </div>
       ) : stage === 'unknown' ? (
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
@@ -203,14 +342,33 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             Status Verification in Progress
           </h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 24 }}>
-            Payment status could not be confirmed immediately. We are safely verifying the existing transaction without double-charging.
+            Payment status could not be confirmed immediately. The server is safely querying Razorpay without duplicate orders.
           </p>
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <Button variant="secondary" onClick={onClose}>
+              Return to AI Buyer
+            </Button>
+          </div>
         </div>
       ) : (
         <form onSubmit={handleInitiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {errorMsg && (
+            <div style={{
+              background: 'var(--error-bg)',
+              border: '1px solid var(--error-border)',
+              color: 'var(--error)',
+              padding: '10px 14px',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '0.8125rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}>
+              <AlertCircle size={16} style={{ flexShrink: 0 }} />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
           <div style={{ padding: 12, background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <p style={{ fontWeight: 600, fontSize: '0.9375rem' }}>{product.name}</p>
@@ -286,3 +444,4 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     </Modal>
   );
 };
+

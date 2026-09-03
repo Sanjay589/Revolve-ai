@@ -5,6 +5,7 @@ import { FileText, RefreshCw, Shield, Sparkles, Filter, CheckCircle2 } from 'luc
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { AuditTimeline, type AuditItem } from '@/components/audit-timeline';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
 
 export default function AuditPage() {
   const [events, setEvents] = useState<AuditItem[]>([]);
@@ -32,7 +33,9 @@ export default function AuditPage() {
   }, [filterAction]);
 
   return (
-    <>
+    <div className="relative">
+      <FloatingCommerceObjects intensity="minimal" />
+
       {/* ── Page Header ────────────────────────────────────── */}
       <PageHeader
         badgeText="COMPLIANCE &amp; GOVERNANCE"
@@ -129,6 +132,6 @@ export default function AuditPage() {
       <div className="editorial-card" style={{ padding: '24px 20px' }}>
         <AuditTimeline events={events} />
       </div>
-    </>
+    </div>
   );
 }

@@ -157,7 +157,7 @@ export const ApprovalCard: React.FC<ApprovalCardProps> = ({
             <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>
               Projected Monthly Value
             </div>
-            <div className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
+            <div className="font-mono value-float" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
               {action.amount ? `+${formatCurrency(action.amount)}` : 'Non-monetary optimization'}
             </div>
           </div>

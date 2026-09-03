@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Modal } from '@/components/ui/modal';
 import { Input, Textarea, Select } from '@/components/ui/form';
+import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 
@@ -135,7 +136,9 @@ export default function ProductsPage() {
   };
 
   return (
-    <>
+    <div className="relative">
+      <FloatingCommerceObjects intensity="minimal" />
+
       {/* ── Page Header ────────────────────────────────────── */}
       <PageHeader
         badgeText="COMMERCE CATALOG"
@@ -329,6 +332,6 @@ export default function ProductsPage() {
           </div>
         </form>
       </Modal>
-    </>
+    </div>
   );
 }

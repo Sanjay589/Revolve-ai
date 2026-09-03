@@ -140,7 +140,7 @@ export const RecommendationCard: React.FC<RecommendationProps> = ({
               <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>
                 Expected Impact
               </div>
-              <div className="font-mono" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
+              <div className="font-mono value-float" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
                 +{formatCurrency(expectedImpact)}
                 <span style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 400 }}> /mo</span>
               </div>
