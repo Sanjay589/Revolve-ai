@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Bot,
   Send,
@@ -10,7 +11,10 @@ import {
   ShieldCheck,
   CheckCircle2,
   Tag,
-  Zap
+  Zap,
+  Package,
+  Layers,
+  Sparkle,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
@@ -51,7 +55,46 @@ export default function AIBuyersPage() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutProduct, setCheckoutProduct] = useState<{ id: string; name: string; price: number; description?: string | null } | null>(null);
-  const { error } = useToast();
+  const [catalogEmpty, setCatalogEmpty] = useState(false);
+  const [checkingCatalog, setCheckingCatalog] = useState(true);
+  const [isSwitching, setIsSwitching] = useState(false);
+  const { success, error } = useToast();
+
+  useEffect(() => {
+    async function checkCatalog() {
+      try {
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          const data = await res.json();
+          setCatalogEmpty(!data.products || data.products.length === 0);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setCheckingCatalog(false);
+      }
+    }
+    checkCatalog();
+  }, []);
+
+  const handleTryDemoBuyer = async () => {
+    setIsSwitching(true);
+    try {
+      const res = await fetch('/api/auth/switch-workspace', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetWorkspace: 'demo' }),
+      });
+      if (res.ok) {
+        success('Switched to Demo Workspace', 'AI Buyer active with 7 catalog items.');
+        window.location.reload();
+      }
+    } catch {
+      error('Error', 'Failed to switch workspace');
+    } finally {
+      setIsSwitching(false);
+    }
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,8 +189,80 @@ export default function AIBuyersPage() {
         </div>
       </div>
 
-      {/* ── Chat Messages Area ──────────────────────────────── */}
-      <div className="editorial-card" style={{ minHeight: 440, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px 24px' }}>
+      {/* ── If Catalog Empty: Preview Shell & Activation ───── */}
+      {catalogEmpty && !checkingCatalog ? (
+        <div className="space-y-6">
+          <div className="bg-[#0D0D0D] border border-[#262626] rounded-xl text-center py-12 px-6 max-w-2xl mx-auto shadow-xl">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--ai-bg)] border border-[var(--ai-border)] flex items-center justify-center mx-auto mb-4 text-[var(--ai-primary)] shadow-sm">
+              <Bot size={28} />
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--ai-bg)] border border-[var(--ai-border)] text-[var(--ai-text)] text-[0.6875rem] font-bold uppercase tracking-wider mb-2">
+              <Sparkles size={11} /> AI BUYER WORKSPACE
+            </div>
+            <h3 className="font-heading font-bold text-xl text-white mb-2">
+              Activate Conversational Shopping Intelligence
+            </h3>
+            <p className="text-xs text-[#888888] max-w-md mx-auto mb-6 leading-relaxed">
+              Connect your catalog so autonomous AI buyers can understand customer intent, search semantic features, evaluate pricing tiers, and generate 1-click Razorpay checkout sessions.
+            </p>
+
+            {/* Conversational Commerce Preview Shell */}
+            <div className="bg-[#141414] border border-[#262626] rounded-xl p-5 mb-6 text-left space-y-3 shadow-inner">
+              <div className="text-[0.625rem] font-mono text-[#666666] uppercase tracking-wider font-semibold">
+                Simulated AI Buyer Exchange
+              </div>
+
+              {/* User Query Bubble */}
+              <div className="flex justify-end">
+                <div className="bg-white text-black px-3.5 py-2 rounded-xl rounded-tr-xs text-xs max-w-md font-medium">
+                  &ldquo;I need running shoes under ₹5,000 for road marathons&rdquo;
+                </div>
+              </div>
+
+              {/* AI Assistant Bubble */}
+              <div className="flex gap-2.5 items-start">
+                <div className="w-7 h-7 rounded-lg bg-[var(--ai-bg)] border border-[var(--ai-border)] flex items-center justify-center text-[var(--ai-primary)] shrink-0 mt-0.5">
+                  <Bot size={14} />
+                </div>
+                <div className="bg-[#0D0D0D] border border-[#262626] p-3 rounded-xl rounded-tl-xs text-xs text-[#CCCCCC] space-y-2.5 max-w-lg">
+                  <p>
+                    Matched 2 catalog items with high cushioning ratings. Top match: <strong>AeroStride Pro Running Shoes</strong>.
+                  </p>
+                  <div className="p-2.5 rounded-lg bg-[#141414] border border-[#262626] flex items-center justify-between gap-3">
+                    <div>
+                      <div className="font-semibold text-white text-xs">AeroStride Pro</div>
+                      <div className="font-mono font-bold text-[#00C076] text-xs mt-0.5">₹3,499</div>
+                    </div>
+                    <span className="badge badge-fintech text-[0.625rem] py-1 px-2.5">
+                      Razorpay Checkout Ready
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link href="/catalog">
+                <Button variant="primary" size="sm">
+                  <Package size={13} />
+                  <span>Activate AI Buyer (Connect Catalog)</span>
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleTryDemoBuyer}
+                disabled={isSwitching}
+              >
+                <Sparkles size={13} className="text-[#F59E0B]" />
+                <span>{isSwitching ? 'Switching...' : 'Try Demo Buyer'}</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ── Chat Messages Area ──────────────────────────────── */
+        <div className="editorial-card" style={{ minHeight: 440, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px 24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto', maxHeight: 520, paddingRight: 4 }}>
           {messages.map((m) => {
             const isAgent = m.sender === 'agent';
@@ -322,6 +437,7 @@ export default function AIBuyersPage() {
           </form>
         </div>
       </div>
+      )}
 
       {/* Checkout Modal */}
       {checkoutProduct && (

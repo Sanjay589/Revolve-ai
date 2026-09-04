@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Brain,
   Sparkles,
@@ -14,6 +15,8 @@ import {
   ShieldCheck,
   Shield,
   Check,
+  Cpu,
+  Activity,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
@@ -40,10 +43,10 @@ interface Recommendation {
 
 export default function AIAgentPage() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [productCount, setProductCount] = useState(7);
-  const [pendingApprovalsCount, setPendingApprovalsCount] = useState(1);
+  const [productCount, setProductCount] = useState(0);
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
   const [activeTab, setActiveTab] = useState<'all' | 'upsell' | 'cross_sell' | 'campaign' | 'pricing'>('all');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedExplain, setSelectedExplain] = useState<ExplainabilityData | null>(null);
   const { success, error } = useToast();
@@ -129,52 +132,140 @@ export default function AIAgentPage() {
         }
       />
 
-      {/* ── Real Engine Health & Status Stats ───────────────── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 14,
-      }}>
-        <div className="editorial-card" style={{ padding: '16px 18px' }}>
-          <div className="stat-label">Products Analyzed</div>
-          <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
-            {productCount} Items
-          </div>
-          <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
-            Indexed with AI feature metadata
-          </p>
-        </div>
+      {/* ── If 0 Products / New Merchant: AI AGENT READY ───── */}
+      {productCount === 0 && !isLoading ? (
+        <div className="space-y-6">
+          {/* Provider Status Banners */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-[#0D0D0D] border border-[#262626] rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-[var(--ai-bg)] border border-[var(--ai-border)] flex items-center justify-center text-[var(--ai-primary)]">
+                  <Brain size={18} />
+                </div>
+                <div>
+                  <div className="font-heading text-xs font-bold text-white">Gemini 2.5 Flash</div>
+                  <div className="text-[0.6875rem] text-[#888888]">Multimodal &amp; Basket Reasoning</div>
+                </div>
+              </div>
+              <span className="badge badge-success text-[0.625rem]">ONLINE • READY</span>
+            </div>
 
-        <div className="editorial-card" style={{ padding: '16px 18px' }}>
-          <div className="stat-label">Opportunities Found</div>
-          <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--fintech-primary)', marginTop: 2 }}>
-            {recommendations.length} Active
+            <div className="bg-[#0D0D0D] border border-[#262626] rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-[var(--ai-bg)] border border-[var(--ai-border)] flex items-center justify-center text-[var(--ai-primary)]">
+                  <Cpu size={18} />
+                </div>
+                <div>
+                  <div className="font-heading text-xs font-bold text-white">Groq LLaMA 3.3 70B</div>
+                  <div className="text-[0.6875rem] text-[#888888]">Ultra-Low Latency Inference</div>
+                </div>
+              </div>
+              <span className="badge badge-success text-[0.625rem]">ONLINE • READY</span>
+            </div>
           </div>
-          <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
-            Passed policy validation
-          </p>
-        </div>
 
-        <div className="editorial-card" style={{ padding: '16px 18px' }}>
-          <div className="stat-label">High Confidence (&gt;75%)</div>
-          <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
-            {highConfidenceCount}
-          </div>
-          <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
-            Strong historical basket affinity
-          </p>
-        </div>
+          {/* Main Agent Ready Card */}
+          <div className="bg-[#0D0D0D] border border-[#262626] rounded-xl text-center py-14 px-6 max-w-2xl mx-auto shadow-xl">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--ai-bg)] border border-[var(--ai-border)] flex items-center justify-center mx-auto mb-4 text-[var(--ai-primary)]">
+              <Sparkles size={28} />
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--ai-bg)] border border-[var(--ai-border)] text-[var(--ai-text)] text-[0.6875rem] font-bold uppercase tracking-wider mb-2">
+              AI AGENT • READY
+            </div>
+            <h3 className="font-heading font-bold text-xl text-white mb-2">
+              Your AI Agent is Waiting for Commerce Signals
+            </h3>
+            <p className="text-xs text-[#888888] max-w-md mx-auto mb-6 leading-relaxed">
+              Connect your product catalog to begin indexing items with semantic embeddings, identifying cross-sell affinities, and generating bounded Razorpay checkout proposals.
+            </p>
 
-        <div className="editorial-card" style={{ padding: '16px 18px' }}>
-          <div className="stat-label">Awaiting Authorization</div>
-          <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: pendingApprovalsCount > 0 ? 'var(--warning)' : 'var(--text-primary)', marginTop: 2 }}>
-            {pendingApprovalsCount}
+            {/* Visual Reasoning Pipeline */}
+            <div className="bg-[#141414] border border-[#262626] rounded-lg p-4 mb-6 text-left">
+              <div className="text-[0.625rem] font-mono text-[#888888] uppercase tracking-wider font-semibold mb-3">
+                Autonomous Reasoning Pipeline
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                {[
+                  { step: '1. Ingest', desc: 'Catalog attributes', color: 'text-indigo-400' },
+                  { step: '2. Detect', desc: 'Basket affinities', color: 'text-indigo-400' },
+                  { step: '3. Guardrail', desc: 'Policy limits', color: 'text-amber-400' },
+                  { step: '4. Transact', desc: 'Razorpay order', color: 'text-emerald-400' },
+                ].map((item) => (
+                  <div key={item.step} className="p-2.5 rounded bg-[#0D0D0D] border border-[#262626]">
+                    <div className={`font-semibold ${item.color} text-[0.6875rem]`}>{item.step}</div>
+                    <div className="text-[0.625rem] text-[#888888] mt-0.5">{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link href="/catalog">
+                <Button variant="primary" size="sm">
+                  <Package size={13} />
+                  <span>Connect Catalog</span>
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleRunAgent('all')}
+                disabled={isAnalyzing}
+              >
+                <Sparkles size={13} className={isAnalyzing ? 'animate-spin' : ''} />
+                <span>{isAnalyzing ? 'Scanning...' : 'Run Test Scan'}</span>
+              </Button>
+            </div>
           </div>
-          <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
-            Rerouted to Security Center
-          </p>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* ── Real Engine Health & Status Stats ───────────────── */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 14,
+          }}>
+            <div className="editorial-card" style={{ padding: '16px 18px' }}>
+              <div className="stat-label">Products Analyzed</div>
+              <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
+                {productCount} Items
+              </div>
+              <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
+                Indexed with AI feature metadata
+              </p>
+            </div>
+
+            <div className="editorial-card" style={{ padding: '16px 18px' }}>
+              <div className="stat-label">Opportunities Found</div>
+              <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--fintech-primary)', marginTop: 2 }}>
+                {recommendations.length} Active
+              </div>
+              <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
+                Passed policy validation
+              </p>
+            </div>
+
+            <div className="editorial-card" style={{ padding: '16px 18px' }}>
+              <div className="stat-label">High Confidence (&gt;75%)</div>
+              <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: 2 }}>
+                {highConfidenceCount}
+              </div>
+              <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
+                Strong historical basket affinity
+              </p>
+            </div>
+
+            <div className="editorial-card" style={{ padding: '16px 18px' }}>
+              <div className="stat-label">Awaiting Authorization</div>
+              <div className="font-mono" style={{ fontSize: '1.375rem', fontWeight: 800, color: pendingApprovalsCount > 0 ? 'var(--warning)' : 'var(--text-primary)', marginTop: 2 }}>
+                {pendingApprovalsCount}
+              </div>
+              <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', marginTop: 2 }}>
+                Rerouted to Security Center
+              </p>
+            </div>
+          </div>
 
       {/* ── Current Inspectable Reasoning Pipeline ──────────── */}
       {topRec && (
@@ -330,8 +421,10 @@ export default function AIAgentPage() {
           <Button variant="primary" size="sm" onClick={() => handleRunAgent(activeTab)}>
             <Sparkles size={14} /> Run Scan Now
           </Button>
-        </div>
-      )}
+          </div>
+        )}
+      </>
+    )}
 
       {/* Explainability Modal */}
       <ExplainabilityModal

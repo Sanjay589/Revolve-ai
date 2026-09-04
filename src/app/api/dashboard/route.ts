@@ -107,7 +107,11 @@ export async function GET(req: Request) {
       ? Math.round((passedActions / totalActions) * 100)
       : 100;
 
+    const productCount = await prisma.product.count({ where: { merchantId } });
+
     return NextResponse.json({
+      isDemoWorkspace: Boolean(session.isDemoWorkspace),
+      productCount,
       metrics: {
         revenue,
         revenueChange: prevRevenue > 0 ? Math.round(((revenue - prevRevenue) / prevRevenue) * 100) : 0,

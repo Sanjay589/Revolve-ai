@@ -19,6 +19,8 @@ import {
   FileText,
   Settings,
   LogOut,
+  Activity,
+  User,
 } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import { AgentStatus } from './agent-status';
@@ -40,7 +42,9 @@ const ALL_DRAWER_LINKS = [
   { href: '/catalog', label: 'Catalog', icon: BookOpen },
   { href: '/campaigns', label: 'Campaigns', icon: Megaphone },
   { href: '/transactions', label: 'Transactions', icon: CreditCard },
+  { href: '/payment-observability', label: 'Payment Observability', icon: Activity },
   { href: '/audit', label: 'Audit Trail', icon: FileText },
+  { href: '/profile', label: 'Profile & Account', icon: User },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 

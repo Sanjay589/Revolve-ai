@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   CreditCard,
   RefreshCw,
@@ -10,7 +11,10 @@ import {
   ChevronRight,
   Shield,
   Check,
-  Zap
+  Zap,
+  Sparkles,
+  Activity,
+  ExternalLink,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
@@ -259,8 +263,54 @@ export default function TransactionsPage() {
             </table>
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--text-tertiary)' }}>
-            No transactions found. Use AI Buyers to simulate an order.
+          <div className="bg-[#0D0D0D] border border-[#262626] rounded-xl text-center py-14 px-6 max-w-2xl mx-auto shadow-xl my-4">
+            <div className="w-14 h-14 rounded-2xl bg-[#00C076]/10 border border-[#00C076]/30 flex items-center justify-center mx-auto mb-4 text-[#00C076]">
+              <CreditCard size={28} />
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00C076]/10 border border-[#00C076]/30 text-[#00C076] text-[0.6875rem] font-bold uppercase tracking-wider mb-2">
+              <ShieldCheck size={11} /> Razorpay Test Mode Active
+            </div>
+            <h3 className="font-heading font-bold text-xl text-white mb-2">
+              NO TRANSACTIONS YET
+            </h3>
+            <p className="text-xs text-[#888888] max-w-md mx-auto mb-6 leading-relaxed">
+              Razorpay transactions will appear here after your first test checkout. Every payment event is cryptographically verified via HMAC-SHA256 signatures and sealed into the immutable ledger.
+            </p>
+
+            {/* Visual Payment Lifecycle */}
+            <div className="bg-[#141414] border border-[#262626] rounded-xl p-4 mb-6 text-left">
+              <div className="text-[0.625rem] font-mono text-[#888888] uppercase tracking-wider font-semibold mb-3">
+                Cryptographic Payment Lifecycle
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+                {[
+                  { step: '1. Order Created', desc: 'Bounded amount' },
+                  { step: '2. Payment Auth', desc: 'Customer checkout' },
+                  { step: '3. Webhook Sync', desc: 'Real-time push' },
+                  { step: '4. HMAC Verify', desc: 'Signature match' },
+                  { step: '5. Audit Seal', desc: 'Immutable ledger' },
+                ].map((item) => (
+                  <div key={item.step} className="p-2 rounded bg-[#0D0D0D] border border-[#262626]">
+                    <div className="font-semibold text-white text-[0.6875rem]">{item.step}</div>
+                    <div className="text-[0.625rem] text-[#888888] mt-0.5">{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link href="/ai-buyers" className="btn btn-primary btn-sm">
+                <Sparkles size={13} />
+                <span>Test Checkout in AI Buyers</span>
+              </Link>
+              <Link href="/payment-observability" className="btn btn-outline btn-sm">
+                <Activity size={13} />
+                <span>Payment Observability</span>
+              </Link>
+              <Link href="/settings" className="btn btn-ghost btn-sm text-[#888888]">
+                <span>Razorpay API Keys</span>
+              </Link>
+            </div>
           </div>
         )}
       </div>

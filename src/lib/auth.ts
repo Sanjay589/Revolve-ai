@@ -13,6 +13,8 @@ export interface SessionPayload {
   email: string;
   name: string;
   role: string;
+  isDemoWorkspace?: boolean;
+  activeMerchantId?: string;
 }
 
 // ─── Password Hashing ─────────────────────────────────────
@@ -59,7 +61,11 @@ export async function getSession(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  return verifySessionToken(token);
+  const session = verifySessionToken(token);
+  if (session && session.activeMerchantId) {
+    session.merchantId = session.activeMerchantId;
+  }
+  return session;
 }
 
 export async function clearSession(): Promise<void> {
@@ -73,7 +79,11 @@ export async function getSessionFromRequest(req: Request): Promise<SessionPayloa
   const cookieHeader = req.headers.get('cookie') || '';
   const match = cookieHeader.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`));
   if (!match) return null;
-  return verifySessionToken(match[1]);
+  const session = verifySessionToken(match[1]);
+  if (session && session.activeMerchantId) {
+    session.merchantId = session.activeMerchantId;
+  }
+  return session;
 }
 
 export async function requireAuth(req: Request): Promise<SessionPayload> {

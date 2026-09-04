@@ -15,10 +15,11 @@ import {
   CreditCard,
   FileText,
   Sliders,
-  Settings,
   LogOut,
   Shield,
   ChevronDown,
+  Activity,
+  Check,
 } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 
@@ -26,33 +27,28 @@ const NAV_GROUPS = [
   {
     title: 'INTELLIGENCE',
     items: [
-      { href: '/overview', label: 'Dashboard', icon: LayoutDashboard },
-      { href: '/ai-agent', label: 'AI Agent', icon: Brain },
-      { href: '/opportunities', label: 'Opportunities', icon: Sparkles },
-      { href: '/approvals', label: 'Approvals', icon: ShieldCheck },
+      { href: '/overview', label: 'Executive Dashboard', icon: LayoutDashboard },
+      { href: '/ai-agent', label: 'AI Agent Brain', icon: Brain },
+      { href: '/opportunities', label: 'Opportunities Pipeline', icon: Sparkles },
+      { href: '/approvals', label: 'Approval Security Center', icon: ShieldCheck },
     ],
   },
   {
-    title: 'COMMERCE',
+    title: 'COMMERCE ENGINE',
     items: [
-      { href: '/products', label: 'Products', icon: Package },
-      { href: '/ai-buyers', label: 'AI Buyers', icon: Bot },
-      { href: '/catalog', label: 'Catalog', icon: BookOpen },
-      { href: '/campaigns', label: 'Campaigns', icon: Megaphone },
+      { href: '/ai-buyers', label: 'Agentic AI Buyers', icon: Bot },
+      { href: '/catalog', label: 'Catalog Intelligence', icon: BookOpen },
+      { href: '/products', label: 'Products & Stock', icon: Package },
+      { href: '/campaigns', label: 'Growth Campaigns', icon: Megaphone },
     ],
   },
   {
-    title: 'CONTROL',
+    title: 'FINTECH & GOVERNANCE',
     items: [
-      { href: '/transactions', label: 'Transactions', icon: CreditCard },
-      { href: '/audit', label: 'Audit Trail', icon: FileText },
-      { href: '/settings', label: 'Policies', icon: Sliders },
-    ],
-  },
-  {
-    title: 'GENERAL',
-    items: [
-      { href: '/settings', label: 'Settings', icon: Settings },
+      { href: '/transactions', label: 'Payment Transactions', icon: CreditCard },
+      { href: '/payment-observability', label: 'Payment Observability', icon: Activity },
+      { href: '/audit', label: 'Immutable Audit Trail', icon: FileText },
+      { href: '/settings', label: 'Policy Guardrails', icon: Sliders },
     ],
   },
 ];
@@ -60,6 +56,40 @@ const NAV_GROUPS = [
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const [session, setSession] = React.useState<{
+    merchantName?: string;
+    personalMerchantName?: string;
+    isDemoWorkspace?: boolean;
+    name?: string;
+  } | null>(null);
+  const [workspaceMenuOpen, setWorkspaceMenuOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    fetch('/api/auth/session')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setSession(data.user);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSwitchWorkspace = async (mode: 'demo' | 'personal') => {
+    try {
+      const res = await fetch('/api/auth/switch-workspace', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode }),
+      });
+      if (res.ok) {
+        setWorkspaceMenuOpen(false);
+        window.location.reload();
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -70,8 +100,11 @@ export const Sidebar: React.FC = () => {
     }
   };
 
+  const currentMerchantName = session?.merchantName || 'Apex Athletics & Gear';
+  const isDemo = Boolean(session?.isDemoWorkspace);
+
   return (
-    <aside className="finpilot-sidebar" style={{ padding: '18px 12px' }}>
+    <aside className="revolve-sidebar" style={{ padding: '18px 12px' }}>
       {/* ─── 1. Brand Logo & Title ────────────────────────────── */}
       <div style={{
         display: 'flex',
@@ -102,35 +135,130 @@ export const Sidebar: React.FC = () => {
         <ThemeToggle />
       </div>
 
-      {/* ─── 2. Workspace Selector ────────────────────────────── */}
-      <div style={{ padding: '10px 0 6px' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '6px 10px',
-          background: 'var(--bg-tertiary)',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid var(--border-primary)',
-        }}>
+      {/* ─── 2. Interactive Workspace Selector ─────────────────── */}
+      <div style={{ padding: '10px 0 6px', position: 'relative' }}>
+        <button
+          type="button"
+          onClick={() => setWorkspaceMenuOpen(!workspaceMenuOpen)}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '6px 10px',
+            background: 'var(--bg-tertiary)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-primary)',
+            cursor: 'pointer',
+            textAlign: 'left',
+          }}
+          aria-label="Switch active workspace"
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
             <div style={{
               width: 22, height: 22,
               borderRadius: 'var(--radius-sm)',
-              background: 'var(--text-primary)',
-              color: 'var(--text-inverse)',
+              background: isDemo ? 'var(--warning)' : 'var(--text-primary)',
+              color: isDemo ? '#000' : 'var(--text-inverse)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '0.6875rem', fontWeight: 800,
               flexShrink: 0,
             }}>
-              A
+              {currentMerchantName.slice(0, 1).toUpperCase()}
             </div>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-              Apex Athletics &amp; Gear
-            </span>
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {currentMerchantName}
+              </div>
+              <div style={{ fontSize: '0.5625rem', color: isDemo ? 'var(--warning-text)' : 'var(--success)', fontWeight: 700, textTransform: 'uppercase' }}>
+                {isDemo ? 'Demo Workspace' : 'Personal Workspace'}
+              </div>
+            </div>
           </div>
           <ChevronDown size={13} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }} />
-        </div>
+        </button>
+
+        {/* Workspace Switcher Popover */}
+        {workspaceMenuOpen && (
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            marginTop: 4,
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-card)',
+            padding: 6,
+            zIndex: 50,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+          }}>
+            <div style={{ fontSize: '0.5625rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', padding: '2px 6px' }}>
+              Available Workspaces
+            </div>
+
+            {/* Personal Workspace Option */}
+            <button
+              type="button"
+              onClick={() => handleSwitchWorkspace('personal')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 8px',
+                borderRadius: 'var(--radius-sm)',
+                background: !isDemo ? 'var(--bg-tertiary)' : 'transparent',
+                border: 'none',
+                color: 'var(--text-primary)',
+                fontSize: '0.6875rem',
+                fontWeight: !isDemo ? 700 : 500,
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
+                <span style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                  {session?.personalMerchantName || 'Personal Workspace'}
+                </span>
+              </div>
+              {!isDemo && <Check size={12} style={{ color: 'var(--success)' }} />}
+            </button>
+
+            {/* Demo Workspace Option */}
+            <button
+              type="button"
+              onClick={() => handleSwitchWorkspace('demo')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 8px',
+                borderRadius: 'var(--radius-sm)',
+                background: isDemo ? 'var(--bg-tertiary)' : 'transparent',
+                border: 'none',
+                color: 'var(--text-primary)',
+                fontSize: '0.6875rem',
+                fontWeight: isDemo ? 700 : 500,
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--warning)', flexShrink: 0 }} />
+                <span style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                  Apex Athletics (Demo Showcase)
+                </span>
+              </div>
+              {isDemo && <Check size={12} style={{ color: 'var(--warning-text)' }} />}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ─── 3. Grouped Navigation Links ──────────────────────── */}

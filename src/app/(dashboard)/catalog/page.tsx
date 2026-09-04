@@ -15,7 +15,10 @@ import {
   CheckCircle2,
   Tag,
   Code2,
-  LayoutGrid
+  LayoutGrid,
+  Upload,
+  FileSpreadsheet,
+  ExternalLink,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
@@ -62,7 +65,27 @@ export default function CatalogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { success } = useToast();
+  const [isSeeding, setIsSeeding] = useState(false);
+  const { success, error } = useToast();
+
+  const handleSeedDemoCatalog = async () => {
+    setIsSeeding(true);
+    try {
+      const res = await fetch('/api/catalog/seed-demo', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to seed demo catalog');
+      }
+      success('Starter Catalog Ingested', `Loaded ${data.createdCount} products into your workspace.`);
+      await fetchCatalog();
+    } catch (err: unknown) {
+      error('Ingestion Error', err instanceof Error ? err.message : 'Failed to load demo catalog');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   const fetchCatalog = async () => {
     setIsLoading(true);
@@ -321,9 +344,142 @@ export default function CatalogPage() {
                 );
               })}
             </div>
+          ) : products.length === 0 ? (
+            /* ── Rich Empty State: Connect Your Catalog ─────────── */
+            <div className="bg-[#0D0D0D] border border-[#262626] rounded-xl p-6 sm:p-8 space-y-6 shadow-xl">
+              <div className="text-center max-w-xl mx-auto">
+                <div className="w-14 h-14 rounded-2xl bg-[var(--ai-bg)] border border-[var(--ai-border)] flex items-center justify-center mx-auto mb-4 text-[var(--ai-primary)] shadow-sm">
+                  <Package size={28} />
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--ai-bg)] border border-[var(--ai-border)] text-[var(--ai-text)] text-[0.6875rem] font-bold uppercase tracking-wider mb-2">
+                  <Sparkles size={11} /> Structured Product Feed
+                </div>
+                <h3 className="font-heading font-bold text-xl text-white mb-2">
+                  CONNECT YOUR CATALOG
+                </h3>
+                <p className="text-xs text-[#888888] leading-relaxed">
+                  Your AI Commerce Engine requires inventory data to analyze basket affinities, calculate cross-sell probabilities, and generate 1-click Razorpay checkout sessions.
+                </p>
+              </div>
+
+              {/* 3 Onboarding Options */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                {/* Option 1: Upload CSV */}
+                <div className="bg-[#141414] border border-[#262626] rounded-xl p-5 flex flex-col justify-between hover:border-[#444444] transition-colors">
+                  <div>
+                    <div className="w-10 h-10 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/30 flex items-center justify-center text-[#3B82F6] mb-3">
+                      <FileSpreadsheet size={20} />
+                    </div>
+                    <div className="text-[0.6875rem] font-bold uppercase tracking-wider text-[#888888] mb-1">
+                      Option 1
+                    </div>
+                    <h4 className="font-heading font-semibold text-sm text-white mb-1.5">
+                      Upload CSV Feed
+                    </h4>
+                    <p className="text-xs text-[#888888] leading-relaxed mb-4">
+                      Bulk ingest SKUs with columns: name, price, category, inventory, and features.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => success('CSV Template', 'Ready for CSV import: name, price, category, inventory.')}
+                  >
+                    <Upload size={13} />
+                    <span>Upload CSV</span>
+                  </Button>
+                </div>
+
+                {/* Option 2: Connect Storefront API */}
+                <div className="bg-[#141414] border border-[#262626] rounded-xl p-5 flex flex-col justify-between hover:border-[#444444] transition-colors">
+                  <div>
+                    <div className="w-10 h-10 rounded-lg bg-[var(--ai-bg)] border border-[var(--ai-border)] flex items-center justify-center text-[var(--ai-primary)] mb-3">
+                      <Code2 size={20} />
+                    </div>
+                    <div className="text-[0.6875rem] font-bold uppercase tracking-wider text-[#888888] mb-1">
+                      Option 2
+                    </div>
+                    <h4 className="font-heading font-semibold text-sm text-white mb-1.5">
+                      Storefront REST API
+                    </h4>
+                    <p className="text-xs text-[#888888] leading-relaxed mb-4">
+                      Push real-time catalog changes directly via authenticated REST endpoint.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => success('API Ingestion', 'Endpoint: POST /api/products with Authorization: Bearer <token>')}
+                  >
+                    <Code2 size={13} />
+                    <span>API Endpoint Info</span>
+                  </Button>
+                </div>
+
+                {/* Option 3: Use Demo Catalog (1-Click) */}
+                <div className="bg-[#141414] border border-[#00C076]/40 rounded-xl p-5 flex flex-col justify-between relative overflow-hidden shadow-sm">
+                  <div className="absolute top-2 right-2">
+                    <span className="badge badge-fintech text-[0.5625rem] py-0.5 px-1.5">
+                      Instant 1-Click
+                    </span>
+                  </div>
+                  <div>
+                    <div className="w-10 h-10 rounded-lg bg-[#00C076]/10 border border-[#00C076]/30 flex items-center justify-center text-[#00C076] mb-3">
+                      <Sparkles size={20} />
+                    </div>
+                    <div className="text-[0.6875rem] font-bold uppercase tracking-wider text-[#00C076] mb-1">
+                      Option 3 (Recommended)
+                    </div>
+                    <h4 className="font-heading font-semibold text-sm text-white mb-1.5">
+                      Use Starter Catalog
+                    </h4>
+                    <p className="text-xs text-[#888888] leading-relaxed mb-4">
+                      Instantly load 7 high-conversion electronics &amp; accessories to evaluate AI workflows right away.
+                    </p>
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="w-full"
+                    onClick={handleSeedDemoCatalog}
+                    disabled={isSeeding}
+                  >
+                    <Sparkles size={13} className={isSeeding ? 'animate-spin' : ''} />
+                    <span>{isSeeding ? 'Ingesting...' : 'Ingest 7 Starter Items'}</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Machine Ingestion Pipeline Diagram */}
+              <div className="bg-[#141414] border border-[#262626] rounded-xl p-4 text-xs">
+                <div className="text-[0.625rem] font-mono text-[#666666] uppercase tracking-wider font-semibold mb-3">
+                  Machine Ingestion Pipeline
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {[
+                    { step: '1. Ingestion', desc: 'JSON-LD normalization' },
+                    { step: '2. Embeddings', desc: 'Semantic feature vectors' },
+                    { step: '3. Affinity Graph', desc: 'Co-purchase matrix' },
+                    { step: '4. Storefront Ready', desc: 'Razorpay checkout hooks' },
+                  ].map((pipe) => (
+                    <div key={pipe.step} className="p-2.5 rounded bg-[#0D0D0D] border border-[#1F1F1F]">
+                      <div className="font-semibold text-white text-[0.6875rem]">{pipe.step}</div>
+                      <div className="text-[0.625rem] text-[#888888] mt-0.5">{pipe.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="card text-center p-12 text-[var(--text-tertiary)]">
               No products found matching &ldquo;{searchQuery}&rdquo;.
+              <div className="mt-3">
+                <Button variant="outline" size="sm" onClick={() => setSearchQuery('')}>
+                  Clear Search
+                </Button>
+              </div>
             </div>
           )}
         </div>

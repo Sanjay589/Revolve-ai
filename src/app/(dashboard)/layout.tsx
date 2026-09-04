@@ -13,7 +13,7 @@ export default function DashboardLayout({
 }) {
   return (
     <ToastProvider>
-      <div className="finpilot-shell">
+      <div className="revolve-shell">
         {/* Floating Left Sidebar (Desktop) */}
         <Sidebar />
 
@@ -21,12 +21,12 @@ export default function DashboardLayout({
         <MobileNav />
 
         {/* Main Dashboard Content Area */}
-        <div className="finpilot-main">
+        <div className="revolve-main">
           {/* Shared TopBar Header (Desktop) */}
           <TopBar />
 
           {/* Page Content Container */}
-          <main className="finpilot-content-container">
+          <main className="revolve-content-container">
             {children}
           </main>
         </div>

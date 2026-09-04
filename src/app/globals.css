@@ -111,6 +111,68 @@
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 0 1px #333333;
 }
 
+[data-theme='light'] {
+  /* Surfaces */
+  --bg-canvas: #F8F9FA;
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F3F4F6;
+  --bg-tertiary: #E5E7EB;
+  --bg-hover: #E5E7EB;
+  --bg-active: #D1D5DB;
+  --bg-card: #FFFFFF;
+
+  /* Text Hierarchy */
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-tertiary: #6B7280;
+  --text-inverse: #FFFFFF;
+  --text-hero-sub: #374151;
+
+  /* Borders */
+  --border-primary: #E5E7EB;
+  --border-secondary: #F3F4F6;
+  --border-focus: #111827;
+
+  /* AI Accent */
+  --ai-primary: #6366F1;
+  --ai-secondary: #4F46E5;
+  --ai-bg: rgba(99, 102, 241, 0.08);
+  --ai-border: rgba(99, 102, 241, 0.25);
+  --ai-text: #4338CA;
+
+  /* Semantic Colors */
+  --success: #00A86B;
+  --success-bg: rgba(0, 168, 107, 0.08);
+  --success-border: rgba(0, 168, 107, 0.25);
+  --success-text: #065F46;
+  --fintech-primary: #00A86B;
+  --fintech-bg: rgba(0, 168, 107, 0.08);
+  --fintech-border: rgba(0, 168, 107, 0.25);
+  --fintech-text: #065F46;
+
+  --warning: #D97706;
+  --warning-bg: rgba(217, 119, 6, 0.08);
+  --warning-border: rgba(217, 119, 6, 0.25);
+  --warning-text: #92400E;
+
+  --error: #DC2626;
+  --error-bg: rgba(220, 38, 38, 0.08);
+  --error-border: rgba(220, 38, 38, 0.25);
+  --error-text: #991B1B;
+
+  --info: #2563EB;
+  --info-bg: rgba(37, 99, 235, 0.08);
+  --info-border: rgba(37, 99, 235, 0.25);
+  --info-text: #1E40AF;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px #E5E7EB;
+}
+
 /* ═══════════════════════════════════════════════════════════
    LIQUID GLASS UTILITY (With Fallback for Non-Supporting Browsers)
    ═══════════════════════════════════════════════════════════ */
@@ -147,6 +209,9 @@
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
@@ -179,7 +244,7 @@
    APP SHELL & LAYOUT ARCHITECTURE
    ═══════════════════════════════════════════════════════════ */
 
-.dashboard-shell, .finpilot-shell {
+.dashboard-shell, .revolve-shell, .finpilot-shell {
   display: flex;
   min-height: 100vh;
   background: var(--bg-canvas);
@@ -189,7 +254,7 @@
 
 /* ─── Left Sidebar (Desktop only) ───────────────────────── */
 
-.sidebar, .finpilot-sidebar {
+.sidebar, .revolve-sidebar, .finpilot-sidebar {
   width: var(--sidebar-width);
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-primary);
@@ -247,7 +312,7 @@
 
 /* ─── Main Content Container ─────────────────────────────── */
 
-.main-content, .finpilot-main {
+.main-content, .revolve-main, .finpilot-main {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -256,7 +321,7 @@
   min-height: 100vh;
 }
 
-.finpilot-topbar {
+.revolve-topbar, .finpilot-topbar {
   height: 56px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-primary);
@@ -269,7 +334,7 @@
   z-index: 30;
 }
 
-.finpilot-content-container {
+.revolve-content-container, .finpilot-content-container {
   padding: 24px 28px 48px;
   max-width: 1400px;
   width: 100%;
@@ -283,7 +348,7 @@
 /* ─── Desktop App Shell (1025px and up) ──────────────────── */
 
 @media (min-width: 1025px) {
-  .sidebar, .finpilot-sidebar {
+  .sidebar, .revolve-sidebar, .finpilot-sidebar {
     display: flex !important;
   }
 
@@ -305,11 +370,11 @@
 /* ─── Mobile App Shell (1024px and down) ─────────────────── */
 
 @media (max-width: 1024px) {
-  .sidebar, .finpilot-sidebar {
+  .sidebar, .revolve-sidebar, .finpilot-sidebar {
     display: none !important;
   }
 
-  .finpilot-topbar {
+  .revolve-topbar, .finpilot-topbar {
     display: none !important;
   }
 
@@ -343,12 +408,12 @@
   }
 
   /* Content offset to prevent any overlap under top/bottom bars */
-  .main-content, .finpilot-main {
+  .main-content, .revolve-main, .finpilot-main {
     padding-top: 60px !important;
     padding-bottom: 68px !important;
   }
 
-  .finpilot-content-container {
+  .revolve-content-container, .finpilot-content-container {
     padding: 16px 14px 28px;
     gap: 20px;
   }

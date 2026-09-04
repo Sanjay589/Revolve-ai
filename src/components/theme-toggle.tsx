@@ -1,34 +1,83 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Laptop } from 'lucide-react';
+
+export type ThemeMode = 'dark' | 'light' | 'system';
 
 export const ThemeToggle: React.FC = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [mode, setMode] = useState<ThemeMode>('dark');
+  const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>('dark');
+
+  const applyTheme = (targetMode: ThemeMode) => {
+    let effective: 'dark' | 'light' = 'dark';
+    if (targetMode === 'system') {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      effective = isDark ? 'dark' : 'light';
+    } else {
+      effective = targetMode;
+    }
+    setResolvedTheme(effective);
+    document.documentElement.setAttribute('data-theme', effective);
+  };
 
   useEffect(() => {
-    const saved = localStorage.getItem('revolve_theme') as 'light' | 'dark' | null;
-    const initial = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    setTheme(initial);
-    document.documentElement.setAttribute('data-theme', initial);
+    const saved = localStorage.getItem('revolve_theme') as ThemeMode | null;
+    const initialMode: ThemeMode = saved || 'dark';
+    setMode(initialMode);
+    applyTheme(initialMode);
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      const currentSaved = localStorage.getItem('revolve_theme') as ThemeMode | null;
+      if (currentSaved === 'system') {
+        applyTheme('system');
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  const toggle = () => {
-    const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    localStorage.setItem('revolve_theme', next);
-    document.documentElement.setAttribute('data-theme', next);
+  const cycleTheme = () => {
+    let nextMode: ThemeMode = 'dark';
+    if (mode === 'dark') nextMode = 'light';
+    else if (mode === 'light') nextMode = 'system';
+    else if (mode === 'system') nextMode = 'dark';
+
+    setMode(nextMode);
+    localStorage.setItem('revolve_theme', nextMode);
+    applyTheme(nextMode);
+  };
+
+  const getLabel = () => {
+    if (mode === 'dark') return 'Theme: Dark (click for Light)';
+    if (mode === 'light') return 'Theme: Light (click for System)';
+    return `Theme: System (${resolvedTheme}) (click for Dark)`;
   };
 
   return (
     <button
       type="button"
-      onClick={toggle}
-      className="btn btn-ghost btn-icon"
-      aria-label="Toggle light and dark mode"
-      title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      onClick={cycleTheme}
+      className="btn btn-ghost btn-icon relative group"
+      aria-label={getLabel()}
+      title={getLabel()}
     >
-      {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+      {mode === 'dark' && <Moon size={17} />}
+      {mode === 'light' && <Sun size={17} />}
+      {mode === 'system' && <Laptop size={17} />}
+
+      {/* Tiny mode indicator dot */}
+      <span
+        className={`absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full ${
+          mode === 'system'
+            ? 'bg-[#818CF8]'
+            : mode === 'light'
+            ? 'bg-[#F59E0B]'
+            : 'bg-[#00C076]'
+        }`}
+      />
     </button>
   );
 };
