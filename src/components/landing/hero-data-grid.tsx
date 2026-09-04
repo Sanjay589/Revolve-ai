@@ -6,19 +6,64 @@ import { motion, useReducedMotion } from 'framer-motion';
 export const HeroDataGrid: React.FC = () => {
   const shouldReduceMotion = useReducedMotion();
 
-  // Grid node definitions representing Revolve AI's autonomous pipeline
+  // 6 nodes positioned in the outer lateral flanks framing the headline and CTAs
   const nodes = [
-    { id: 'node-catalog', x: 220, y: 140, label: 'CATALOG_SYNC', color: '#00C076' },
-    { id: 'node-policy', x: 600, y: 80, label: 'POLICY_GATE', color: '#818CF8' },
-    { id: 'node-ledger', x: 980, y: 160, label: 'HMAC_LEDGER', color: '#00C076' },
-    { id: 'node-aux-1', x: 380, y: 260, label: '', color: '#FFFFFF' },
-    { id: 'node-aux-2', x: 820, y: 280, label: '', color: '#FFFFFF' },
+    {
+      id: 'node-catalog',
+      x: 100,
+      y: 150,
+      label: 'CATALOG_SYNC',
+      badgeWidth: 94,
+      color: '#00C076',
+    },
+    {
+      id: 'node-affinity',
+      x: 80,
+      y: 330,
+      label: 'AFFINITY_SCAN',
+      badgeWidth: 92,
+      color: '#818CF8',
+    },
+    {
+      id: 'node-stream',
+      x: 100,
+      y: 500,
+      label: 'BASKET_STREAM',
+      badgeWidth: 96,
+      color: '#00C076',
+    },
+    {
+      id: 'node-policy-gate',
+      x: 1340,
+      y: 150,
+      label: 'POLICY_GATE',
+      badgeWidth: 88,
+      color: '#818CF8',
+    },
+    {
+      id: 'node-ledger',
+      x: 1360,
+      y: 330,
+      label: 'HMAC_LEDGER',
+      badgeWidth: 90,
+      color: '#00C076',
+    },
+    {
+      id: 'node-recovery',
+      x: 1340,
+      y: 500,
+      label: 'EXEC_RECOVERY',
+      badgeWidth: 96,
+      color: '#F59E0B',
+    },
   ];
 
-  // Pipeline connector paths
-  const connectorPath1 = 'M 220 140 L 600 80';
-  const connectorPath2 = 'M 600 80 L 980 160';
-  const connectorPath3 = 'M 380 260 L 600 80 L 820 280';
+  // Pipeline connector paths framing the hero
+  const connectorArch = 'M 100 150 L 260 65 L 1180 65 L 1340 150';
+  const connectorLeftCol = 'M 100 150 L 80 330 L 100 500';
+  const connectorRightCol = 'M 1340 150 L 1360 330 L 1340 500';
+  const connectorDiagonalLeft = 'M 100 500 L 260 65';
+  const connectorDiagonalRight = 'M 1340 500 L 1180 65';
 
   return (
     <div
@@ -27,31 +72,31 @@ export const HeroDataGrid: React.FC = () => {
     >
       {/* Subtle radial dark ambient gradient for lighting depth */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[520px] opacity-30"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[1400px] h-[650px] opacity-40 pointer-events-none"
         style={{
           background:
-            'radial-gradient(circle at 50% 30%, rgba(0, 192, 118, 0.09) 0%, rgba(99, 102, 241, 0.05) 35%, transparent 70%)',
-          filter: 'blur(70px)',
+            'radial-gradient(circle at 50% 25%, rgba(0, 192, 118, 0.14) 0%, rgba(99, 102, 241, 0.08) 45%, transparent 70%)',
+          filter: 'blur(80px)',
         }}
       />
 
-      {/* SVG Responsive Grid System with Smooth Radial Fade Mask */}
+      {/* SVG Responsive Grid System calibrated for 1440x680 */}
       <svg
-        className="w-full h-full min-h-[580px] max-h-[760px] opacity-90"
-        viewBox="0 0 1200 480"
+        className="w-full h-full min-h-[580px] max-h-[760px]"
+        viewBox="0 0 1440 680"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="xMidYMin slice"
+        preserveAspectRatio="xMidYMin meet"
       >
         <defs>
-          {/* Radial mask that softly feathers the grid lines out toward the edges & bottom */}
-          <radialGradient id="hero-grid-fade" cx="50%" cy="35%" r="55%">
+          {/* Radial mask specifically for the background grid pattern */}
+          <radialGradient id="hero-grid-fade" cx="50%" cy="30%" r="70%">
             <stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
-            <stop offset="65%" stopColor="#FFFFFF" stopOpacity="0.6" />
+            <stop offset="65%" stopColor="#FFFFFF" stopOpacity="0.5" />
             <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
           </radialGradient>
 
-          {/* Grid pattern with ~4% white opacity lines (1px) */}
+          {/* Grid pattern with ~5% white opacity lines (1px) */}
           <pattern
             id="hero-grid-pattern"
             width="80"
@@ -61,135 +106,168 @@ export const HeroDataGrid: React.FC = () => {
             <path
               d="M 80 0 L 0 0 0 80"
               fill="none"
-              stroke="rgba(255, 255, 255, 0.04)"
+              stroke="rgba(255, 255, 255, 0.05)"
               strokeWidth="1"
             />
           </pattern>
         </defs>
 
-        {/* 1. Animated Grid Fill */}
-        <motion.rect
+        {/* 1. Subtle Background Grid Texture (Gently faded at edges) */}
+        <rect
           width="100%"
           height="100%"
           fill="url(#hero-grid-pattern)"
           mask="url(#hero-grid-fade)"
-          initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-          style={{ transformOrigin: 'top center' }}
         />
 
-        {/* 2. Pipeline Connector Lines (Draw-in on load, ~15-20% white opacity) */}
-        <g mask="url(#hero-grid-fade)">
-          {/* Path 1: Catalog -> Policy */}
-          <motion.path
-            d={connectorPath1}
-            stroke="rgba(255, 255, 255, 0.16)"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-            fill="none"
-            initial={shouldReduceMotion ? { pathLength: 1, opacity: 0.8 } : { pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 0.8 }}
-            transition={{ duration: 1.8, delay: 0.4, ease: 'easeOut' }}
-          />
-
-          {/* Path 2: Policy -> Razorpay Ledger */}
-          <motion.path
-            d={connectorPath2}
-            stroke="rgba(255, 255, 255, 0.16)"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-            fill="none"
-            initial={shouldReduceMotion ? { pathLength: 1, opacity: 0.8 } : { pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 0.8 }}
-            transition={{ duration: 1.8, delay: 0.6, ease: 'easeOut' }}
-          />
-
-          {/* Path 3: Auxiliary telemetry branch */}
-          <motion.path
-            d={connectorPath3}
-            stroke="rgba(255, 255, 255, 0.08)"
-            strokeWidth="1"
-            strokeDasharray="2 4"
-            fill="none"
-            initial={shouldReduceMotion ? { pathLength: 1, opacity: 0.5 } : { pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 0.5 }}
-            transition={{ duration: 2.2, delay: 0.7, ease: 'easeOut' }}
-          />
-        </g>
-
-        {/* 3. Grid Intersection Plus / Cross Markers */}
-        <g mask="url(#hero-grid-fade)">
+        {/* 2. Grid Intersection Cross Markers (~25-28% white opacity, 10px size) */}
+        <g>
           {[
-            { x: 160, y: 80 },
-            { x: 320, y: 80 },
-            { x: 480, y: 80 },
-            { x: 720, y: 80 },
-            { x: 880, y: 80 },
-            { x: 1040, y: 80 },
-            { x: 240, y: 160 },
-            { x: 400, y: 160 },
-            { x: 560, y: 160 },
-            { x: 720, y: 160 },
-            { x: 880, y: 160 },
-            { x: 160, y: 240 },
-            { x: 480, y: 240 },
-            { x: 720, y: 240 },
-            { x: 1040, y: 240 },
+            { x: 140, y: 260 },
+            { x: 300, y: 140 },
+            { x: 300, y: 340 },
+            { x: 1140, y: 140 },
+            { x: 1140, y: 340 },
+            { x: 1300, y: 260 },
+            { x: 220, y: 48 },
+            { x: 1220, y: 48 },
+            { x: 80, y: 460 },
+            { x: 1360, y: 460 },
           ].map((pt, i) => (
-            <motion.g
-              key={`cross-${i}`}
-              initial={shouldReduceMotion ? { opacity: 0.25 } : { opacity: 0 }}
-              animate={{ opacity: [0.15, 0.35, 0.15] }}
-              transition={
-                shouldReduceMotion
-                  ? { duration: 0 }
-                  : {
-                      duration: 3.5,
-                      repeat: Infinity,
-                      delay: (i % 5) * 0.4,
-                      ease: 'easeInOut',
-                    }
-              }
-            >
-              {/* Subtle cross / plus mark 8px */}
+            <g key={`cross-${i}`} opacity="0.28">
               <line
-                x1={pt.x - 4}
+                x1={pt.x - 5}
                 y1={pt.y}
-                x2={pt.x + 4}
+                x2={pt.x + 5}
                 y2={pt.y}
-                stroke="rgba(255, 255, 255, 0.25)"
+                stroke="#FFFFFF"
                 strokeWidth="1"
               />
               <line
                 x1={pt.x}
-                y1={pt.y - 4}
+                y1={pt.y - 5}
                 x2={pt.x}
-                y2={pt.y + 4}
-                stroke="rgba(255, 255, 255, 0.25)"
+                y2={pt.y + 5}
+                stroke="#FFFFFF"
                 strokeWidth="1"
               />
-            </motion.g>
+            </g>
           ))}
         </g>
 
-        {/* 4. Active Pipeline Node Points with Subtle Breathing Glow */}
-        <g mask="url(#hero-grid-fade)">
+        {/* 3. Pipeline Connector Lines (Desktop only >= 1280px) */}
+        <g className="hidden xl:inline">
+          {/* Main Top Architectural Arch */}
+          <path
+            d={connectorArch}
+            stroke="rgba(255, 255, 255, 0.24)"
+            strokeWidth="1.5"
+            strokeDasharray="5 5"
+            fill="none"
+          />
+
+          {/* Animated Light Packet flowing through the Arch */}
+          <motion.path
+            d={connectorArch}
+            stroke="#00C076"
+            strokeWidth="2"
+            strokeDasharray="30 320"
+            fill="none"
+            initial={shouldReduceMotion ? false : { strokeDashoffset: 500 }}
+            animate={shouldReduceMotion ? false : { strokeDashoffset: -500 }}
+            transition={{
+              duration: 4.5,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+            opacity="0.65"
+          />
+
+          {/* Left Column Feed */}
+          <path
+            d={connectorLeftCol}
+            stroke="rgba(255, 255, 255, 0.22)"
+            strokeWidth="1.5"
+            strokeDasharray="5 5"
+            fill="none"
+          />
+          <motion.path
+            d={connectorLeftCol}
+            stroke="#818CF8"
+            strokeWidth="2"
+            strokeDasharray="25 180"
+            fill="none"
+            initial={shouldReduceMotion ? false : { strokeDashoffset: 300 }}
+            animate={shouldReduceMotion ? false : { strokeDashoffset: -300 }}
+            transition={{
+              duration: 3.5,
+              repeat: Infinity,
+              ease: 'linear',
+              delay: 0.5,
+            }}
+            opacity="0.6"
+          />
+
+          {/* Right Column Feed */}
+          <path
+            d={connectorRightCol}
+            stroke="rgba(255, 255, 255, 0.22)"
+            strokeWidth="1.5"
+            strokeDasharray="5 5"
+            fill="none"
+          />
+          <motion.path
+            d={connectorRightCol}
+            stroke="#00C076"
+            strokeWidth="2"
+            strokeDasharray="25 180"
+            fill="none"
+            initial={shouldReduceMotion ? false : { strokeDashoffset: 300 }}
+            animate={shouldReduceMotion ? false : { strokeDashoffset: -300 }}
+            transition={{
+              duration: 3.5,
+              repeat: Infinity,
+              ease: 'linear',
+              delay: 1.2,
+            }}
+            opacity="0.6"
+          />
+
+          {/* Diagonal Bracing Conduits */}
+          <path
+            d={connectorDiagonalLeft}
+            stroke="rgba(255, 255, 255, 0.16)"
+            strokeWidth="1.2"
+            strokeDasharray="4 4"
+            fill="none"
+          />
+          <path
+            d={connectorDiagonalRight}
+            stroke="rgba(255, 255, 255, 0.16)"
+            strokeWidth="1.2"
+            strokeDasharray="4 4"
+            fill="none"
+          />
+        </g>
+
+        {/* 4. Active Pipeline Node Markers & High-Contrast Labels (~25-35% opacity + crisp text, desktop xl+ only) */}
+        <g className="hidden xl:inline">
           {nodes.map((node, i) => (
             <g key={node.id}>
-              {/* Subtle ambient pulse ring */}
+              {/* Outer Pulse Ring (~11px radius, ~22px diameter, ~25-35% opacity) */}
               <motion.circle
                 cx={node.x}
                 cy={node.y}
-                r="7"
+                r="11"
                 fill="none"
                 stroke={node.color}
-                initial={shouldReduceMotion ? { opacity: 0.2, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                strokeWidth="1.5"
+                initial={shouldReduceMotion ? { opacity: 0.35, scale: 1 } : { opacity: 0.25, scale: 0.95 }}
                 animate={
                   shouldReduceMotion
-                    ? { opacity: 0.2 }
+                    ? { opacity: 0.35 }
                     : {
-                        opacity: [0.1, 0.35, 0.1],
+                        opacity: [0.25, 0.55, 0.25],
                         scale: [1, 1.25, 1],
                       }
                 }
@@ -199,39 +277,80 @@ export const HeroDataGrid: React.FC = () => {
                     : {
                         duration: 3.2,
                         repeat: Infinity,
-                        delay: i * 0.5,
+                        delay: i * 0.4,
                         ease: 'easeInOut',
                       }
                 }
               />
 
-              {/* Core node dot */}
-              <motion.circle
+              {/* Middle Concentric Ring (~6.5px radius) */}
+              <circle
                 cx={node.x}
                 cy={node.y}
-                r="2.5"
-                fill={node.color}
-                initial={shouldReduceMotion ? { opacity: 0.6 } : { opacity: 0 }}
-                animate={{ opacity: 0.6 }}
-                transition={{ duration: 0.8, delay: 0.3 + i * 0.2 }}
+                r="6.5"
+                fill="none"
+                stroke={node.color}
+                strokeWidth="1"
+                opacity="0.5"
               />
 
-              {/* Faint technical label if present */}
+              {/* Core Node Solid Dot (~3.5px radius, 7px diameter) */}
+              <circle
+                cx={node.x}
+                cy={node.y}
+                r="3.5"
+                fill={node.color}
+                opacity="0.95"
+              />
+
+              {/* Inner High-Contrast White Pip */}
+              <circle
+                cx={node.x}
+                cy={node.y}
+                r="1.2"
+                fill="#FFFFFF"
+                opacity="1"
+              />
+
+              {/* High-Contrast Node Label with Dark Pill Backdrop */}
               {node.label && (
-                <motion.text
-                  x={node.x}
-                  y={node.y + 16}
-                  textAnchor="middle"
-                  fill="rgba(255, 255, 255, 0.28)"
-                  fontSize="8"
-                  fontFamily="var(--font-mono, monospace)"
-                  letterSpacing="0.08em"
-                  initial={shouldReduceMotion ? { opacity: 0.4 } : { opacity: 0 }}
-                  animate={{ opacity: 0.4 }}
-                  transition={{ duration: 1, delay: 0.8 + i * 0.2 }}
-                >
-                  {node.label}
-                </motion.text>
+                <g>
+                  {/* Subtle Dark Pill Background to ensure 100% legibility */}
+                  <rect
+                    x={node.x - node.badgeWidth / 2}
+                    y={node.y + 16}
+                    width={node.badgeWidth}
+                    height="18"
+                    rx="4"
+                    fill="#0A0A0A"
+                    stroke="rgba(255, 255, 255, 0.18)"
+                    strokeWidth="1"
+                    opacity="0.95"
+                  />
+
+                  {/* Colored status dot inside pill */}
+                  <circle
+                    cx={node.x - node.badgeWidth / 2 + 8}
+                    cy={node.y + 25}
+                    r="2"
+                    fill={node.color}
+                  />
+
+                  {/* Sharp, Legible Monospaced Label */}
+                  <text
+                    x={node.x + 3}
+                    y={node.y + 28.5}
+                    textAnchor="middle"
+                    fill="#FFFFFF"
+                    fillOpacity="0.9"
+                    fontSize="8.5"
+                    fontWeight="600"
+                    fontFamily="var(--font-mono, monospace)"
+                    letterSpacing="0.08em"
+                  >
+                    {node.label}
+                  </text>
+                </g>
               )}
             </g>
           ))}

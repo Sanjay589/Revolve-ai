@@ -118,7 +118,7 @@ export const ProductSimulationTabs: React.FC = () => {
                 id="sim-panel-overview"
                 role="tabpanel"
                 aria-labelledby="sim-tab-overview"
-                initial={{ opacity: 0, y: 10 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
@@ -293,7 +293,7 @@ export const ProductSimulationTabs: React.FC = () => {
                 id="sim-panel-scanner"
                 role="tabpanel"
                 aria-labelledby="sim-tab-scanner"
-                initial={{ opacity: 0, y: 10 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
@@ -362,7 +362,7 @@ export const ProductSimulationTabs: React.FC = () => {
                 id="sim-panel-explain"
                 role="tabpanel"
                 aria-labelledby="sim-tab-explain"
-                initial={{ opacity: 0, y: 10 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
@@ -424,7 +424,7 @@ export const ProductSimulationTabs: React.FC = () => {
                 id="sim-panel-policy"
                 role="tabpanel"
                 aria-labelledby="sim-tab-policy"
-                initial={{ opacity: 0, y: 10 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
@@ -491,7 +491,7 @@ export const ProductSimulationTabs: React.FC = () => {
                 id="sim-panel-ledger"
                 role="tabpanel"
                 aria-labelledby="sim-tab-ledger"
-                initial={{ opacity: 0, y: 10 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
@@ -550,7 +550,7 @@ export const ProductSimulationTabs: React.FC = () => {
                 id="sim-panel-buyer"
                 role="tabpanel"
                 aria-labelledby="sim-tab-buyer"
-                initial={{ opacity: 0, y: 10 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
