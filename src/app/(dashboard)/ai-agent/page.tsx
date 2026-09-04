@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { RecommendationCard } from '@/components/recommendation-card';
 import { ExplainabilityModal, ExplainabilityData } from '@/components/explainability-drawer';
 import { FloatingCommerceObjects } from '@/components/ui/floating-commerce-objects';
+import { StatValue } from '@/components/ui/floating-value';
 import { useToast } from '@/components/ui/toast';
 import { formatCurrency } from '@/lib/utils';
 
@@ -240,12 +241,14 @@ export default function AIAgentPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: 2 }}>
                 3. Expected Impact
               </div>
-              <div className="font-mono" style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--fintech-primary)', marginTop: 2 }}>
-                +{formatCurrency(topRec.expectedImpact)} / mo
-              </div>
+              <StatValue
+                value={`+${formatCurrency(topRec.expectedImpact)} / mo`}
+                size="md"
+                font="mono"
+              />
             </div>
 
             <div>

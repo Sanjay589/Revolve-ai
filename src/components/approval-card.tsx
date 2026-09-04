@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Check, X, AlertTriangle, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge, StatusPill } from '@/components/ui/badge';
+import { StatValue } from '@/components/ui/floating-value';
 import { Modal } from '@/components/ui/modal';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
@@ -92,17 +93,10 @@ export const ApprovalCard: React.FC<ApprovalCardProps> = ({
       <div className="editorial-card" style={{ borderLeft: '4px solid var(--warning)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="badge badge-warning" style={{ fontSize: '0.6875rem' }}>
-              <ShieldCheck size={12} /> AWAITING APPROVAL
-            </span>
-            <span className="badge badge-neutral" style={{ textTransform: 'uppercase', fontSize: '0.6875rem' }}>
+            <StatusPill status="AWAITING_APPROVAL" />
+            <span className="badge badge-ai" style={{ textTransform: 'uppercase', fontSize: '0.6875rem' }}>
               {action.type}
             </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-            <Clock size={12} />
-            <span>Expires: {formatDateTime(expiresAt)}</span>
           </div>
         </div>
 
@@ -154,12 +148,14 @@ export const ApprovalCard: React.FC<ApprovalCardProps> = ({
           borderTop: '1px solid var(--border-secondary)',
         }}>
           <div>
-            <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', marginBottom: 2 }}>
               Projected Monthly Value
             </div>
-            <div className="font-mono value-float" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
-              {action.amount ? `+${formatCurrency(action.amount)}` : 'Non-monetary optimization'}
-            </div>
+            <StatValue
+              value={action.amount ? `+${formatCurrency(action.amount)}` : 'Non-monetary optimization'}
+              size="xl"
+              font="mono"
+            />
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>

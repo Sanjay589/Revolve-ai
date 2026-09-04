@@ -428,7 +428,7 @@ export default function OverviewPage() {
                         <td style={{ fontSize: '0.75rem' }}>
                           {formatDateTime(o.createdAt).slice(0, 10)}
                         </td>
-                        <td className="font-mono value-float" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                        <td className="font-mono" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {formatCurrency(o.amount)}
                         </td>
                         <td>

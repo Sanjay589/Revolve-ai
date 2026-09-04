@@ -754,83 +754,32 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 }
 
 /* ═══════════════════════════════════════════════════════════
-   1C. FLOATING VALUE TREATMENT FOR MONETARY FIGURES
+   2. FLOATING VALUE TREATMENT FOR MONETARY FIGURES
+   Purely static elevated visual layer with stacked multi-stop shadow.
+   NO idle animation, NO hover lift, NO transforms of any kind.
    ═══════════════════════════════════════════════════════════ */
 
 .value-float {
   display: inline-block;
   position: relative;
   z-index: 2;
-  transform: translateZ(0);
-  /* Stacked multi-stop shadow: tight dark occlusion + wide diffuse ambient glow */
+  /* Stacked multi-stop drop shadow: tight dark occlusion + wider diffuse ambient glow */
   text-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.14),
-    0 4px 12px rgba(15, 23, 42, 0.08),
-    0 12px 28px rgba(99, 102, 241, 0.14);
+    0 1px 2px rgba(15, 23, 42, 0.16),
+    0 4px 12px rgba(15, 23, 42, 0.09),
+    0 12px 28px rgba(99, 102, 241, 0.15);
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.04));
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              text-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, text-shadow;
+  /* Static elevation only — no hover lift, no translateY */
 }
 
-/* Hover lift on parent card or on value itself */
-.card:hover .value-float,
-.editorial-card:hover .value-float,
-.card-interactive:hover .value-float,
-.value-float:hover {
-  transform: translateY(-2.5px);
-  text-shadow:
-    0 2px 3px rgba(15, 23, 42, 0.18),
-    0 8px 18px rgba(15, 23, 42, 0.10),
-    0 16px 36px rgba(99, 102, 241, 0.22);
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.07));
-}
-
-/* Companion floating element (trend %, sparkline, badge) offset slightly */
+/* Companion element (trend %, badge, sparkline) layered slightly behind/offset at lighter weight */
 .companion-float {
   position: relative;
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  transform: translateZ(0);
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.04),
     0 4px 10px rgba(0, 0, 0, 0.03);
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.card:hover .companion-float,
-.editorial-card:hover .companion-float {
-  transform: translateY(-1.5px) translateX(1px);
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.08),
-    0 6px 16px rgba(0, 0, 0, 0.06);
-}
-
-/* Static layered-shadow appearance on mobile (no hover jumps on touch) */
-@media (max-width: 768px) {
-  .card:hover .value-float,
-  .editorial-card:hover .value-float,
-  .value-float:hover,
-  .card:hover .companion-float,
-  .editorial-card:hover .companion-float {
-    transform: none !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .value-float,
-  .companion-float {
-    transition: none !important;
-    transform: none !important;
-  }
-  .card:hover .value-float,
-  .editorial-card:hover .value-float,
-  .value-float:hover,
-  .card:hover .companion-float,
-  .editorial-card:hover .companion-float {
-    transform: none !important;
-  }
+  /* Static elevation only — no hover motion */
 }

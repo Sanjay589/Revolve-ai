@@ -203,7 +203,7 @@ export default function TransactionsPage() {
                       </td>
 
                       <td>
-                        <div className="font-mono value-float" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+                        <div className="font-mono" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
                           {formatCurrency(tx.amount)}
                         </div>
                       </td>

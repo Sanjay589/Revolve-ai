@@ -22,9 +22,10 @@ const SIZE_CLASSES = {
 };
 
 /**
- * 1C. Floating Value Treatment for Monetary Figures
- * Gives primary monetary values their own elevated visual z-layer
- * via a soft multi-stop drop shadow and subtle hover lift.
+ * Section 2. Floating Value Treatment for Monetary Figures
+ * Gives primary monetary values their own static elevated visual z-layer
+ * via a soft stacked multi-stop drop shadow.
+ * Purely static — no hover lift or transform.
  */
 export const FloatingValue: React.FC<FloatingValueProps> = ({
   value,
@@ -64,3 +65,7 @@ export const FloatingValue: React.FC<FloatingValueProps> = ({
     </div>
   );
 };
+
+// Export StatValue alias per Section 2 specification
+export const StatValue = FloatingValue;
+export type StatValueProps = FloatingValueProps;

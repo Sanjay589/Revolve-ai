@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ExplainabilityModal } from '@/components/explainability-drawer';
+import { StatValue } from '@/components/ui/floating-value';
 import { formatCurrency } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 
@@ -137,13 +138,14 @@ export const RecommendationCard: React.FC<RecommendationProps> = ({
             marginBottom: 14,
           }}>
             <div>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', marginBottom: 2 }}>
                 Expected Impact
               </div>
-              <div className="font-mono value-float" style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--fintech-primary)' }}>
-                +{formatCurrency(expectedImpact)}
-                <span style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 400 }}> /mo</span>
-              </div>
+              <StatValue
+                value={`+${formatCurrency(expectedImpact)} / mo`}
+                size="md"
+                font="mono"
+              />
             </div>
 
             <div style={{ textAlign: 'right' }}>
