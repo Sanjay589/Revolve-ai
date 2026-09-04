@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import { HeroDataGrid } from '@/components/landing/hero-data-grid';
 
 export interface HeroScrollContainerProps {
   children?: React.ReactNode;
@@ -18,32 +19,24 @@ export const HeroScrollContainer: React.FC<HeroScrollContainerProps> = ({ childr
     offset: ['start start', 'end start'],
   });
 
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : -160]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.75], [1, shouldReduceMotion ? 1 : 0]);
-  const visualY = useTransform(scrollYProgress, [0, 1], [0, shouldReduceMotion ? 0 : -80]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.85], [1, shouldReduceMotion ? 1 : 0.1]);
 
   return (
-    <div ref={containerRef} className="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
-      {/* Subtle radial ambient gradient behind hero for dark depth */}
-      <div
-        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] opacity-25"
-        style={{
-          background: 'radial-gradient(circle, rgba(0, 192, 118, 0.08) 0%, rgba(99, 102, 241, 0.04) 40%, transparent 70%)',
-          filter: 'blur(60px)',
-        }}
-        aria-hidden="true"
-      />
+    <div ref={containerRef} className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden bg-black">
+      {/* ─── AMBIENT ANIMATED DATA GRID BACKGROUND ──────────────── */}
+      <HeroDataGrid />
 
+      {/* ─── HERO EDITORIAL COPY & CALLS TO ACTION ──────────────── */}
       <motion.div
-        style={{ y: contentY, opacity: contentOpacity }}
-        className="max-w-[1180px] mx-auto px-6 text-center relative z-10"
+        style={{ opacity: contentOpacity }}
+        className="max-w-[1140px] mx-auto px-6 text-center relative z-10"
       >
         {/* Eyebrow / Tag with liquid-glass styling and generous top margin below navbar */}
         <motion.div
           initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 mt-4 sm:mt-6 mb-8"
+          className="inline-flex items-center gap-2 mt-2 sm:mt-4 mb-6 md:mb-8"
         >
           <div className="liquid-glass rounded-full px-4 py-1.5 flex items-center gap-2.5 text-xs font-semibold text-white/90 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-[#00C076] animate-pulse" />
@@ -57,10 +50,10 @@ export const HeroScrollContainer: React.FC<HeroScrollContainerProps> = ({ childr
 
         {/* Large Display Headline with text-balance and clean two-line break */}
         <motion.h1
-          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="font-heading text-balance text-4xl sm:text-6xl md:text-7xl lg:text-[4.75rem] font-extrabold tracking-[-0.035em] leading-[1.08] max-w-5xl mx-auto mb-6 text-white"
+          className="font-heading text-balance text-3xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-[4.25rem] font-extrabold tracking-[-0.035em] leading-[1.12] max-w-5xl mx-auto mb-6 text-white"
         >
           AI That Grows Your Commerce Revenue.
           <br className="hidden sm:inline" />{' '}
@@ -71,21 +64,21 @@ export const HeroScrollContainer: React.FC<HeroScrollContainerProps> = ({ childr
 
         {/* Supporting Description */}
         <motion.p
-          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-base sm:text-lg md:text-xl text-[#A6A6A6] max-w-2xl mx-auto mb-8 leading-relaxed font-normal"
+          className="text-base sm:text-lg md:text-xl text-[#A6A6A6] max-w-2xl mx-auto mb-6 md:mb-8 leading-relaxed font-normal"
           style={{ color: 'var(--text-hero-sub)' }}
         >
           Revolve AI is an AI-native commerce operating system for merchants. It discovers high-ROI revenue opportunities, explains every decision with concrete basket evidence, strictly enforces merchant safety policies, and executes bounded checkouts through Razorpay with cryptographic verification.
         </motion.p>
 
-        {/* Live System Status Indicator - cleanly above CTAs with mb-4 */}
+        {/* Live System Status Indicator - cleanly above CTAs with mb-6 */}
         <motion.div
-          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.25 }}
-          className="inline-flex items-center gap-4 px-5 py-2 rounded-full border border-[#333333] bg-[#0D0D0D]/90 backdrop-blur-md mb-4 text-xs text-[#A6A6A6] flex-wrap justify-center shadow-md"
+          className="inline-flex items-center gap-4 px-5 py-2 rounded-full border border-[#333333] bg-[#0D0D0D]/90 backdrop-blur-md mb-6 md:mb-8 text-xs text-[#A6A6A6] flex-wrap justify-center shadow-md"
         >
           <span className="flex items-center gap-2 text-[#00C076] font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00C076]" />
@@ -103,12 +96,12 @@ export const HeroScrollContainer: React.FC<HeroScrollContainerProps> = ({ childr
           </span>
         </motion.div>
 
-        {/* Primary and Secondary Action CTAs - proper vertical separation mb-8 md:mb-12 above preview container */}
+        {/* Primary and Secondary Action CTAs - generous vertical separation mb-12 md:mb-16 above preview container */}
         <motion.div
-          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex items-center justify-center gap-4 flex-wrap mb-8 md:mb-12"
+          className="flex items-center justify-center gap-4 flex-wrap mb-12 md:mb-16"
         >
           <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
             <Link
@@ -132,12 +125,11 @@ export const HeroScrollContainer: React.FC<HeroScrollContainerProps> = ({ childr
         </motion.div>
       </motion.div>
 
-      {/* Product Visualization / Preview Container with Parallax */}
+      {/* ─── PRODUCT VISUALIZATION / PREVIEW CONTAINER ────────────── */}
       <motion.div
-        style={{ y: visualY }}
-        initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+        initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
+        transition={{ duration: 0.7, delay: 0.35 }}
         className="max-w-[1240px] mx-auto px-6 relative z-20"
       >
         {children}
