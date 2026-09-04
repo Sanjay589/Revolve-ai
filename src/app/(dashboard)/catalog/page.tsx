@@ -117,7 +117,8 @@ export default function CatalogPage() {
         badgeText="AGENT-READABLE STOREFRONT FEED"
         badgeVariant="ai"
         badgeIcon={<Sparkles size={12} />}
-        title="Structured Catalog Feed"
+        title="Structured"
+        italicAccent="Catalog Feed"
         description="Dual-view merchant catalog: human visual product cards alongside raw JSON-LD feed consumable by external AI shopping agents."
         actions={
           <div style={{ display: 'flex', gap: 8 }}>

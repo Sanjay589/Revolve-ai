@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { Clock, AlertTriangle, XCircle, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'success' | 'warning' | 'error' | 'info' | 'ai' | 'neutral';
+  variant?: 'success' | 'warning' | 'error' | 'info' | 'ai' | 'neutral' | 'glass';
 }
 
 export const Badge: React.FC<BadgeProps> = ({
@@ -19,6 +19,7 @@ export const Badge: React.FC<BadgeProps> = ({
     info: 'badge-info',
     ai: 'badge-ai',
     neutral: 'badge-neutral',
+    glass: 'liquid-glass text-white/90 border border-white/10',
   }[variant];
 
   return (

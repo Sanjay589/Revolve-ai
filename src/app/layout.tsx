@@ -1,20 +1,21 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Sora, Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+  weight: ["400"],
+  style: ["normal", "italic"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -25,9 +26,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Revolve AI — AI-Powered Revenue Growth",
-  description: "AI that grows your revenue. Safely. Explainable AI recommendations, bounded actions, policy engine, and real Razorpay payment integration.",
-  keywords: ["AI", "revenue growth", "Razorpay", "fintech", "commerce", "agentic AI"],
+  title: "Revolve AI — Autonomous AI Commerce Operating System",
+  description: "AI that grows your commerce revenue safely. Explainable AI recommendations, zero-trust policy engine, and cryptographic Razorpay payment integration.",
+  keywords: ["AI", "revenue growth", "Razorpay", "fintech", "commerce", "agentic AI", "policy engine"],
 };
 
 export default function RootLayout({
@@ -38,9 +39,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="light"
+      data-theme="dark"
       suppressHydrationWarning
-      className={`${sora.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <Script
@@ -49,7 +50,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body suppressHydrationWarning className="font-body antialiased">
+      <body suppressHydrationWarning className="font-body antialiased bg-black text-white">
         {children}
       </body>
     </html>

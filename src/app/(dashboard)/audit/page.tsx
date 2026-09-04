@@ -41,7 +41,8 @@ export default function AuditPage() {
         badgeText="COMPLIANCE &amp; GOVERNANCE"
         badgeVariant="success"
         badgeIcon={<FileText size={12} />}
-        title="Immutable Audit Trail"
+        title="Immutable"
+        italicAccent="Audit Trail"
         description="Chronological, cryptographically sealed records of all AI recommendations, policy verifications, merchant authorizations, and Razorpay captured events."
         actions={
           <button

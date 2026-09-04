@@ -101,7 +101,8 @@ export default function CampaignsPage() {
         badgeText="PROMOTIONS &amp; CAMPAIGNS"
         badgeVariant="neutral"
         badgeIcon={<Megaphone size={12} />}
-        title="Autonomous Campaigns &amp; Offers"
+        title="Autonomous"
+        italicAccent="Campaigns &amp; Offers"
         description="Manage merchant promotions, bounded discount structures, and AI-generated dynamic checkout offers."
         actions={
           <div style={{ display: 'flex', gap: 8 }}>

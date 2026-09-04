@@ -149,7 +149,8 @@ export default function OpportunitiesPage() {
         badgeText="LIFECYCLE PIPELINE"
         badgeVariant="ai"
         badgeIcon={<Sparkles size={12} />}
-        title="Opportunities & Actions Pipeline"
+        title="Opportunities"
+        italicAccent="Pipeline"
         description="Track and inspect autonomous AI action lifecycles from initial basket co-purchase detection through deterministic policy verification to checkout execution."
         actions={
           <div className="flex items-center gap-2">

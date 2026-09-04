@@ -108,7 +108,8 @@ export default function AIBuyersPage() {
         badgeText="AGENTIC COMMERCE"
         badgeVariant="ai"
         badgeIcon={<Bot size={12} />}
-        title="AI Buyer Discovery &amp; Checkout"
+        title="AI Buyer Discovery &amp;"
+        italicAccent="Checkout"
         description="Natural language product discovery, intelligent catalog matching, feature ranking, and secure Razorpay Test Mode checkout."
       />
 

@@ -113,7 +113,8 @@ export default function AIAgentPage() {
         badgeText="AI REVENUE AGENT • ONLINE"
         badgeVariant="ai"
         badgeIcon={<Brain size={12} />}
-        title="Autonomous Intelligence Engine"
+        title="Autonomous"
+        italicAccent="Intelligence"
         description="Catalog co-purchase discovery, margin protection, cross-sell bundles, and bounded conversion optimizers."
         actions={
           <Button

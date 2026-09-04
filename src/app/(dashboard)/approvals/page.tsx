@@ -62,6 +62,7 @@ export default function ApprovalsPage() {
         badgeVariant="warning"
         badgeIcon={<ShieldCheck size={12} />}
         title="Approval Security Center"
+        italicAccent="Governance"
         description="High-impact AI campaigns, discount thresholds, and financial workflows require explicit merchant authorization before execution."
         actions={
           <button

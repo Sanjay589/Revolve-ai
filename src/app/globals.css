@@ -1,79 +1,79 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════
-   REVOLVE AI — Unified Design System
-   Clean, Calibrated Fintech + AI Commerce Operating System
+   REVOLVE AI — Stripe-Inspired Dark Editorial Design System
+   Pure Dark Canvas • Restrained Color Restraint • Editorial Typography
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  --font-heading: var(--font-sora), 'Sora', system-ui, sans-serif;
-  --font-body: var(--font-inter), 'Inter', system-ui, sans-serif;
-  --font-mono: var(--font-mono), 'JetBrains Mono', monospace;
+  --font-heading: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-editorial: var(--font-serif), Georgia, serif;
+  --font-mono: var(--font-mono), monospace;
 
-  /* ── 1. Surfaces (Light Mode Primary) ─────────────────── */
-  --bg-canvas: #F7F8FA;
-  --bg-primary: #F7F8FA;
-  --bg-secondary: #FFFFFF;
-  --bg-tertiary: #F8FAFC;
-  --bg-hover: #F1F5F9;
-  --bg-active: #E2E8F0;
-  --bg-card: #FFFFFF;
+  /* ── 1. Surfaces (Dark-First Foundation) ────────────────── */
+  --bg-canvas: #000000;           /* HSL 0 0% 0% */
+  --bg-primary: #000000;          /* HSL 0 0% 0% */
+  --bg-secondary: #0D0D0D;        /* HSL 0 0% 5% - Card Surface */
+  --bg-tertiary: #141414;         /* HSL 0 0% 8% - Nested Elements */
+  --bg-hover: #1A1A1A;
+  --bg-active: #262626;
+  --bg-card: #0D0D0D;             /* HSL 0 0% 5% */
 
   /* ── 2. Text Hierarchy ─────────────────────────────────── */
-  --text-primary: #111827;
-  --text-secondary: #64748B;
-  --text-tertiary: #94A3B8;
-  --text-inverse: #FFFFFF;
+  --text-primary: #FFFFFF;        /* HSL 0 0% 100% */
+  --text-secondary: #A6A6A6;      /* HSL 0 0% 65% */
+  --text-tertiary: #666666;
+  --text-inverse: #000000;
+  --text-hero-sub: #F0F3F6;       /* HSL 210 17% 95% */
 
   /* ── 3. Borders ────────────────────────────────────────── */
-  --border-primary: #E5E7EB;
-  --border-secondary: #F1F5F9;
-  --border-focus: #6366F1;
+  --border-primary: #333333;      /* HSL 0 0% 20% */
+  --border-secondary: #222222;
+  --border-focus: #FFFFFF;
 
-  /* ── 4. AI Accent (Indigo/Violet — ONLY for AI) ───────── */
-  --ai-primary: #6366F1;
-  --ai-secondary: #818CF8;
-  --ai-bg: #EEF2FF;
-  --ai-border: #C7D2FE;
-  --ai-text: #4F46E5;
+  /* ── 4. AI Accent (Restrained Indigo) ──────────────────── */
+  --ai-primary: #818CF8;
+  --ai-secondary: #6366F1;
+  --ai-bg: rgba(99, 102, 241, 0.1);
+  --ai-border: rgba(99, 102, 241, 0.25);
+  --ai-text: #C7D2FE;
 
-  /* ── 5. Semantic Colors ────────────────────────────────── */
-  /* Success: Emerald */
-  --success: #059669;
-  --success-bg: #ECFDF5;
-  --success-border: #A7F3D0;
-  --success-text: #065F46;
-  --fintech-primary: #059669;
-  --fintech-bg: #ECFDF5;
-  --fintech-border: #A7F3D0;
-  --fintech-text: #065F46;
+  /* ── 5. Semantic Colors (Razorpay Fintech & Control) ───── */
+  /* Success / FinTech: Razorpay Emerald */
+  --success: #00C076;
+  --success-bg: rgba(0, 192, 118, 0.1);
+  --success-border: rgba(0, 192, 118, 0.25);
+  --success-text: #6EE7B7;
+  --fintech-primary: #00C076;
+  --fintech-bg: rgba(0, 192, 118, 0.1);
+  --fintech-border: rgba(0, 192, 118, 0.25);
+  --fintech-text: #6EE7B7;
 
   /* Warning: Amber */
-  --warning: #D97706;
-  --warning-bg: #FFFBEB;
-  --warning-border: #FDE68A;
-  --warning-text: #92400E;
+  --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --warning-border: rgba(245, 158, 11, 0.25);
+  --warning-text: #FCD34D;
 
   /* Error: Crimson */
-  --error: #DC2626;
-  --error-bg: #FEF2F2;
-  --error-border: #FECACA;
-  --error-text: #991B1B;
+  --error: #EF4444;
+  --error-bg: rgba(239, 68, 68, 0.1);
+  --error-border: rgba(239, 68, 68, 0.25);
+  --error-text: #FCA5A5;
 
-  /* Info / Links: Blue */
-  --info: #2563EB;
-  --info-bg: #EFF6FF;
-  --info-border: #BFDBFE;
-  --info-text: #1D4ED8;
+  /* Info: Blue */
+  --info: #3B82F6;
+  --info-bg: rgba(59, 130, 246, 0.1);
+  --info-border: rgba(59, 130, 246, 0.25);
+  --info-text: #93C5FD;
 
-  /* ── 6. Shadows — Restrained & Subtle ──────────────────── */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  /* ── 6. Shadows — Subtle Depth on Pure Dark ───────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.85);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 0 1px #333333;
 
   /* ── 7. Radii ──────────────────────────────────────────── */
   --radius-sm: 6px;
@@ -90,58 +90,72 @@
   --transition-base: 200ms ease;
 }
 
+[data-theme='dark'] {
+  --bg-canvas: #000000;
+  --bg-primary: #000000;
+  --bg-secondary: #0D0D0D;
+  --bg-tertiary: #141414;
+  --bg-hover: #1A1A1A;
+  --bg-active: #262626;
+  --bg-card: #0D0D0D;
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #A6A6A6;
+  --text-tertiary: #666666;
+  --text-inverse: #000000;
+  --text-hero-sub: #F0F3F6;
+
+  --border-primary: #333333;
+  --border-secondary: #222222;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 0 1px #333333;
+}
+
 /* ═══════════════════════════════════════════════════════════
-   DARK MODE — Calibrated Slate Palette
+   LIQUID GLASS UTILITY (With Fallback for Non-Supporting Browsers)
    ═══════════════════════════════════════════════════════════ */
 
-[data-theme='dark'] {
-  --bg-canvas: #0F1115;
-  --bg-primary: #0F1115;
-  --bg-secondary: #15181D;
-  --bg-tertiary: #1B1F26;
-  --bg-hover: #222730;
-  --bg-active: #2B313D;
-  --bg-card: #15181D;
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* fallback */
+  position: relative;
+  overflow: hidden;
+}
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-tertiary: #64748B;
-  --text-inverse: #0F1115;
+@supports (-webkit-mask-composite: xor) or (mask-composite: exclude) {
+  .liquid-glass {
+    border: none;
+  }
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.15) 20%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0) 60%,
+      rgba(255, 255, 255, 0.15) 80%,
+      rgba(255, 255, 255, 0.45) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
 
-  --border-primary: #272D36;
-  --border-secondary: #1E232B;
-
-  --ai-primary: #818CF8;
-  --ai-secondary: #6366F1;
-  --ai-bg: rgba(99, 102, 241, 0.12);
-  --ai-border: rgba(99, 102, 241, 0.28);
-  --ai-text: #A5B4FC;
-
-  --success: #10B981;
-  --success-bg: rgba(16, 185, 129, 0.12);
-  --success-border: rgba(16, 185, 129, 0.28);
-  --success-text: #6EE7B7;
-  --fintech-primary: #10B981;
-  --fintech-bg: rgba(16, 185, 129, 0.12);
-  --fintech-border: rgba(16, 185, 129, 0.28);
-  --fintech-text: #6EE7B7;
-
-  --warning: #F59E0B;
-  --warning-bg: rgba(245, 158, 11, 0.12);
-  --warning-border: rgba(245, 158, 11, 0.28);
-  --warning-text: #FCD34D;
-
-  --error: #EF4444;
-  --error-bg: rgba(239, 68, 68, 0.12);
-  --error-border: rgba(239, 68, 68, 0.28);
-  --error-text: #FCA5A5;
-
-  --info: #3B82F6;
-  --info-bg: rgba(59, 130, 246, 0.12);
-  --info-border: rgba(59, 130, 246, 0.28);
-  --info-text: #93C5FD;
-
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+.font-editorial {
+  font-family: var(--font-editorial);
+  font-style: italic;
 }
 
 /* ─── Reset & Base ───────────────────────────────────────── */
@@ -219,15 +233,16 @@ h1, h2, h3, h4, h5, h6, .font-heading { font-family: var(--font-heading); letter
   background: var(--bg-hover);
 }
 
-/* Subtle, premium active state — light indigo bg with indigo text */
+/* Subtle, premium active state — dark editorial surface with crisp border */
 .sidebar-nav-item.active, .nav-pill-item.active {
-  color: var(--ai-text);
-  background: var(--ai-bg);
+  color: #FFFFFF;
+  background: #141414;
+  border: 1px solid #333333;
   font-weight: 600;
 }
 
 .sidebar-nav-item.active .nav-icon, .nav-pill-item.active .nav-icon {
-  color: var(--ai-text);
+  color: #00C076;
 }
 
 /* ─── Main Content Container ─────────────────────────────── */

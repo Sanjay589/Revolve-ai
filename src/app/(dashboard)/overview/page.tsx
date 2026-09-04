@@ -192,6 +192,7 @@ export default function OverviewPage() {
         badgeVariant="ai"
         badgeIcon={<Brain size={12} />}
         title="Merchant Dashboard"
+        italicAccent="Overview"
         description="Clarity and control over every AI commerce action, policy verification, and payment outcome."
         actions={
           <div style={{ display: 'flex', gap: 8 }}>

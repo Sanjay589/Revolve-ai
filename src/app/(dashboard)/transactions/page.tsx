@@ -113,7 +113,8 @@ export default function TransactionsPage() {
         badgeText="CRYPTOGRAPHIC FINANCIAL LEDGER"
         badgeVariant="success"
         badgeIcon={<CreditCard size={12} />}
-        title="Payment Ledger &amp; Transactions"
+        title="Payment"
+        italicAccent="Ledger"
         description="Every transaction is bounded by policy checks, verified via Razorpay HMAC-SHA256 signatures, and sealed in an immutable audit log."
         actions={
           <button

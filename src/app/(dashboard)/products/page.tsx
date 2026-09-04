@@ -144,7 +144,8 @@ export default function ProductsPage() {
         badgeText="COMMERCE CATALOG"
         badgeVariant="neutral"
         badgeIcon={<Package size={12} />}
-        title="Products &amp; Inventory"
+        title="Products &amp;"
+        italicAccent="Inventory"
         description="Manage store merchandise indexed for autonomous AI discovery, companion bundling, and natural language recommendations."
         actions={
           <div style={{ display: 'flex', gap: 8 }}>

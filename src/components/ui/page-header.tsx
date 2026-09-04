@@ -8,6 +8,7 @@ export interface PageHeaderProps {
   badgeVariant?: 'ai' | 'success' | 'warning' | 'error' | 'neutral' | 'info';
   badgeIcon?: React.ReactNode;
   title: string;
+  italicAccent?: string;
   description?: string;
   actions?: React.ReactNode;
   className?: string;
@@ -18,6 +19,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   badgeVariant = 'neutral',
   badgeIcon,
   title,
+  italicAccent,
   description,
   actions,
   className,
@@ -50,7 +52,12 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         <h1
           className="font-heading text-2xl md:text-[1.625rem] font-extrabold text-[var(--text-primary)] tracking-tight leading-tight"
         >
-          {title}
+          {title}{' '}
+          {italicAccent && (
+            <span className="font-editorial text-white/90 font-normal italic">
+              {italicAccent}
+            </span>
+          )}
         </h1>
         {description && (
           <p className="text-sm text-[var(--text-secondary)] mt-1 max-w-3xl leading-relaxed">

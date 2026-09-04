@@ -84,7 +84,8 @@ export default function SettingsPage() {
         badgeText="CONTROLS &amp; POLICIES"
         badgeVariant="neutral"
         badgeIcon={<Sliders size={12} />}
-        title="Safety Guardrails &amp; Policy Engine"
+        title="Safety"
+        italicAccent="Guardrails"
         description="Define strict financial limits, automated thresholds, and human-in-the-loop authorization gates. The merchant maintains absolute control."
       />
 
